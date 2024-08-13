@@ -41,14 +41,16 @@ const AdminPanel = ({ setToken }) => {
   const [editUser, setEditUser] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await fetch('http://localhost:5500/users');
+      const response = await fetch(`${apiUrl}/users`);
       const data = await response.json();
       setUsers(data);
     };
     fetchUsers();
-  }, []);
+  }, [apiUrl]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -72,7 +74,7 @@ const AdminPanel = ({ setToken }) => {
 
   const handleDownload = async (cedula) => {
     try {
-      const response = await fetch(`http://localhost:5500/download/${cedula}`);
+      const response = await fetch(`${apiUrl}/download/${cedula}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -99,7 +101,7 @@ const AdminPanel = ({ setToken }) => {
   const handleToggleEstado = async (user) => {
     try {
       const newEstado = user.estado === 'activo' ? 'inactivo' : 'activo';
-      await fetch(`http://localhost:5500/user/estado/${user.id}`, {
+      await fetch(`${apiUrl}/user/estado/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +120,7 @@ const AdminPanel = ({ setToken }) => {
 
   const handleDeleteUser = async (id) => {
     try {
-      await fetch(`http://localhost:5500/user/${id}`, {
+      await fetch(`${apiUrl}/user/${id}`, {
         method: 'DELETE',
       });
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
@@ -145,7 +147,7 @@ const AdminPanel = ({ setToken }) => {
   const handleEditSubmit = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5500/user/${editUser.id}`,
+        `${apiUrl}/user/${editUser.id}`,
         {
           method: 'PUT',
           headers: {
