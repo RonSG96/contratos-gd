@@ -7,28 +7,43 @@ import './UserQRCode.css';
 const UserQRCode = () => {
   const { id: userId } = useParams();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5500/user/${userId}`, {
-        headers: {
-          'x-access-token': token,
-        },
-      });
-      const data = await response.json();
-      setUser(data);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/user/${userId}`, {
+          headers: {
+            'x-access-token': token,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const data = await response.json();
+        setUser(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchUser();
   }, [userId]);
 
-  if (!user) {
+  if (loading) {
     return <Typography>Cargando...</Typography>;
   }
 
-  const qrData = `http://localhost:5500/user/${userId}/qr`;
+  if (error) {
+    return <Typography>Error: {error}</Typography>;
+  }
+
+  const qrData = `${process.env.REACT_APP_API_URL}/user/${userId}/qr`;
   const estado = user.estado === 'activo' ? 'aprobado' : 'caducado';
-  const imageUrl = `http://localhost:5500/assets/${estado}.png`;
+  const imageUrl = `${process.env.REACT_APP_API_URL}/assets/${estado}.png`;
   const fechaExpiracion = new Date(user.fecha_expiracion).toLocaleDateString();
 
   return (
