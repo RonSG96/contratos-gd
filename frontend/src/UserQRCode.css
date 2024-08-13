@@ -1,0 +1,16 @@
+.user-qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.qr-paper {
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.estado-image {
+    width: 100px;
+    height: 100px;
+}
