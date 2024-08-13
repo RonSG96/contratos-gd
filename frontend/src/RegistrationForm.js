@@ -29,7 +29,7 @@ const RegistrationForm = () => {
     correo: '',
     direccion: '',
     sucursal: '',
-    planContratado: '', // Asegúrate de que este campo esté correctamente definido
+    planContratado: '',
   });
 
   const [signatureDataURL, setSignatureDataURL] = useState('');
@@ -39,6 +39,8 @@ const RegistrationForm = () => {
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null);
+
+  const apiUrl = process.env.REACT_APP_API_URL; // Obtener la URL base de la API desde una variable de entorno
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,11 +80,11 @@ const RegistrationForm = () => {
       ...formData,
       firma: signatureDataURL,
       foto: photoDataURL,
-      plan_contratado: formData.planContratado, // Asegúrate de que el campo sea enviado correctamente
+      plan_contratado: formData.planContratado,
     };
 
     try {
-      const response = await fetch('http://localhost:5500/submit', {
+      const response = await fetch(`${apiUrl}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
