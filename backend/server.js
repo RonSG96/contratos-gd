@@ -429,6 +429,15 @@ app.get('/download/:cedula', async (req, res) => {
 
 const startServer = async () => {
   await initDb();
+
+  // Inicializar el administrador si no existe
+  const adminExists = await Admin.findOne({ where: { username: 'admin' } });
+  if (!adminExists) {
+    const hashedPassword = await bcrypt.hash('admin_password', 10); // Cambia 'admin_password' por la contraseña que prefieras
+    await Admin.create({ username: 'admin', password: hashedPassword });
+    console.log('Administrador creado con éxito.');
+  }
+
   app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
   });
