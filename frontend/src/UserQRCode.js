@@ -10,28 +10,29 @@ const UserQRCode = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/user/${userId}`, {
-          headers: {
-            'x-access-token': token,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-        const data = await response.json();
-        setUser(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [userId]);
+ useEffect(() => {
+  const fetchUser = async () => {
+    const token = localStorage.getItem('token');  // Obtener el token desde localStorage
+    if (!token) {
+      console.error('Token no disponible');
+      return;
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/${userId}`, {
+      headers: {
+        'x-access-token': token,  // Enviar el token en las cabeceras
+      },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setUser(data);
+    } else {
+      console.error('Error al obtener el usuario:', data.message);
+    }
+  };
+  fetchUser();
+}, [userId]);
+
 
   if (loading) {
     return <Typography>Cargando...</Typography>;
