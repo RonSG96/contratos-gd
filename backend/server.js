@@ -13,6 +13,7 @@ const { sequelize, User, Admin, initDb } = require('./database');
 const app = express();
 const PORT = 5500;
 const SECRET_KEY = 'your_secret_key';
+const TEMPORARY_TOKEN_KEY = 'temporary_secret_key';
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -24,7 +25,7 @@ app.use(
 );
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
+  const token = req.headers['x-access-token'] || req.query.token;
   if (!token) {
     return res.status(403).send({ auth: false, message: 'No token provided.' });
   }
@@ -39,6 +40,52 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+
+// Nueva ruta para generar una URL segura con token temporal
+app.get('/user/:id/qr-url', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Genera un token temporal válido por 10 minutos
+    const token = jwt.sign({ id: user.id }, TEMPORARY_TOKEN_KEY, {
+      expiresIn: '10m',
+    });
+
+    const qrUrl = `https://contratos-backend.onrender.com/user/${user.id}/qr?token=${token}`;
+    res.json({ qrUrl });
+  } catch (error) {
+    console.error('Error al generar la URL del QR:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/user/:id/qr', async (req, res) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(403).json({ auth: false, message: 'No token provided.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, TEMPORARY_TOKEN_KEY);
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const estado = user.estado === 'activo' ? 'aprobado' : 'caducado';
+    const imagePath =
+      estado === 'aprobado' ? '/assets/aprobado.png' : '/assets/caducado.png';
+
+    res.sendFile(path.join(__dirname, imagePath));
+  } catch (error) {
+    console.error('Error al procesar el QR:', error);
+    return res.status(500).json({ message: 'Failed to authenticate token.' });
+  }
+});
 
 app.post('/submit', async (req, res) => {
   const {
@@ -141,28 +188,6 @@ app.get('/user/:id', verifyToken, async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error('Error fetching user:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Ruta para mostrar el QR del usuario
-app.get('/user/:id/qr', verifyToken, async (req, res) => {
-  try {
-    const user = await User.findByPk(req.params.id);
-    if (!user) {
-      console.error(`User with ID ${req.params.id} not found`);
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    console.log('User:', user);
-    const estado = user.estado === 'activo' ? 'aprobado' : 'caducado';
-    const imagePath =
-      estado === 'aprobado' ? '/assets/aprobado.png' : '/assets/caducado.png';
-    console.log('Image path:', imagePath);
-
-    res.sendFile(path.join(__dirname, imagePath));
-  } catch (error) {
-    console.error('Error fetching user QR:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
