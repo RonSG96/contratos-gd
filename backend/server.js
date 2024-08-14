@@ -63,6 +63,7 @@ app.get('/user/:id/qr-url', async (req, res) => {
   }
 });
 
+// Ruta para mostrar la imagen QR al comercio
 app.get('/user/:id/qr', async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -81,7 +82,6 @@ app.get('/user/:id/qr', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 app.post('/submit', async (req, res) => {
   const {
@@ -146,9 +146,9 @@ app.post('/submit', async (req, res) => {
       estado,
     });
 
-    const qrData = `https://contratos-backend.onrender.com/user/${user.id}/qr`;
+    // Generar la URL temporal para el QR
+    const qrData = `https://contratos-backend.onrender.com/user/${user.id}/qr-url`;
     const qrCode = await QRCode.toDataURL(qrData);
-
 
     user.qr_code = qrCode;
     await user.save();
@@ -225,7 +225,7 @@ app.put('/user/:id', async (req, res) => {
   const estado = fecha_expiracion > new Date() ? 'activo' : 'inactivo';
 
   try {
-    const qrData = `http://localhost:5500/user/${id}/qr`;
+    const qrData = `http://localhost:5500/user/${id}/qr-url`;
     const qrCode = await QRCode.toDataURL(qrData);
 
     await User.update(
