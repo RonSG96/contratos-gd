@@ -30,6 +30,7 @@ import {
   ToggleOff as ToggleOffIcon,
   ToggleOn as ToggleOnIcon,
   ExitToApp as LogoutIcon,
+  QrCode2 as QrCodeIcon,
 } from '@mui/icons-material';
 import './AdminPanel.css';
 
@@ -72,9 +73,9 @@ const AdminPanel = ({ setToken }) => {
       user.cedula.includes(search)
   );
 
-  const handleDownloadQR = async (userId) => {
+  const handleDownloadPDF = async (cedula) => {
     try {
-      const response = await fetch(`${apiUrl}/user/${userId}/qr-with-background`);
+      const response = await fetch(`${apiUrl}/download/${cedula}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -82,11 +83,31 @@ const AdminPanel = ({ setToken }) => {
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${userId}-qr.png`);
+      link.setAttribute('download', `${cedula}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      alert('Se ha descargado el QR con fondo.');
+      alert('Se ha descargado el documento.');
+    } catch (error) {
+      console.error('Error al descargar el documento:', error);
+    }
+  };
+
+  const handleDownloadQR = async (id) => {
+    try {
+      const response = await fetch(`${apiUrl}/user/${id}/download-qr`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `user_${id}_qr.png`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      alert('Se ha descargado el QR.');
     } catch (error) {
       console.error('Error al descargar el QR:', error);
     }
@@ -243,7 +264,7 @@ const AdminPanel = ({ setToken }) => {
                   <TableCell>
                     <IconButton
                       color="primary"
-                      onClick={() => handleDownloadQR(user.id)}
+                      onClick={() => handleDownloadPDF(user.cedula)}
                     >
                       <DownloadIcon />
                     </IconButton>
@@ -268,6 +289,12 @@ const AdminPanel = ({ setToken }) => {
                       onClick={() => handleDeleteUser(user.id)}
                     >
                       <DeleteIcon />
+                    </IconButton>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleDownloadQR(user.id)}
+                    >
+                      <QrCodeIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
