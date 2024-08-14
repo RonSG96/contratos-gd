@@ -30,6 +30,7 @@ import {
   ToggleOff as ToggleOffIcon,
   ToggleOn as ToggleOnIcon,
   ExitToApp as LogoutIcon,
+  QrCode as QRCodeIcon,  // Asegúrate de importar el icono para el QR
 } from '@mui/icons-material';
 import './AdminPanel.css';
 
@@ -89,6 +90,29 @@ const AdminPanel = ({ setToken }) => {
       alert('Se ha descargado el documento.');
     } catch (error) {
       console.error('Error al descargar el documento:', error);
+    }
+  };
+
+  const handleDownloadQRCode = async (id) => {
+    try {
+      const response = await fetch(`${apiUrl}/user/${id}/qr-url`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al obtener la URL del QR');
+      }
+
+      const qrResponse = await fetch(data.qrUrl);
+      const blob = await qrResponse.blob();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `qr_${id}.png`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Error al descargar el QR:', error);
     }
   };
 
@@ -246,6 +270,12 @@ const AdminPanel = ({ setToken }) => {
                       onClick={() => handleDownload(user.cedula)}
                     >
                       <DownloadIcon />
+                    </IconButton>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleDownloadQRCode(user.id)}
+                    >
+                      <QRCodeIcon />
                     </IconButton>
                     <IconButton
                       color="primary"
