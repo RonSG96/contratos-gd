@@ -30,7 +30,6 @@ import {
   ToggleOff as ToggleOffIcon,
   ToggleOn as ToggleOnIcon,
   ExitToApp as LogoutIcon,
-  QrCode as QRCodeIcon,  // Asegúrate de importar el icono para el QR
 } from '@mui/icons-material';
 import './AdminPanel.css';
 
@@ -73,9 +72,9 @@ const AdminPanel = ({ setToken }) => {
       user.cedula.includes(search)
   );
 
-  const handleDownload = async (cedula) => {
+  const handleDownloadQR = async (userId) => {
     try {
-      const response = await fetch(`${apiUrl}/download/${cedula}`);
+      const response = await fetch(`${apiUrl}/user/${userId}/qr-with-background`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -83,34 +82,11 @@ const AdminPanel = ({ setToken }) => {
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${cedula}.pdf`);
+      link.setAttribute('download', `${userId}-qr.png`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      alert('Se ha descargado el documento.');
-    } catch (error) {
-      console.error('Error al descargar el documento:', error);
-    }
-  };
-
-  const handleDownloadQRCode = async (id) => {
-    try {
-      const response = await fetch(`${apiUrl}/user/${id}/qr-url`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al obtener la URL del QR');
-      }
-
-      const qrResponse = await fetch(data.qrUrl);
-      const blob = await qrResponse.blob();
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `qr_${id}.png`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
+      alert('Se ha descargado el QR con fondo.');
     } catch (error) {
       console.error('Error al descargar el QR:', error);
     }
@@ -267,15 +243,9 @@ const AdminPanel = ({ setToken }) => {
                   <TableCell>
                     <IconButton
                       color="primary"
-                      onClick={() => handleDownload(user.cedula)}
+                      onClick={() => handleDownloadQR(user.id)}
                     >
                       <DownloadIcon />
-                    </IconButton>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleDownloadQRCode(user.id)}
-                    >
-                      <QRCodeIcon />
                     </IconButton>
                     <IconButton
                       color="primary"
