@@ -103,8 +103,9 @@ app.post('/submit', async (req, res) => {
       estado,
     });
 
-    const qrData = `http://localhost:5500/user/${user.id}/qr`;
+    const qrData = `https://contratos-backend.onrender.com/user/${user.id}/qr`;
     const qrCode = await QRCode.toDataURL(qrData);
+
 
     user.qr_code = qrCode;
     await user.save();
