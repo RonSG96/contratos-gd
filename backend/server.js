@@ -8,7 +8,7 @@ const path = require('path');
 const { addMonths } = require('date-fns');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
-const { createCanvas, loadImage } = require('canvas');  // Importar canvas y loadImage
+const canvas = require('canvas');
 const { sequelize, User, Admin, initDb } = require('./database');
 
 const app = express();
@@ -64,8 +64,28 @@ app.get('/user/:id/qr-url', async (req, res) => {
   }
 });
 
-// Nueva ruta para generar una imagen del QR sobre un fondo
-app.get('/user/:id/qr-with-background', async (req, res) => {
+// Ruta para mostrar el QR del usuario
+app.get('/user/:id/qr', async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
+      console.error(`User with ID ${req.params.id} not found`);
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const estado = user.estado === 'activo' ? 'aprobado' : 'caducado';
+    const imagePath =
+      estado === 'aprobado' ? '/assets/aprobado.png' : '/assets/caducado.png';
+
+    res.sendFile(path.join(__dirname, imagePath));
+  } catch (error) {
+    console.error('Error fetching user QR:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Ruta para descargar el QR Code con fondo personalizado
+app.get('/user/:id/download-qr', async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) {
@@ -73,27 +93,23 @@ app.get('/user/:id/qr-with-background', async (req, res) => {
     }
 
     const qrData = `https://contratos-backend.onrender.com/user/${user.id}/qr`;
-    const qrCode = await QRCode.toDataURL(qrData);
-    const backgroundPath = path.join(__dirname, 'assets', 'background.png'); // Cambia esto al nombre de tu imagen de fondo
-    const qrImage = await loadImage(qrCode);
-    const backgroundImage = await loadImage(backgroundPath);
 
-    const canvas = createCanvas(backgroundImage.width, backgroundImage.height);
-    const ctx = canvas.getContext('2d');
+    const canvasEl = canvas.createCanvas(500, 500);
+    const ctx = canvasEl.getContext('2d');
 
-    // Dibuja la imagen de fondo
-    ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height);
+    const background = await canvas.loadImage(path.join(__dirname, 'assets', 'qr-background.png'));
+    ctx.drawImage(background, 0, 0, 500, 500);
 
-    // Dibuja el QR code en el centro de la imagen de fondo
-    const qrSize = Math.min(backgroundImage.width, backgroundImage.height) / 2;
-    ctx.drawImage(qrImage, (backgroundImage.width - qrSize) / 2, (backgroundImage.height - qrSize) / 2, qrSize, qrSize);
+    await QRCode.toCanvas(canvasEl, qrData, { width: 200 });
+    ctx.drawImage(canvasEl, 150, 150);
 
-    const finalImage = canvas.toBuffer();
+    const buffer = canvasEl.toBuffer('image/png');
 
-    res.set('Content-Type', 'image/png');
-    res.send(finalImage);
+    res.setHeader('Content-Disposition', `attachment; filename="user_${user.id}_qr.png"`);
+    res.setHeader('Content-Type', 'image/png');
+    res.send(buffer);
   } catch (error) {
-    console.error('Error al generar la imagen del QR:', error);
+    console.error('Error generating QR code image:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -236,7 +252,7 @@ app.put('/user/:id', async (req, res) => {
         .json({ status: 'error', message: 'Tipo de plan no válido' });
   }
 
-  const estado = fecha_expiracion > new Fecha() ? 'activo' : 'inactivo';
+  const estado = fecha_expiracion > new Date() ? 'activo' : 'inactivo';
 
   try {
     const qrData = `https://contratos-backend.onrender.com/user/${id}/qr`;
