@@ -75,7 +75,7 @@ app.get('/user/:id/qr', async (req, res) => {
 
     const estado = user.estado === 'activo' ? 'aprobado' : 'caducado';
     const imagePath =
-      estado === 'aprobado' ? '/assets/aprobado.png' : '/assets/caducado.png';
+      estado === 'aprobado' ? '/assets/aprobado.jpg' : '/assets/caducado.jpg';
 
     res.sendFile(path.join(__dirname, imagePath));
   } catch (error) {
@@ -97,7 +97,9 @@ app.get('/user/:id/download-qr', async (req, res) => {
     const canvasEl = canvas.createCanvas(500, 500);
     const ctx = canvasEl.getContext('2d');
 
-    const background = await canvas.loadImage(path.join(__dirname, 'assets', 'qr-background.png'));
+    const background = await canvas.loadImage(
+      path.join(__dirname, 'assets', 'qr-background.jpg')
+    );
     ctx.drawImage(background, 0, 0, 500, 500);
 
     await QRCode.toCanvas(canvasEl, qrData, { width: 200 });
@@ -105,7 +107,10 @@ app.get('/user/:id/download-qr', async (req, res) => {
 
     const buffer = canvasEl.toBuffer('image/png');
 
-    res.setHeader('Content-Disposition', `attachment; filename="user_${user.id}_qr.png"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="user_${user.id}_qr.png"`
+    );
     res.setHeader('Content-Type', 'image/png');
     res.send(buffer);
   } catch (error) {
