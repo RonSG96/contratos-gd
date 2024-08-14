@@ -64,15 +64,10 @@ app.get('/user/:id/qr-url', async (req, res) => {
 });
 
 app.get('/user/:id/qr', async (req, res) => {
-  const token = req.query.token;
-  if (!token) {
-    return res.status(403).json({ auth: false, message: 'No token provided.' });
-  }
-
   try {
-    const decoded = jwt.verify(token, TEMPORARY_TOKEN_KEY);
-    const user = await User.findByPk(decoded.id);
+    const user = await User.findByPk(req.params.id);
     if (!user) {
+      console.error(`User with ID ${req.params.id} not found`);
       return res.status(404).json({ message: 'User not found' });
     }
 
@@ -82,10 +77,11 @@ app.get('/user/:id/qr', async (req, res) => {
 
     res.sendFile(path.join(__dirname, imagePath));
   } catch (error) {
-    console.error('Error al procesar el QR:', error);
-    return res.status(500).json({ message: 'Failed to authenticate token.' });
+    console.error('Error fetching user QR:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 app.post('/submit', async (req, res) => {
   const {
