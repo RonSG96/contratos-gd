@@ -465,6 +465,7 @@ app.get('/download/:cedula', async (req, res) => {
     .moveDown();
 
   // Detalles del usuario con formato mejorado
+  doc.moveDown(3); // Añadir espacio entre el último texto y la firma
   doc
     .fontSize(12)
     .text(
@@ -512,35 +513,37 @@ app.get('/download/:cedula', async (req, res) => {
 
   // Firma del usuario con dimensiones más pequeñas y bien alineada
   doc.moveDown();
+  // Firma del usuario con espacio y centrado
   doc.text('Firma del usuario:', {
-    align: 'left',
-    indent: 40,
-    lineGap: 5,
+    align: 'center', // Centrar el texto
+    lineGap: 15, // Espacio extra debajo del texto
   });
 
-  // Redimensionar la imagen de la firma para que se ajuste mejor
+  // Redimensionar la imagen de la firma y centrarla
   doc.image(firmaPath, {
-    fit: [150, 75], // Ajuste de tamaño de la firma
-    align: 'left',
+    fit: [150, 75], // Tamaño ajustado para la firma
+    align: 'center', // Centrar la imagen
     valign: 'top',
-    margin: [40, 20, 0, 20], // Ajustar margen para evitar que la imagen esté muy pegada al texto
   });
 
-  // Foto del usuario con dimensiones ajustadas y bien alineada
-  doc.moveDown();
+  // Añadir espacio entre la firma y la foto
+  doc.moveDown(3); // Añadir espacio extra entre la firma y la foto
+
+  // Foto del usuario con espacio y centrado
   doc.text('Foto del usuario:', {
-    align: 'left',
-    indent: 40,
-    lineGap: 5,
+    align: 'center', // Centrar el texto
+    lineGap: 15, // Espacio extra debajo del texto
   });
 
-  // Redimensionar la imagen de la foto para que se ajuste bien
+  // Redimensionar la imagen de la foto y centrarla
   doc.image(fotoPath, {
-    fit: [100, 100], // Ajuste de tamaño de la foto
-    align: 'left',
+    fit: [100, 100], // Tamaño ajustado para la foto
+    align: 'center', // Centrar la imagen
     valign: 'top',
-    margin: [40, 20, 0, 20], // Ajustar márgenes para una mejor presentación
   });
+
+  // Saltos de línea finales para asegurar que quede bien alineado
+  doc.moveDown(2);
 
   doc.end();
 });
