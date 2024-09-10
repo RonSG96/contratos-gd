@@ -338,148 +338,165 @@ app.get('/download/:cedula', async (req, res) => {
       .end(pdfData);
   });
 
-  doc.fontSize(20).text('Bienvenid@ a:', { align: 'center' });
-  doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), {
-    width: 150,
-    align: 'center',
+  // Posicionar el logotipo en la esquina superior izquierda
+  doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), 50, 50, {
+    width: 150, // Ajustar el tamaño del logotipo
   });
-  doc.moveDown();
+
+  doc.fontSize(20).text('Bienvenid@ a:', { align: 'left', indent: 20 });
+
+  // Espacio después del logo
+  doc.moveDown(2);
+
   doc
     .fontSize(12)
     .text(
-      'Le agradecemos, haya escogido los productos y servicios que presta GIMNASIO DORIAN (en adelante "los servicios"). Los servicios se proporcionan en el gimnasio por usted seleccionado.'
+      'Le agradecemos, haya escogido los productos y servicios que presta GIMNASIO DORIAN (en adelante "los servicios"). Los servicios se proporcionan en el gimnasio por usted seleccionado.',
+      { align: 'justify' } // Justificación del texto
+    )
+    .moveDown();
+
+  doc
+    .text(
+      'El uso de nuestros servicios constituye una aceptación total de estas condiciones y la posibilidad de aplicar las leyes necesarias de ser el caso. Razón por la que recomendamos que las lea detenidamente y con atención, y de ser posible guardarlos. Si usted no se encuentra de acuerdo con ellos, no debe usar nuestros servicios bajo ninguna excusa.',
+      { align: 'justify' } // Justificación del texto
+    )
+    .moveDown();
+
+  // Normas de Funcionamiento
+  doc.fontSize(14).text('1. Normas de Funcionamiento', { underline: true });
+
+  const normas = [
+    '1.1 Está prohibido fumar dentro de las instalaciones.',
+    '1.2 El consumo del alcohol o sustancias sujetas a fiscalización está terminantemente prohibido en las instalaciones.',
+    '1.3 No se permite el consumo de alimentos dentro de las instalaciones, salvo en las zonas expresamente habilitadas para ello.',
+    '1.4 Está prohibida la entrada de animales a las instalaciones.',
+    '1.5 Se deberá usar ropa y calzados adecuados para las actividades y servicios prestados.',
+    '1.6 Se habrá de dejar los equipos y las instalaciones en las condiciones que se las encontró previo al uso, es decir, sin sudor, sin residuos de ningún tipo libres disponibles para el resto de usuarios.',
+    '1.7 Se deberá hacer uso correcto del equipamiento e implementos del gimnasio, siendo responsable el usuario de cualquier deterioro que se causase por uso indebido.',
+    '1.8 La sustracción y/o destrucción o daño material de cualquier equipo o implemento de la instalación, significará la expulsión automática de las instalaciones, sin perjuicio de las acciones civiles y penales que puedan derivar.',
+    '1.9 Debe respetarse la higiene de las instalaciones, haciendo el uso debido de papeleras de reciclaje para depositar los desperdicios de cualquier tipo.',
+    '1.10 Se respetarán los horarios establecidos para las actividades en las instalaciones.',
+    '1.11 Se pagará de forma puntual y sin retraso la mensualidad requerida.',
+    '1.12 El hecho de permitir pagar fuera de fecha, no implica bajo ninguna circunstancia renuncia a la cantidad debida.',
+    '1.13 El acceso y uso de las instalaciones está reservado únicamente a los usuarios que tengan la calidad de miembro. La participación en la introducción no autorizada de personas ajenas, no se encuentra permitida.',
+    '1.14 Las instalaciones están equipadas con sistemas de vigilancia y seguridad con grabación de imagen, al acceder al presente acuerdo, usted acepta ser grabado.',
+    '1.15 El personal se encargará de velar por el cumplimiento de las normas de conducta y de uso de las instalaciones.',
+    '1.16 Gimnasio Dorian se reserva limitar o impedir el acceso a las instalaciones cuando las circunstancias y/o la seguridad de las personas así lo ameriten.',
+    '1.17 Los implementos y accesorios, deben permanecer en las instalaciones, debiendo dejarse tras su uso en el sitio correcto y en orden.',
+    '1.18 Las recomendaciones o solicitudes que presenten los clientes deberán ser dirigidas de manera escrita a la administración para que puedan ser canalizadas de la mejor manera.',
+  ];
+
+  normas.forEach((norma) => {
+    doc.text(norma, { align: 'justify', indent: 20 }).moveDown(0.5);
+  });
+
+  // Vestuarios y Casilleros
+  doc.moveDown(2);
+  doc.fontSize(14).text('2. Vestuarios y Casilleros', { underline: true });
+  doc
+    .fontSize(12)
+    .text(
+      '2.1 DORIAN GIMNASIO no se responsabiliza de pérdidas, daños materiales, sustracción de dinero o de otros artículos de valor que se dejen en los casilleros.',
+      { align: 'justify' }
+    )
+    .moveDown();
+  doc
+    .text(
+      '2.2 No está permitido afeitarse en las duchas por motivos de higiene, sanitarios y de seguridad.',
+      { align: 'justify' }
+    )
+    .moveDown();
+  doc
+    .text(
+      '2.3 Se ruega dejar los vestidores de la misma manera en que fueron encontrados.',
+      { align: 'justify' }
+    )
+    .moveDown();
+
+  // Responsabilidad
+  doc.moveDown(2);
+  doc.fontSize(14).text('3. Responsabilidad', { underline: true });
+  const responsabilidades = [
+    '3.1 GIMNASIO DORIAN no será responsable de los problemas de salud que pueda sufrir a consecuencia del mal uso de nuestras instalaciones o de nuestros programas de ejercicios. Por lo tanto, recomendamos que consulte con un médico antes de contratar nuestros servicios en caso de que tenga la tensión alta, angina de pecho, cardiopatía, diabetes, enfermedad crónica, desmayos y, en general, si concurre cualquier otra circunstancia que afecte a su salud y forma física. Con la suscripción del presente contrato, usted declara que está en buenas condiciones para la realización de ejercicio físico.',
+    '3.2 Adicionalmente, GIMNASIO DORIAN no se hará responsable en caso de lesión debido a:',
+    'A. No prestar atención a las indicaciones del entrenador.',
+    'B. No realizar la debida preparación corporal para realizar la rutina de entrenamiento, es decir, calentamiento.',
+    'C. Afecciones cutáneas debido al no uso de la toalla.',
+    'D. Utilizar ropa indebida para realizar ejercicio.',
+    'E. Mal uso de las máquinas y demás implementos del gimnasio.',
+    'F. Ejecución de los ejercicios sin realizar la técnica correctamente.',
+    'G. No haber hecho uso del instructor.',
+    'H. Por no comunicar lesiones o circunstancias de salud anteriores.',
+    'I. Por no utilizar implementos de seguridad durante el entrenamiento, como: cinturón, guantes, vendas, agarraderas, entre otros.',
+    'J. Accidentes ocasionados por terceros, sin perjuicio de la posibilidad de exigirle al causante del daño la reparación debida.',
+    'K. Irrespeto a los protocolos de las clases grupales.',
+    'L. Ingresar en estado etílico o bajo el efecto de sustancias estupefacientes.',
+    'M. Por no haber informado de padecer algún desorden alimenticio o cualquier otra enfermedad.',
+    'N. Por no alimentarse de una manera correcta antes, durante y después de realizar los ejercicios.',
+  ];
+
+  responsabilidades.forEach((resp) => {
+    doc.text(resp, { align: 'justify', indent: 20 }).moveDown(0.5);
+  });
+
+  // Incumplimiento
+  doc.moveDown(2);
+  doc.fontSize(14).text('4. Incumplimiento', { underline: true });
+  doc
+    .fontSize(12)
+    .text(
+      '4.1 En caso de incumplimiento, GIMNASIO DORIAN se reserva la posibilidad de expulsar a dicho usuario, sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.',
+      { align: 'justify' }
+    )
+    .moveDown();
+
+  // Política de Congelamiento de Planes
+  doc.moveDown(2);
+  doc
+    .fontSize(14)
+    .text('5. Política de Congelamiento de Planes', { underline: true });
+  doc
+    .fontSize(12)
+    .text(
+      'Los planes no serán sujetos a devoluciones o extensiones, y tendrán validez durante el tiempo y por el monto acordado.',
+      { align: 'justify' }
+    )
+    .moveDown();
+
+  // Detalles del usuario con formato
+  doc
+    .fontSize(12)
+    .text(
+      `Yo, ${user.nombre} ${user.apellido}, con cédula de ciudadanía ${user.cedula}, declaro que he leído y acepto los términos y condiciones.`,
+      {
+        align: 'justify',
+        indent: 20,
+      }
     );
-  doc.text(
-    'El uso de nuestros servicios constituye una aceptacion total de estas condiciones y la posibilidad de aplicar las leyes necesarias de ser el caso. Razón por la que recomendamos que las lea detenidamente y con atencion, de ser posible guardarlos. Si usted no se encuentra de acuerdo con ellos, no debe usar nuestros servicios bajo ninguna excusa.'
-  );
+
+  doc.text(`Fecha: ${new Date(user.fecha_inscripcion).toLocaleDateString()}`, {
+    align: 'left',
+    indent: 20,
+  });
+
+  doc.text(`Plan contratado: ${user.plan_contratado}`, {
+    align: 'left',
+    indent: 20,
+  });
+  doc.text(`Dirección: ${user.direccion}`, { align: 'left', indent: 20 });
+  doc.text(`Teléfono: ${user.telefono}`, { align: 'left', indent: 20 });
+  doc.text(`Correo: ${user.correo}`, { align: 'left', indent: 20 });
+
+  // Firma del usuario
   doc.moveDown();
-  doc.text('1. Normas de Funcionamiento', { underline: true });
-  doc.text('1.1 Está prohibido fumar dentro de las instalaciones.');
-  doc.text(
-    '1.2 El consumo del alcohol o sustancias sujetas a fiscalización está terminantemente prohibido en las instalaciones.'
-  );
-  doc.text(
-    '1.3 No se permite el consumo de alimentos dentro de las instalaciones, salvo en las zonas expresamente habilitadas para ello.'
-  );
-  doc.text('1.4 Está prohibida la entrada de animales a las instalaciones.');
-  doc.text(
-    '1.5 Se deberá usar ropa y calzados adecuados para las actividades y servicios prestados.'
-  );
-  doc.text(
-    '1.6 Se habrá de dejar los equipos y las instalaciones en las condiciones que se las encontró previo al uso, es decir, sin sudor, sin residuos de ningún tipo libres disponibles para el resto de usuarios.'
-  );
-  doc.text(
-    '1.7 Se deberá hacer uso correcto del equipamiento e implementos del gimnasio. siendo responsable el usuario de cualquier deterioro que se causase por uso indebido.'
-  );
-  doc.text(
-    '1.8 La sustracción y/o destrucción o dañó material de cualquier equipo o implemento de la instalación, significará la expulsión automática de las instalaciones, sin perjuicio de las acciones civiles y penales que puedan derivar.'
-  );
-  doc.text(
-    '1.9 Debe respetarse la higiene de las instalaciones, haciendo el uso debido de papeleras de reciclaje para depositar los desperdicios de cualquier tipo.'
-  );
-  doc.text(
-    '1.10 Se respetarán los horarios establecidos para las actividades en las instalaciones.'
-  );
-  doc.text(
-    '1.11 Se pagará de forma puntal y sin retraso la mensualidad requerida.'
-  );
-  doc.text(
-    '1.12 El hecho de permitir pagar fuera de fecha, no implica bajo ninguna circunstancia renuncia a la cantidad debida.'
-  );
-  doc.text(
-    '1.13 El acceso y uso de las instalaciones está reservado únicamente a los usuarios que tengan la calidad de miembro. La participación en la introducción no autorizada de personas ajenas, no se encuentra permitida.'
-  );
-  doc.text(
-    '1.14 Las instalaciones están equipadas con sistemas de vigilancia y seguridad con grabación de imagen, al acceder al presente acuerdo, usted acepta ser grabado.'
-  );
-  doc.text(
-    '1.15 El personal se encargará de velar por el cumplimiento de las normas de conducta y de uso de las instalaciones.'
-  );
-  doc.text(
-    '1.16 Gimnasio Dorian se reserva limitar o impedir el acceso a las instalaciones cuando las circunstancias y/o la seguridad de las personas así lo ameriten.'
-  );
-  doc.text(
-    '1.17 Los implementos y accesorios, deben permanecer en las instalaciones, debiendo dejarse tras su uso en el sitio correcto y en orden.'
-  );
-  doc.text(
-    '1.18 Las recomendaciones o solicitudes que presenten los clientes deberán ser dirigidas de manera escrita a la administración a que puedan ser canalizadas de la mejor manera.'
-  );
+  doc.text('Firma del usuario:', { align: 'left', indent: 20 });
+  doc.image(firmaPath, { fit: [200, 100], align: 'left', valign: 'top' });
+
+  // Foto del usuario
   doc.moveDown();
-  doc.text('2. Vestuarios y Casilleros', { underline: true });
-  doc.text(
-    '2.1 DORIAN GIMNASIO no se responsabiliza de pérdidas, daños materiales, sustracción de dinero o de otros artículos de valor que se deje en los casilleros.'
-  );
-  doc.text(
-    '2.2 No está permitido afeitarse en las duchas por motivos de higiene, sanitarios y de seguridad.'
-  );
-  doc.text(
-    '2.3 Se ruega dejar los vestidores de la misma manera en que fueron encontrados.'
-  );
-  doc.moveDown();
-  doc.text('3. Responsabilidad', { underline: true });
-  doc.text(
-    '3.1 GIMNASIO DORIAN no será responsable de los problemas de salud que pueda sufrir a consecuencia del "mal" uso de nuestras instalaciones o de nuestros programas de ejercicios. Por lo tanto, recomendamos que consulte con un médico antes de contratar nuestros servicios en caso de que tenga la tensión alta, angina de pecho, cardiopatía, diabetes, enfermedad crónica, desmayos y, en general, si concurre cualquier otra circunstancia que afecte a tu salud y forma fisica. Con la suscripción del presente contrato, usted declara que está en buenas condiciones para la realización de ejercicio físico.'
-  );
-  doc.text(
-    '3.2 Adicionalmente, GIMNASIO DORIAN no se hará responsable en caso de lesión debido a:'
-  );
-  doc.text('A. No prestar atención indicaciones del entrenador.');
-  doc.text(
-    'B. No realizar la debida preparación corporal para realizar la rutina de entrenamiento, es decir, calentamiento.'
-  );
-  doc.text('C. Afecciones cutáneas debido al no uso de la toalla.');
-  doc.text('D. Utilizar ropa indebida para realizar ejercicio.');
-  doc.text('E. Mal uso de las máquinas y demás implementos del Gimnasio.');
-  doc.text(
-    'F. Ejecución de los ejercicios sin realizar la técnica correctamente.'
-  );
-  doc.text('G. No haber hecho uso del instructor.');
-  doc.text(
-    'H. Por no comunicar lesiones o circunstancias de salud anteriores.'
-  );
-  doc.text(
-    'I. Por no utilizar implementos de seguridad durante el entrenamiento, como: cinturón, guantes, vendas, agarraderas, entre otros.'
-  );
-  doc.text(
-    'J. Accidentes ocasionados por terceros, sin perjuicio de la posibilidad de exigirle al causante del daño, la reparación debida.'
-  );
-  doc.text('K. Irrespeto a los protocolos de las clases grupales.');
-  doc.text(
-    'L. Ingresar en estado etilico o bajo el efecto sustancias estupefacientes.'
-  );
-  doc.text(
-    'M. Por no haber informado de padecer algún desorden alimenticio o cualquier otra enfermedad.'
-  );
-  doc.text(
-    'N. Por no alimentarse de una manera correcta antes, durante y después de realizar los ejercicios.'
-  );
-  doc.moveDown();
-  doc.text('4. Incumplimiento', { underline: true });
-  doc.text(
-    '4.1 En caso de incumplimiento, GIMNASIO DORIAN se reserva la posibilidad de expulsar a dicho usuario, sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.'
-  );
-  doc.moveDown();
-  doc.text('5. Política de Congelamiento de Planes', { underline: true });
-  doc.text(
-    'Los planes no serán sujetos a devoluciones o extensiones, y tendrán validez durante el tiempo y por el monto acordado.'
-  );
-  doc.moveDown();
-  doc.text(
-    `Yo, ${user.nombre} ${user.apellido}, con cédula de ciudadanía ${user.cedula}, declaro que he leído y acepto los términos y condiciones.`
-  );
-  doc.text(`Fecha: ${new Date(user.fecha_inscripcion).toLocaleDateString()}`);
-  doc.text(`Plan contratado: ${user.plan_contratado}`);
-  doc.text(`Dirección: ${user.direccion}`);
-  doc.text(`Teléfono: ${user.telefono}`);
-  doc.text(`Correo: ${user.correo}`);
-  doc.moveDown();
-  doc.text('Firma del usuario:');
-  doc.image(firmaPath, { fit: [250, 100], align: 'left' });
-  doc.moveDown();
-  doc.text('Foto del usuario:');
+  doc.text('Foto del usuario:', { align: 'left', indent: 20 });
   doc.image(fotoPath, { fit: [100, 100], align: 'left' });
-  doc.moveDown();
-  doc.text(`Contrato Nro.: ${user.id}`);
 
   doc.end();
 });
