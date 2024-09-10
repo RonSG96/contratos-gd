@@ -464,39 +464,83 @@ app.get('/download/:cedula', async (req, res) => {
     )
     .moveDown();
 
-  // Detalles del usuario con formato
+  // Detalles del usuario con formato mejorado
   doc
     .fontSize(12)
     .text(
       `Yo, ${user.nombre} ${user.apellido}, con cédula de ciudadanía ${user.cedula}, declaro que he leído y acepto los términos y condiciones.`,
       {
-        align: 'justify',
-        indent: 20,
+        align: 'left',
+        indent: 40,
+        lineGap: 10,
       }
     );
 
+  // Espacio para separar la firma
+  doc.moveDown();
+
+  // Agregar detalles del contrato con espacio entre cada línea
   doc.text(`Fecha: ${new Date(user.fecha_inscripcion).toLocaleDateString()}`, {
     align: 'left',
-    indent: 20,
+    indent: 40,
+    lineGap: 5,
   });
 
   doc.text(`Plan contratado: ${user.plan_contratado}`, {
     align: 'left',
-    indent: 20,
+    indent: 40,
+    lineGap: 5,
   });
-  doc.text(`Dirección: ${user.direccion}`, { align: 'left', indent: 20 });
-  doc.text(`Teléfono: ${user.telefono}`, { align: 'left', indent: 20 });
-  doc.text(`Correo: ${user.correo}`, { align: 'left', indent: 20 });
 
-  // Firma del usuario
-  doc.moveDown();
-  doc.text('Firma del usuario:', { align: 'left', indent: 20 });
-  doc.image(firmaPath, { fit: [200, 100], align: 'left', valign: 'top' });
+  doc.text(`Dirección: ${user.direccion}`, {
+    align: 'left',
+    indent: 40,
+    lineGap: 5,
+  });
 
-  // Foto del usuario
+  doc.text(`Teléfono: ${user.telefono}`, {
+    align: 'left',
+    indent: 40,
+    lineGap: 5,
+  });
+
+  doc.text(`Correo: ${user.correo}`, {
+    align: 'left',
+    indent: 40,
+    lineGap: 5,
+  });
+
+  // Firma del usuario con dimensiones más pequeñas y bien alineada
   doc.moveDown();
-  doc.text('Foto del usuario:', { align: 'left', indent: 20 });
-  doc.image(fotoPath, { fit: [100, 100], align: 'left' });
+  doc.text('Firma del usuario:', {
+    align: 'left',
+    indent: 40,
+    lineGap: 5,
+  });
+
+  // Redimensionar la imagen de la firma para que se ajuste mejor
+  doc.image(firmaPath, {
+    fit: [150, 75], // Ajuste de tamaño de la firma
+    align: 'left',
+    valign: 'top',
+    margin: [40, 20, 0, 20], // Ajustar margen para evitar que la imagen esté muy pegada al texto
+  });
+
+  // Foto del usuario con dimensiones ajustadas y bien alineada
+  doc.moveDown();
+  doc.text('Foto del usuario:', {
+    align: 'left',
+    indent: 40,
+    lineGap: 5,
+  });
+
+  // Redimensionar la imagen de la foto para que se ajuste bien
+  doc.image(fotoPath, {
+    fit: [100, 100], // Ajuste de tamaño de la foto
+    align: 'left',
+    valign: 'top',
+    margin: [40, 20, 0, 20], // Ajustar márgenes para una mejor presentación
+  });
 
   doc.end();
 });
