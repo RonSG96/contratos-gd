@@ -339,14 +339,14 @@ app.get('/download/:cedula', async (req, res) => {
   });
 
   // Posicionar el logotipo en la esquina superior derecha y ajustar el tamaño
-  doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), 450, 50, {
-    width: 200, // Ajusta el tamaño del logotipo
-    align: 'right', // Alinear a la derecha
+  doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), 350, 50, {
+    width: 100, // Ajuste del tamaño para que no sea tan grande
+    align: 'right', // Mantener alineado a la derecha, pero más cerca
     valign: 'top',
   });
 
   doc.moveDown(4); // Añadir espacio después del logotipo
-  doc.fontSize(20).text('Bienvenid@ a:', { align: 'left', indent: 20 });
+  doc.fontSize(16).text('Bienvenid@ a:', { align: 'left', indent: 20 });
 
   // Espacio después del logo
   doc.moveDown(2);
@@ -364,7 +364,8 @@ app.get('/download/:cedula', async (req, res) => {
       'El uso de nuestros servicios constituye una aceptación total de estas condiciones y la posibilidad de aplicar las leyes necesarias de ser el caso. Razón por la que recomendamos que las lea detenidamente y con atención, y de ser posible guardarlos. Si usted no se encuentra de acuerdo con ellos, no debe usar nuestros servicios bajo ninguna excusa.',
       { align: 'justify' } // Justificación del texto
     )
-    .moveDown();
+    .moveDown()
+    .fontSize(12);
 
   // Normas de Funcionamiento
   doc.fontSize(14).text('1. Normas de Funcionamiento', { underline: true });
@@ -446,7 +447,7 @@ app.get('/download/:cedula', async (req, res) => {
   ];
 
   responsabilidades.forEach((resp) => {
-    doc.text(resp, { align: 'justify', indent: 20 }).moveDown(0.5);
+    doc.text(resp, { align: 'justify', indent: 20 }).moveDown(0.5).fontSize(12);
   });
 
   // Incumplimiento
@@ -522,34 +523,40 @@ app.get('/download/:cedula', async (req, res) => {
     lineGap: 5,
   });
 
-  doc.moveDown(2);
+  doc.moveDown(2); // Añadir espacio entre el último texto y la firma
 
+  // Firma del usuario alineada a la izquierda
   doc.text('Firma del usuario:', {
-    align: 'left', // Alinear el texto a la izquierda
+    align: 'left', // Mantener el texto alineado a la izquierda
     lineGap: 15, // Espacio extra debajo del texto
   });
 
-  doc.moveDown(1);
+  // Añadir espacio entre el texto de la firma y la imagen de la firma
+  doc.moveDown(1); // Espacio entre "Firma del usuario:" y la imagen
 
+  // Redimensionar la imagen de la firma y centrarla
   doc.image(firmaPath, {
-    fit: [100, 50], // Tamaño más pequeño para la firma
+    fit: [150, 75], // Tamaño más pequeño para la firma
     align: 'center', // Centrar la imagen de la firma
     valign: 'top',
   });
 
-  doc.moveDown(2); // Añadir espacio extra entre la firma y la foto
+  // Añadir espacio entre la firma y la foto
+  doc.moveDown(2); // Espacio extra entre la firma y la foto
 
+  // Foto del usuario alineada a la izquierda
   doc.text('Foto del usuario:', {
-    align: 'left',
-    lineGap: 15,
+    align: 'left', // Mantener el texto alineado a la izquierda
+    lineGap: 15, // Espacio extra debajo del texto
   });
 
-  doc.moveDown(1);
+  // Añadir espacio entre el texto de la foto y la imagen de la foto
+  doc.moveDown(1); // Espacio entre "Foto del usuario:" y la imagen
 
   // Redimensionar la imagen de la foto y centrarla
   doc.image(fotoPath, {
-    fit: [100, 100],
-    align: 'center',
+    fit: [100, 100], // Tamaño ajustado para la foto
+    align: 'center', // Centrar la imagen de la foto
     valign: 'top',
   });
 
