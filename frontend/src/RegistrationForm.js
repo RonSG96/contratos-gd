@@ -43,11 +43,12 @@ const RegistrationForm = () => {
   const [isSignatureDone, setSignatureDone] = useState(false);
   const [isPhotoTaken, setPhotoTaken] = useState(false);
   const [isFinalButtonDisabled, setFinalButtonDisabled] = useState(true);
+  const [isSignButtonEnabled, setSignButtonEnabled] = useState(false); // Nueva variable para controlar el botón de Firmar
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null);
 
-  const apiUrl = process.env.REACT_APP_API_URL; // Obtener la URL base de la API desde una variable de entorno
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,7 +83,7 @@ const RegistrationForm = () => {
 
   const checkIfCanEnableAgree = () => {
     if (signatureDataURL && photoDataURL) {
-      setAgreeChecked(false); // Reseteamos el check en caso de que se haya hecho cambios
+      setAgreeChecked(false); // Resetear el check si hay cambios
     }
   };
 
@@ -93,6 +94,11 @@ const RegistrationForm = () => {
     } else {
       setFinalButtonDisabled(true);
     }
+  };
+
+  const handleContractModalClose = () => {
+    setContractModalOpen(false);
+    setSignButtonEnabled(true); // Activamos el botón de firmar al cerrar el modal del contrato
   };
 
   const handleSubmit = async (e) => {
@@ -137,6 +143,7 @@ const RegistrationForm = () => {
         setPhotoDataURL('');
         setAgreeChecked(false);
         setFinalButtonDisabled(true);
+        setSignButtonEnabled(false);
       } else {
         console.error('Error:', result.message);
         alert('Hubo un problema con el registro.');
@@ -251,7 +258,7 @@ const RegistrationForm = () => {
                 onClick={() => setSignatureModalOpen(true)}
                 variant="outlined"
                 color="primary"
-                disabled={!isAgreeChecked}
+                disabled={!isSignButtonEnabled} // Botón firmar solo habilitado cuando se cierre el modal del contrato
               >
                 Firmar
               </Button>
@@ -307,7 +314,6 @@ const RegistrationForm = () => {
           </form>
         </Paper>
       </Box>
-
       {/* Modal para ver el contrato */}
       <Dialog
         open={isContractModalOpen}
@@ -425,9 +431,8 @@ const RegistrationForm = () => {
             si concurre cualquier otra circunstancia que afecte a tu salud y
             forma fisica. Con la suscripción del presente contrato, usted
             declara que está en buenas condiciones para la realización de
-            <br />
-            <br />
             ejercicio físico.
+            <br />
             <br />
             3.2. Adicionalmente, GIMNASIO DORIAN no se hará responsable en caso
             de lesión debido a:
@@ -481,7 +486,7 @@ const RegistrationForm = () => {
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setContractModalOpen(false)}
+            onClick={handleContractModalClose}
             variant="contained"
             color="secondary"
           >
