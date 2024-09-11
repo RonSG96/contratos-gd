@@ -345,7 +345,7 @@ app.get('/download/:cedula', async (req, res) => {
     valign: 'top',
   });
 
-  doc.moveDown(4); // Añadir espacio después del logotipo
+  doc.moveDown(8); // Añadir espacio después del logotipo
   doc.fontSize(14).text('Bienvenid@ a:', { align: 'justify' });
 
   // Espacio después del logo
