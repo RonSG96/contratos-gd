@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { QRCode } from 'qrcode.react';
+import QRCode from 'react-qr-code'; // Actualizado a react-qr-code
 import { Container, Typography, Box, Paper } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import './UserQRCode.css';
@@ -56,6 +56,7 @@ const UserQRCode = () => {
           Código QR
         </Typography>
         <Paper elevation={3} className="qr-paper">
+          {/* Asegúrate de que QRCode esté recibiendo el valor */}
           <QRCode value={qrData} size={256} />
         </Paper>
         <Box mt={2}>
