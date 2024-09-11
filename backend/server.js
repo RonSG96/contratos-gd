@@ -514,31 +514,36 @@ app.get('/download/:cedula', async (req, res) => {
   // Firma del usuario con dimensiones más pequeñas y bien alineada
   doc.moveDown();
   // Firma del usuario con espacio y centrado
+
   doc.text('Firma del usuario:', {
-    align: 'center', // Centrar el texto
+    align: 'left', // Alinear el texto a la izquierda
     lineGap: 15, // Espacio extra debajo del texto
   });
 
+  doc.moveDown(1); // Añadir espacio extra entre la firma y la foto
+
   // Redimensionar la imagen de la firma y centrarla
   doc.image(firmaPath, {
-    fit: [150, 75], // Tamaño ajustado para la firma
-    align: 'center', // Centrar la imagen
+    fit: [100, 50], // Tamaño más pequeño para la firma
+    align: 'center', // Centrar la imagen de la firma
     valign: 'top',
   });
 
   // Añadir espacio entre la firma y la foto
-  doc.moveDown(3); // Añadir espacio extra entre la firma y la foto
+  doc.moveDown(2); // Añadir espacio extra entre la firma y la foto
 
-  // Foto del usuario con espacio y centrado
+  // Foto del usuario alineada a la izquierda
   doc.text('Foto del usuario:', {
-    align: 'center', // Centrar el texto
+    align: 'left', // Alinear el texto a la izquierda
     lineGap: 15, // Espacio extra debajo del texto
   });
+
+  doc.moveDown(1); // Añadir espacio extra entre la firma y la foto
 
   // Redimensionar la imagen de la foto y centrarla
   doc.image(fotoPath, {
     fit: [100, 100], // Tamaño ajustado para la foto
-    align: 'center', // Centrar la imagen
+    align: 'center', // Centrar la imagen de la foto
     valign: 'top',
   });
 
