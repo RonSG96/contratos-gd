@@ -337,16 +337,16 @@ app.get('/download/:cedula', async (req, res) => {
       })
       .end(pdfData);
   });
-
-  // Posicionar el logotipo en la esquina superior derecha y ajustar el tamaño
   doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), {
-    fit: [200, 200], // Aumentar el tamaño del logotipo
+    fit: [200, 100], // Tamaño ajustado
     align: 'center', // Centrar el logotipo
     valign: 'top',
+    x: 220, // Ajusta la posición en el eje X para centrarlo en la página
+    y: 30, // Colocar el logotipo más cerca de la parte superior de la página
   });
 
-  doc.moveDown(8); // Añadir espacio después del logotipo
-  doc.fontSize(14).text('Bienvenid@ a:', { align: 'justify' });
+  doc.moveDown(6); // Añadir espacio después del logotipo
+  doc.fontSize(16).text('Bienvenid@ a:', { align: 'justify' });
 
   // Espacio después del logo
   doc.moveDown(2);
