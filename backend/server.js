@@ -534,7 +534,6 @@ app.get('/download/:cedula', async (req, res) => {
     fit: [150, 75], // Tamaño más pequeño para la firma
     align: 'center', // Centrar la imagen de la firma
     valign: 'top',
-    x: 220,
   });
 
   // Añadir espacio entre la firma y la foto
