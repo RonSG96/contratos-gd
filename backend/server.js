@@ -478,14 +478,13 @@ app.get('/download/:cedula', async (req, res) => {
     .moveDown();
 
   // Detalles del usuario con formato mejorado
-  doc.moveDown(3); // Añadir espacio entre el último texto y la firma
+  doc.moveDown(6); // Añadir espacio entre el último texto y la firma
   doc
     .fontSize(12)
     .text(
       `Yo, ${user.nombre} ${user.apellido}, con cédula de ciudadanía ${user.cedula}, declaro que he leído y acepto los términos y condiciones.`,
       {
-        align: 'left',
-        indent: 40,
+        align: 'justify',
         lineGap: 10,
       }
     );
@@ -496,31 +495,26 @@ app.get('/download/:cedula', async (req, res) => {
   // Agregar detalles del contrato con espacio entre cada línea
   doc.text(`Fecha: ${new Date(user.fecha_inscripcion).toLocaleDateString()}`, {
     align: 'left',
-    indent: 40,
     lineGap: 5,
   });
 
   doc.text(`Plan contratado: ${user.plan_contratado}`, {
     align: 'left',
-    indent: 40,
     lineGap: 5,
   });
 
   doc.text(`Dirección: ${user.direccion}`, {
     align: 'left',
-    indent: 40,
     lineGap: 5,
   });
 
   doc.text(`Teléfono: ${user.telefono}`, {
     align: 'left',
-    indent: 40,
     lineGap: 5,
   });
 
   doc.text(`Correo: ${user.correo}`, {
     align: 'left',
-    indent: 40,
     lineGap: 5,
   });
 
@@ -540,6 +534,7 @@ app.get('/download/:cedula', async (req, res) => {
     fit: [150, 75], // Tamaño más pequeño para la firma
     align: 'center', // Centrar la imagen de la firma
     valign: 'top',
+    x: 220,
   });
 
   // Añadir espacio entre la firma y la foto
