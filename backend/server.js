@@ -339,14 +339,14 @@ app.get('/download/:cedula', async (req, res) => {
   });
 
   // Posicionar el logotipo en la esquina superior derecha y ajustar el tamaño
-  doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), 350, 50, {
-    width: 100, // Ajuste del tamaño para que no sea tan grande
-    align: 'right', // Mantener alineado a la derecha, pero más cerca
+  doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), {
+    fit: [200, 200], // Aumentar el tamaño del logotipo
+    align: 'center', // Centrar el logotipo
     valign: 'top',
   });
 
   doc.moveDown(4); // Añadir espacio después del logotipo
-  doc.fontSize(16).text('Bienvenid@ a:', { align: 'left', indent: 20 });
+  doc.fontSize(14).text('Bienvenid@ a:', { align: 'justify' });
 
   // Espacio después del logo
   doc.moveDown(2);
@@ -394,9 +394,9 @@ app.get('/download/:cedula', async (req, res) => {
 
   normas.forEach((norma) => {
     doc
+      .fontSize(12)
       .text(norma, { align: 'justify', indent: 20 })
-      .moveDown(0.5)
-      .fontSize(12);
+      .moveDown(0.5);
   });
 
   // Vestuarios y Casilleros
@@ -447,6 +447,7 @@ app.get('/download/:cedula', async (req, res) => {
   ];
 
   responsabilidades.forEach((resp) => {
+    doc.fontSize(12);
     doc.text(resp, { align: 'justify', indent: 20 }).moveDown(0.5).fontSize(12);
   });
 
@@ -532,7 +533,7 @@ app.get('/download/:cedula', async (req, res) => {
   });
 
   // Añadir espacio entre el texto de la firma y la imagen de la firma
-  doc.moveDown(1); // Espacio entre "Firma del usuario:" y la imagen
+  doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
 
   // Redimensionar la imagen de la firma y centrarla
   doc.image(firmaPath, {
@@ -542,7 +543,7 @@ app.get('/download/:cedula', async (req, res) => {
   });
 
   // Añadir espacio entre la firma y la foto
-  doc.moveDown(2); // Espacio extra entre la firma y la foto
+  doc.moveDown(4); // Espacio extra entre la firma y la foto
 
   // Foto del usuario alineada a la izquierda
   doc.text('Foto del usuario:', {
@@ -551,7 +552,7 @@ app.get('/download/:cedula', async (req, res) => {
   });
 
   // Añadir espacio entre el texto de la foto y la imagen de la foto
-  doc.moveDown(1); // Espacio entre "Foto del usuario:" y la imagen
+  doc.moveDown(1.5); // Espacio entre "Foto del usuario:" y la imagen
 
   // Redimensionar la imagen de la foto y centrarla
   doc.image(fotoPath, {
