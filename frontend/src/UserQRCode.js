@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import QRCode from 'qrcode.react';
+import { QRCode } from 'qrcode.react';
 import { Container, Typography, Box, Paper } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import './UserQRCode.css';
@@ -10,29 +10,31 @@ const UserQRCode = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
- useEffect(() => {
-  const fetchUser = async () => {
-    const token = localStorage.getItem('token');  // Obtener el token desde localStorage
-    if (!token) {
-      console.error('Token no disponible');
-      return;
-    }
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token'); // Obtener el token desde localStorage
+      if (!token) {
+        console.error('Token no disponible');
+        return;
+      }
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/${userId}`, {
-      headers: {
-        'x-access-token': token,  // Enviar el token en las cabeceras
-      },
-    });
-    const data = await response.json();
-    if (response.ok) {
-      setUser(data);
-    } else {
-      console.error('Error al obtener el usuario:', data.message);
-    }
-  };
-  fetchUser();
-}, [userId]);
-
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/user/${userId}`,
+        {
+          headers: {
+            'x-access-token': token, // Enviar el token en las cabeceras
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data);
+      } else {
+        console.error('Error al obtener el usuario:', data.message);
+      }
+    };
+    fetchUser();
+  }, [userId]);
 
   if (loading) {
     return <Typography>Cargando...</Typography>;
