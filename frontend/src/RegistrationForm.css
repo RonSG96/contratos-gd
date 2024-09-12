@@ -216,7 +216,7 @@
     /* Ancho completo */
     border: 2px solid #FB6718 !important;
     /* Borde color */
-    color: #FB6718;
+    color: #FB6718 !important;
     /* Color del texto */
     text-transform: none;
     /* Mantener el texto en su caso original */
