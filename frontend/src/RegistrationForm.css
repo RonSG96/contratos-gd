@@ -76,7 +76,9 @@
 .form-title {
     font-size: 20px;
     font-weight: bold;
-    text-align: left;
+    text-align: center;
+    color: #f97316;
+
 }
 
 .registration-form {
@@ -214,7 +216,7 @@
     /* Ancho completo */
     border: 2px solid #FB6718 !important;
     /* Borde color */
-    color: #FB6718 !important;
+    color: #FB6718;
     /* Color del texto */
     text-transform: none;
     /* Mantener el texto en su caso original */
