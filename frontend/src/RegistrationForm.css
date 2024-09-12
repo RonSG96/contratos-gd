@@ -114,8 +114,11 @@
 }
 
 .sigCanvas {
-    border: 1px solid #000;
+    border: 1px solid #f97316;
     margin-top: 10px;
+    width: 300px;
+    /* Ajusta según el tamaño adecuado para tu diseño */
+    height: 150px;
 }
 
 .signature-placeholder {
@@ -188,13 +191,13 @@
     color: #f97316;
 }
 
-.user-contract-paper .signature-placeholder {
-    border: 1px solid #f97316;
-    border-radius: 5px;
-    width: 225px;
-    height: 25%;
-    margin-top: 10px;
-    /* margin-left: 30%; */
+.user-contract-paper .signature-placeholder img {
+    width: 150px;
+    /* Ajusta el tamaño según tus necesidades */
+    height: auto;
+    /* Mantiene la proporción */
+    display: block;
+    margin: 0 auto;
 }
 
 .MuiFormControl-root {
@@ -203,6 +206,30 @@
 
 .MuiInputLabel-root {
     top: -6px;
+}
+
+/* Botones generales (Ver contrato, Firmar, Tomar foto) */
+.MuiButton-outlined {
+    width: 100%;
+    /* Ancho completo */
+    border: 2px solid #FB6718;
+    /* Borde color */
+    color: #FB6718;
+    /* Color del texto */
+    text-transform: none;
+    /* Mantener el texto en su caso original */
+}
+
+/* Botón Finalizar */
+.MuiButton-containedPrimary {
+    width: 100%;
+    /* Ancho completo */
+    background-color: #FB6718 !important;
+    /* Color de fondo */
+    color: white;
+    /* Color del texto */
+    text-transform: none;
+    /* Mantener el texto en su caso original */
 }
 
 /* Media Queries para Responsividad en Dispositivos Móviles */
