@@ -25,7 +25,7 @@
     position: relative;
     width: 400px;
     height: 600px;
-    background-image: url('qr-background.jpg');
+    background-image: url('./assets/qr-background.jpg');
     /* Si mueves la imagen al directorio raíz de public */
     background-size: cover;
     background-position: center;
