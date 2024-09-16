@@ -241,10 +241,10 @@ const RegistrationForm = () => {
                 value={formData.planContratado}
                 onChange={handleChange}
               >
-                <MenuItem value="Plan Premium">Plan Anual</MenuItem>
-                <MenuItem value="Plan Básico">Plan Mensual</MenuItem>
-                <MenuItem value="Plan Básico">Plan Semestral</MenuItem>
-                <MenuItem value="Plan Básico">Plan Trimestral</MenuItem>
+                <MenuItem value="Plan Anual">Plan Anual</MenuItem>
+                <MenuItem value="Plan Mensual">Plan Mensual</MenuItem>
+                <MenuItem value="Plan Semestral">Plan Semestral</MenuItem>
+                <MenuItem value="Plan Trimestral">Plan Trimestral</MenuItem>
               </Select>
             </FormControl>
 
