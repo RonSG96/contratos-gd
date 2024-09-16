@@ -77,23 +77,34 @@ const AdminPanel = ({ setToken }) => {
   // Cambia esto para generar la imagen con el QR y los datos del cliente
   const handleDownloadQR = async (id) => {
     try {
-      const node = document.getElementById(`qr-${id}`); // Captura el div con QR y datos
-      const dataUrl = await toPng(node); // Captura el componente como imagen PNG
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/user/${id}/download-qr`
+      );
+      if (!response.ok) {
+        console.error('Estado de la respuesta:', response.status);
+        throw new Error('Network response was not ok');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
-      link.href = dataUrl;
+      link.href = url;
       link.setAttribute('download', `user_${id}_qr.png`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      alert('Se ha descargado el QR con la información del cliente.');
+      alert('Se ha descargado el QR.');
     } catch (error) {
       console.error('Error al descargar el QR:', error);
     }
   };
+
   const handleDownloadPDF = async (cedula) => {
     try {
-      const response = await fetch(`${apiUrl}/download/${cedula}`);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/download/${cedula}`
+      );
       if (!response.ok) {
+        console.error('Estado de la respuesta:', response.status);
         throw new Error('Network response was not ok');
       }
       const blob = await response.blob();
