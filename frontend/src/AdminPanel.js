@@ -32,6 +32,7 @@ import {
   ExitToApp as LogoutIcon,
   QrCode2 as QrCodeIcon,
 } from '@mui/icons-material';
+import { toPng } from 'html-to-image';
 import './AdminPanel.css';
 
 const AdminPanel = ({ setToken }) => {
@@ -41,8 +42,8 @@ const AdminPanel = ({ setToken }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editUser, setEditUser] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-
   const apiUrl = process.env.REACT_APP_API_URL;
+  const qrRef = React.createRef(); // Para capturar el QR
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -73,41 +74,18 @@ const AdminPanel = ({ setToken }) => {
       user.cedula.includes(search)
   );
 
-  const handleDownloadPDF = async (cedula) => {
-    try {
-      const response = await fetch(`${apiUrl}/download/${cedula}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${cedula}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      alert('Se ha descargado el documento.');
-    } catch (error) {
-      console.error('Error al descargar el documento:', error);
-    }
-  };
-
+  // Cambia esto para generar la imagen con el QR y los datos del cliente
   const handleDownloadQR = async (id) => {
     try {
-      const response = await fetch(`${apiUrl}/user/${id}/download-qr`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      const node = document.getElementById(`qr-${id}`); // Captura el div con QR y datos
+      const dataUrl = await toPng(node); // Captura el componente como imagen PNG
       const link = document.createElement('a');
-      link.href = url;
+      link.href = dataUrl;
       link.setAttribute('download', `user_${id}_qr.png`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      alert('Se ha descargado el QR.');
+      alert('Se ha descargado el QR con la información del cliente.');
     } catch (error) {
       console.error('Error al descargar el QR:', error);
     }
@@ -167,16 +145,13 @@ const AdminPanel = ({ setToken }) => {
 
   const handleEditSubmit = async () => {
     try {
-      const response = await fetch(
-        `${apiUrl}/user/${editUser.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(editUser),
-        }
-      );
+      const response = await fetch(`${apiUrl}/user/${editUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editUser),
+      });
       const result = await response.json();
       if (result.status === 'success') {
         setUsers((prevUsers) =>
