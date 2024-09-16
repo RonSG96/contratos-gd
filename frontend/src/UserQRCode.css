@@ -25,13 +25,14 @@
     position: relative;
     width: 400px;
     height: 600px;
-    background-image: url('/assets/qr-background.jpg');
-    /* Ruta desde la carpeta public */
+    background-image: url('qr-background.jpg');
+    /* Si mueves la imagen al directorio raíz de public */
     background-size: cover;
     background-position: center;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
+
 
 /* Clase para el contenedor de fondo del QR */
 .qr-background {
