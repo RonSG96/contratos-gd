@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import QRCode from 'react-qr-code'; // Actualizado a react-qr-code
-import { Container, Typography, Box, Paper } from '@mui/material';
+import QRCode from 'react-qr-code'; // Utiliza react-qr-code
+import { Container, Typography, Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import './UserQRCode.css';
 
@@ -12,7 +12,7 @@ const UserQRCode = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem('token'); // Obtener el token desde localStorage
+      const token = localStorage.getItem('token');
       if (!token) {
         console.error('Token no disponible');
         return;
@@ -22,7 +22,7 @@ const UserQRCode = () => {
         `${process.env.REACT_APP_API_URL}/user/${userId}`,
         {
           headers: {
-            'x-access-token': token, // Enviar el token en las cabeceras
+            'x-access-token': token,
           },
         }
       );
@@ -46,32 +46,33 @@ const UserQRCode = () => {
 
   const qrData = `${process.env.REACT_APP_API_URL}/user/${userId}/qr`;
   const estado = user.estado === 'activo' ? 'aprobado' : 'caducado';
-  const imageUrl = `${process.env.REACT_APP_API_URL}/assets/${estado}.png`;
   const fechaExpiracion = new Date(user.fecha_expiracion).toLocaleDateString();
+  const fechaInscripcion = new Date(
+    user.fecha_inscripcion
+  ).toLocaleDateString();
 
   return (
     <Container className="user-qr-container">
-      <Box display="flex" flexDirection="column" alignItems="center">
-        <Typography variant="h4" gutterBottom>
-          Código QR
-        </Typography>
-        <Paper elevation={3} className="qr-paper">
-          {/* Asegúrate de que QRCode esté recibiendo el valor */}
-          <QRCode value={qrData} size={256} />
-        </Paper>
-        <Box mt={2}>
-          <img src={imageUrl} alt={estado} className="estado-image" />
-        </Box>
-        <Box mt={2}>
-          <Typography variant="body1">
-            Nombre: {user.nombre} {user.apellido}
-          </Typography>
-          <Typography variant="body1">Cédula: {user.cedula}</Typography>
-          <Typography variant="body1">Estado: {estado}</Typography>
-          <Typography variant="body1">
-            Su suscripción vence: {fechaExpiracion}
-          </Typography>
-        </Box>
+      <Box className="qr-card">
+        {/* Contenedor del QR */}
+        <div className="qr-background">
+          {/* QR Code */}
+          <div className="qr-code">
+            <QRCode value={qrData} size={200} />
+          </div>
+
+          {/* Información del usuario */}
+          <div className="user-info">
+            <Typography variant="body2">
+              Nombre: {user.nombre} {user.apellido}
+            </Typography>
+            <Typography variant="body2">Cédula: {user.cedula}</Typography>
+            <Typography variant="body2">
+              Fecha de Inscripción: {fechaInscripcion}
+            </Typography>
+            <Typography variant="body2">Estado: {estado}</Typography>
+          </div>
+        </div>
       </Box>
     </Container>
   );

@@ -1,16 +1,70 @@
+/* Mantén esta clase si se usa en otras partes */
 .user-qr-container {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    /* Cambié para centrar mejor el contenido */
     align-items: center;
-    margin-top: 20px;
+    height: 100vh;
+    /* Añadí esta propiedad para centrar verticalmente */
 }
 
+/* Ya no será necesario si usas el nuevo diseño */
 .qr-paper {
     padding: 20px;
     margin: 20px 0;
 }
 
+/* Imagen del estado, si es relevante */
 .estado-image {
     width: 100px;
     height: 100px;
+}
+
+/* Nueva clase para la tarjeta del QR */
+.qr-card {
+    position: relative;
+    width: 400px;
+    /* Ajusta según el tamaño deseado */
+    height: 600px;
+    /* Ajusta según el tamaño deseado */
+    background-image: url('/frontend/src/assets/qr-background.jpg');
+    /* Aquí va la ruta de la imagen de fondo */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Clase para el contenedor de fondo del QR */
+.qr-background {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Posiciona el QR sobre la imagen */
+.qr-code {
+    position: absolute;
+    top: 35%;
+    /* Ajusta la posición según tu diseño */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    /* Añade un fondo blanco para mejor visibilidad */
+    padding: 10px;
+    border-radius: 8px;
+}
+
+/* Información del usuario */
+.user-info {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: #333;
+    background-color: rgba(255, 255, 255, 0.7);
+    /* Fondo translúcido para mejor legibilidad */
+    padding: 10px;
+    border-radius: 5px;
 }

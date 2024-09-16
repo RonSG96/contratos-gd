@@ -146,7 +146,7 @@ const RegistrationForm = () => {
         setSignButtonEnabled(false);
       } else {
         console.error('Error:', result.message);
-        alert('Hubo un problema con el registro.');
+        alert('Ya existe un registro con la misma cedula.');
       }
     } catch (error) {
       console.error('Error de red:', error);
@@ -219,12 +219,16 @@ const RegistrationForm = () => {
             />
 
             <FormControl fullWidth margin="dense" required>
-              <InputLabel>Sucursal</InputLabel>
+              <InputLabel shrink={false}>Sucursal</InputLabel>
               <Select
                 name="sucursal"
                 value={formData.sucursal}
                 onChange={handleChange}
+                displayEmpty
               >
+                <MenuItem value="" disabled>
+                  Seleccione una sucursal
+                </MenuItem>
                 <MenuItem value="Parque Industrial">Parque Industrial</MenuItem>
                 <MenuItem value="Gonzalez Suarez">Gonzalez Suarez</MenuItem>
                 <MenuItem value="El Cebollar">El Cebollar</MenuItem>
@@ -237,10 +241,10 @@ const RegistrationForm = () => {
                 value={formData.planContratado}
                 onChange={handleChange}
               >
-                <MenuItem value="Plan Anual">Plan Anual</MenuItem>
-                <MenuItem value="Plan Trimestral">Plan Trimestral</MenuItem>
-                <MenuItem value="Plan Semestral">Plan Semestral</MenuItem>
-                <MenuItem value="Plan Mensual">Plan Mensual</MenuItem>
+                <MenuItem value="Plan Premium">Plan Anual</MenuItem>
+                <MenuItem value="Plan Básico">Plan Mensual</MenuItem>
+                <MenuItem value="Plan Básico">Plan Semestral</MenuItem>
+                <MenuItem value="Plan Básico">Plan Trimestral</MenuItem>
               </Select>
             </FormControl>
 
