@@ -24,11 +24,9 @@
 .qr-card {
     position: relative;
     width: 400px;
-    /* Ajusta según el tamaño deseado */
     height: 600px;
-    /* Ajusta según el tamaño deseado */
-    background-image: url('/frontend/src/assets/qr-background.jpg');
-    /* Aquí va la ruta de la imagen de fondo */
+    background-image: url('/assets/qr-background.jpg');
+    /* Ruta desde la carpeta public */
     background-size: cover;
     background-position: center;
     border-radius: 10px;
