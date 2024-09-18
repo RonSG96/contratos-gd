@@ -124,7 +124,7 @@ app.post('/submit', async (req, res) => {
     nombre,
     apellido,
     cedula,
-    plan_contratado,
+    plan_contratado = null,
     direccion,
     telefono,
     correo,

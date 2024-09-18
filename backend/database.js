@@ -1,18 +1,22 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Crear una nueva instancia de Sequelize usando las variables de entorno
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 5432, // Puedes asegurar que el puerto también está definido como variable de entorno
-  dialect: 'postgres',
-});
-
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432, // Puedes asegurar que el puerto también está definido como variable de entorno
+    dialect: 'postgres',
+  }
+);
 
 // Definir el modelo de User
 const User = sequelize.define('User', {
   nombre: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   apellido: {
     type: DataTypes.STRING,
