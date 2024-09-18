@@ -34,7 +34,7 @@ const User = sequelize.define('User', {
   },
   plan_contratado: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   direccion: {
     type: DataTypes.STRING,
@@ -63,7 +63,7 @@ const User = sequelize.define('User', {
   },
   fecha_expiracion: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
   },
   estado: {
     type: DataTypes.STRING,
