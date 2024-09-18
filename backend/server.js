@@ -124,7 +124,7 @@ app.post('/submit', async (req, res) => {
     nombre,
     apellido,
     cedula,
-    plan_contratado = null,
+    plan_contratado,
     direccion,
     telefono,
     correo,
@@ -136,23 +136,28 @@ app.post('/submit', async (req, res) => {
   const fecha_inscripcion = new Date();
   let fecha_expiracion;
 
-  switch (plan_contratado) {
-    case 'Plan Mensual':
-      fecha_expiracion = addMonths(fecha_inscripcion, 1);
-      break;
-    case 'Plan Trimestral':
-      fecha_expiracion = addMonths(fecha_inscripcion, 3);
-      break;
-    case 'Plan Semestral':
-      fecha_expiracion = addMonths(fecha_inscripcion, 6);
-      break;
-    case 'Plan Anual':
-      fecha_expiracion = addMonths(fecha_inscripcion, 12);
-      break;
-    default:
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'Tipo de plan no válido' });
+  if (!plan_contratado) {
+    // Si no se especifica un plan, establece la fecha de expiración a null o a una fecha predeterminada.
+    fecha_expiracion = null; // Ajusta según la lógica de negocio que prefieras.
+  } else {
+    switch (plan_contratado) {
+      case 'Plan Mensual':
+        fecha_expiracion = addMonths(fecha_inscripcion, 1);
+        break;
+      case 'Plan Trimestral':
+        fecha_expiracion = addMonths(fecha_inscripcion, 3);
+        break;
+      case 'Plan Semestral':
+        fecha_expiracion = addMonths(fecha_inscripcion, 6);
+        break;
+      case 'Plan Anual':
+        fecha_expiracion = addMonths(fecha_inscripcion, 12);
+        break;
+      default:
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'Tipo de plan no válido' });
+    }
   }
 
   const estado = fecha_expiracion > new Date() ? 'activo' : 'inactivo';
