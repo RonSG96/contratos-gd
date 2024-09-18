@@ -31,7 +31,7 @@ const RegistrationForm = () => {
     correo: '',
     direccion: '',
     sucursal: '',
-    planContratado: '',
+    planContratado: null,
   });
 
   const [signatureDataURL, setSignatureDataURL] = useState('');
@@ -234,7 +234,7 @@ const RegistrationForm = () => {
                 <MenuItem value="El Cebollar">El Cebollar</MenuItem>
               </Select>
             </FormControl>
-            <FormControl fullWidth margin="dense" required>
+            {/* <FormControl fullWidth margin="dense" required>
               <InputLabel>Tipo de Plan</InputLabel>
               <Select
                 name="planContratado"
@@ -246,7 +246,7 @@ const RegistrationForm = () => {
                 <MenuItem value="Plan Semestral">Plan Semestral</MenuItem>
                 <MenuItem value="Plan Trimestral">Plan Trimestral</MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
 
             <Box mt={2}>
               <Button

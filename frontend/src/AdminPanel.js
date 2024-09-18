@@ -392,7 +392,11 @@ const AdminPanel = ({ setToken }) => {
               name="plan_contratado"
               value={editUser?.plan_contratado || ''}
               onChange={handleEditChange}
+              displayEmpty
             >
+              <MenuItem value="">
+                <em>Ninguno</em>
+              </MenuItem>
               <MenuItem value="Plan Anual">Plan Anual</MenuItem>
               <MenuItem value="Plan Trimestral">Plan Trimestral</MenuItem>
               <MenuItem value="Plan Semestral">Plan Semestral</MenuItem>
