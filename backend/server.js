@@ -323,14 +323,6 @@ app.get('/download/:cedula', async (req, res) => {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  const firmaPath = path.join(__dirname, 'signatures', `${user.cedula}.png`);
-  const fotoPath = path.join(__dirname, 'photos', `${user.cedula}.jpg`);
-
-  // Verificar si los archivos existen
-  if (!fs.existsSync(firmaPath) || !fs.existsSync(fotoPath)) {
-    return res.status(404).json({ message: 'Firma o foto no encontradas' });
-  }
-
   const doc = new PDFDocument();
   let buffers = [];
   doc.on('data', buffers.push.bind(buffers));
@@ -344,15 +336,17 @@ app.get('/download/:cedula', async (req, res) => {
       })
       .end(pdfData);
   });
+
+  // Añadir logo
   doc.image(path.join(__dirname, 'assets', 'logo-dorian.png'), {
-    fit: [200, 100], // Tamaño ajustado
-    align: 'center', // Centrar el logotipo
+    fit: [200, 100],
+    align: 'center',
     valign: 'top',
-    x: 220, // Ajusta la posición en el eje X para centrarlo en la página
-    y: 30, // Colocar el logotipo más cerca de la parte superior de la página
+    x: 220,
+    y: 30,
   });
 
-  doc.moveDown(6); // Añadir espacio después del logotipo
+  doc.moveDown(6);
   doc.fontSize(16).text('Bienvenid@ a:', { align: 'justify' });
 
   // Espacio después del logo
@@ -498,14 +492,13 @@ app.get('/download/:cedula', async (req, res) => {
 
   // Espacio para separar la firma
   doc.moveDown();
-
-  // Agregar detalles del contrato con espacio entre cada línea
+// Agregar detalles del contrato con espacio entre cada línea
   doc.text(`Fecha: ${new Date(user.fecha_inscripcion).toLocaleDateString()}`, {
     align: 'left',
     lineGap: 5,
   });
 
-  doc.text(`Plan contratado: ${user.plan_contratado}`, {
+  doc.text(`Plan contratado: ${user.plan_contratado || 'No especificado'}`, {
     align: 'left',
     lineGap: 5,
   });
@@ -525,7 +518,7 @@ app.get('/download/:cedula', async (req, res) => {
     lineGap: 5,
   });
 
-  doc.moveDown(2); // Añadir espacio entre el último texto y la firma
+  doc.moveDown(2);
 
   // Firma del usuario alineada a la izquierda
   doc.text('Firma del usuario:', {
@@ -536,12 +529,15 @@ app.get('/download/:cedula', async (req, res) => {
   // Añadir espacio entre el texto de la firma y la imagen de la firma
   doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
 
-  // Redimensionar la imagen de la firma y centrarla
-  doc.image(firmaPath, {
-    fit: [150, 75], // Tamaño más pequeño para la firma
-    align: 'center', // Centrar la imagen de la firma
-    valign: 'top',
-  });
+  if (user.firma && Buffer.isBuffer(user.firma)) {
+    doc.image(Buffer.from(user.firma), {
+      fit: [150, 75],
+      align: 'center',
+      valign: 'top',
+    });
+  } else {
+    doc.text('Firma no disponible', { align: 'center' });
+  }
 
   // Añadir espacio entre la firma y la foto
   doc.moveDown(4); // Espacio extra entre la firma y la foto
@@ -555,12 +551,16 @@ app.get('/download/:cedula', async (req, res) => {
   // Añadir espacio entre el texto de la foto y la imagen de la foto
   doc.moveDown(1.5); // Espacio entre "Foto del usuario:" y la imagen
 
-  // Redimensionar la imagen de la foto y centrarla
-  doc.image(fotoPath, {
-    fit: [100, 100], // Tamaño ajustado para la foto
-    align: 'center', // Centrar la imagen de la foto
-    valign: 'top',
-  });
+  // Añadir foto desde el blob en la base de datos, o mensaje si no está disponible
+  if (user.foto && Buffer.isBuffer(user.foto)) {
+    doc.image(Buffer.from(user.foto), {
+      fit: [100, 100],
+      align: 'center',
+      valign: 'top',
+    });
+  } else {
+    doc.text('Foto no disponible', { align: 'center' });
+  }
 
   // Saltos de línea finales para asegurar que quede bien alineado
   doc.moveDown(2);
