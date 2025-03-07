@@ -43,7 +43,7 @@ const RegistrationForm = () => {
   const [isSignatureDone, setSignatureDone] = useState(false);
   const [isPhotoTaken, setPhotoTaken] = useState(false);
   const [isFinalButtonDisabled, setFinalButtonDisabled] = useState(true);
-  const [isSignButtonEnabled, setSignButtonEnabled] = useState(false); // Nueva variable para controlar el botón de Firmar
+  const [isSignButtonEnabled, setSignButtonEnabled] = useState(false);
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null);
@@ -52,16 +52,16 @@ const RegistrationForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Sanitizar la cédula para eliminar espacios y caracteres no válidos
+    const sanitizedValue = name === 'cedula' ? value.replace(/[^0-9]/g, '').trim() : value;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: sanitizedValue,
     });
   };
 
   const handleSaveSignature = () => {
-    const signature = sigCanvas.current
-      .getTrimmedCanvas()
-      .toDataURL('image/png');
+    const signature = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
     setSignatureDataURL(signature);
     setSignatureModalOpen(false);
     setSignatureDone(true);
@@ -98,7 +98,7 @@ const RegistrationForm = () => {
 
   const handleContractModalClose = () => {
     setContractModalOpen(false);
-    setSignButtonEnabled(true); // Activamos el botón de firmar al cerrar el modal del contrato
+    setSignButtonEnabled(true);
   };
 
   const handleSubmit = async (e) => {
@@ -124,7 +124,10 @@ const RegistrationForm = () => {
         body: JSON.stringify(data),
       });
       const result = await response.json();
-      if (result.status === 'success') {
+
+      console.log('Respuesta del backend:', result); // Depuración
+
+      if (response.ok && result.status === 'success') {
         alert('Registro completado con éxito.');
         if (sigCanvas.current) {
           sigCanvas.current.clear();
@@ -144,13 +147,14 @@ const RegistrationForm = () => {
         setAgreeChecked(false);
         setFinalButtonDisabled(true);
         setSignButtonEnabled(false);
-      } else {
-        console.error('Error:', result.message);
+      } else if (result.message === 'Ya existe un registro con la misma cedula.') {
         alert('Ya existe un registro con la misma cedula.');
+      } else {
+        alert('Hubo un problema con el registro: ' + (result.message || 'Error desconocido'));
       }
     } catch (error) {
       console.error('Error de red:', error);
-      alert('Hubo un problema con el registro.');
+      alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
     }
   };
 
@@ -234,19 +238,6 @@ const RegistrationForm = () => {
                 <MenuItem value="El Cebollar">El Cebollar</MenuItem>
               </Select>
             </FormControl>
-            {/* <FormControl fullWidth margin="dense" required>
-              <InputLabel>Tipo de Plan</InputLabel>
-              <Select
-                name="planContratado"
-                value={formData.planContratado}
-                onChange={handleChange}
-              >
-                <MenuItem value="Plan Anual">Plan Anual</MenuItem>
-                <MenuItem value="Plan Mensual">Plan Mensual</MenuItem>
-                <MenuItem value="Plan Semestral">Plan Semestral</MenuItem>
-                <MenuItem value="Plan Trimestral">Plan Trimestral</MenuItem>
-              </Select>
-            </FormControl> */}
 
             <Box mt={2}>
               <Button
@@ -263,7 +254,7 @@ const RegistrationForm = () => {
                 onClick={() => setSignatureModalOpen(true)}
                 variant="outlined"
                 color="primary"
-                disabled={!isSignButtonEnabled} // Botón firmar solo habilitado cuando se cierre el modal del contrato
+                disabled={!isSignButtonEnabled}
               >
                 Firmar
               </Button>
@@ -319,6 +310,7 @@ const RegistrationForm = () => {
           </form>
         </Paper>
       </Box>
+
       {/* Modal para ver el contrato */}
       <Dialog
         open={isContractModalOpen}
@@ -328,9 +320,7 @@ const RegistrationForm = () => {
       >
         <DialogTitle>CONTRATO GIMNASIOS DORIAN</DialogTitle>
         <DialogContent dividers style={{ height: '400px', overflowY: 'auto' }}>
-          {/* Aquí va el contrato con el scroll */}
           <Typography variant="body2" component="div">
-            {/* Sección para el logo centrado */}
             <div style={{ textAlign: 'center' }}>
               <img
                 src={logoDorian}
@@ -338,8 +328,6 @@ const RegistrationForm = () => {
                 className="contract-logo"
               />
             </div>
-
-            {/* Sección para el texto justificado */}
             <div style={{ textAlign: 'justify' }}>
               <b>Bienvenid@s a:</b>
               <br />
@@ -374,7 +362,7 @@ const RegistrationForm = () => {
               instalaciones, salvo en las zonas expresamente habilitadas para
               ello.
               <br />
-              <b>1.4.</b> Está prohibida Ja entrada de animales a las
+              <b>1.4.</b> Está prohibida la entrada de animales a las
               instalaciones.
               <br />
               <b>1.5.</b> Se deberá usar ropa y calzados adecuados para las
@@ -389,7 +377,7 @@ const RegistrationForm = () => {
               implementos del gimnasio. siendo responsable el usuario de
               cualquier deterioro que se causase por uso indebido.
               <br />
-              <b>1.8.</b> La sustracción y/o destrucción o dañó material de
+              <b>1.8.</b> La sustracción y/o destrucción o daño material de
               cualquier equipo o implemento de la instalación, significará la
               expulsión automática de las instalaciones, sin perjuicio de las
               acciones civiles y penales que puedan derivar.
@@ -401,7 +389,7 @@ const RegistrationForm = () => {
               <b>1.10.</b> Se respetarán los horarios establecidos para las
               actividades en las instalaciones.
               <br />
-              <b>1.11.</b> Se pagará de forma puntal y sin retraso la
+              <b>1.11.</b> Se pagará de forma puntual y sin retraso la
               mensualidad requerida.
               <br />
               <b>1.12.</b> El hecho de permitir pagar fuera de fecha, no implica
@@ -456,7 +444,7 @@ const RegistrationForm = () => {
               nuestros servicios en caso de que tenga la tensión alta, angina de
               pecho, cardiopatía, diabetes, enfermedad crónica, desmayos y, en
               general, si concurre cualquier otra circunstancia que afecte a tu
-              salud y forma fisica. Con la suscripción del presente contrato,
+              salud y forma física. Con la suscripción del presente contrato,
               usted declara que está en buenas condiciones para la realización
               de ejercicio físico.
               <br />
@@ -493,7 +481,7 @@ const RegistrationForm = () => {
               <br />
               <b>K.</b> Irrespeto a los protocolos de las clases grupales.
               <br />
-              <b>L.</b> Ingresar en estado etilico o bajo el efecto sustancias
+              <b>L.</b> Ingresar en estado etílico o bajo el efecto sustancias
               estupefacientes.
               <br />
               <b>M.</b> Por no haber informado de padecer algún desorden
