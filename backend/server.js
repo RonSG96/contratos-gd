@@ -137,8 +137,7 @@ app.post('/submit', async (req, res) => {
   let fecha_expiracion;
 
   if (!plan_contratado) {
-    // Si no se especifica un plan, establece la fecha de expiración a null o a una fecha predeterminada.
-    fecha_expiracion = null; // Ajusta según la lógica de negocio que prefieras.
+    fecha_expiracion = null;
   } else {
     switch (plan_contratado) {
       case 'Plan Mensual':
@@ -162,15 +161,18 @@ app.post('/submit', async (req, res) => {
 
   const estado = fecha_expiracion > new Date() ? 'activo' : 'inactivo';
 
-  const firmaData = firma.replace(/^data:image\/png;base64,/, '');
-  const firmaPath = path.join(__dirname, 'signatures', `${cedula}.png`);
-  fs.writeFileSync(firmaPath, firmaData, 'base64');
-
-  const fotoData = foto.replace(/^data:image\/jpeg;base64,/, '');
-  const fotoPath = path.join(__dirname, 'photos', `${cedula}.jpg`);
-  fs.writeFileSync(fotoPath, fotoData, 'base64');
+  // Convertir datos base64 a buffer para almacenar en PostgreSQL
+  const firmaBuffer = Buffer.from(firma.replace(/^data:image\/png;base64,/, ''), 'base64');
+  const fotoBuffer = foto ? Buffer.from(foto.replace(/^data:image\/jpeg;base64,/, ''), 'base64') : null;
 
   try {
+    const existingUser = await User.findOne({ where: { cedula } });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Ya existe un registro con la misma cedula.' });
+    }
+
     const user = await User.create({
       nombre,
       apellido,
@@ -181,9 +183,9 @@ app.post('/submit', async (req, res) => {
       direccion,
       telefono,
       correo,
-      firma: firmaPath,
+      firma: firmaBuffer, // Almacenar buffer directamente
       sucursal,
-      foto: fotoPath,
+      foto: fotoBuffer, // Almacenar buffer directamente
       estado,
     });
 
