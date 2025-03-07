@@ -1,18 +1,14 @@
 const { Sequelize, DataTypes } = require('sequelize');
+const path = require('path');
+const { addMonths } = require('date-fns');
 
-// Crear una nueva instancia de Sequelize usando las variables de entorno
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432, // Puedes asegurar que el puerto también está definido como variable de entorno
-    dialect: 'postgres',
-  }
-);
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  dialect: 'postgres',
+  logging: false,
+});
 
-// Definir el modelo de User
 const User = sequelize.define('User', {
   nombre: {
     type: DataTypes.STRING,
@@ -36,6 +32,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  fecha_expiracion: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   direccion: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -50,33 +50,28 @@ const User = sequelize.define('User', {
     unique: true,
   },
   firma: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.BLOB('long'), // Cambiado a BLOB para almacenar datos binarios
+    allowNull: true, // Permitir null para registros existentes sin firma
   },
   foto: {
-    type: DataTypes.STRING,
-    allowNull: true,
+    type: DataTypes.BLOB('long'), // Cambiado a BLOB para almacenar datos binarios
+    allowNull: true, // Permitir null para registros existentes sin foto
   },
   sucursal: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  fecha_expiracion: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
   estado: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'activo', // 'activo' o 'inactivo'
+    defaultValue: 'activo',
   },
   qr_code: {
-    type: DataTypes.TEXT, // Almacena la URL del código QR
+    type: DataTypes.TEXT,
     allowNull: true,
   },
 });
 
-// Definir el modelo de Admin
 const Admin = sequelize.define('Admin', {
   username: {
     type: DataTypes.STRING,
@@ -89,10 +84,14 @@ const Admin = sequelize.define('Admin', {
   },
 });
 
-// Inicializar la base de datos
 const initDb = async () => {
-  await sequelize.sync({ force: false });
-  console.log('Database synced!');
+  try {
+    await sequelize.authenticate();
+    console.log('Conexión a la base de datos establecida correctamente.');
+    await sequelize.sync({ alter: true }); // Ajusta la tabla si es necesario
+  } catch (error) {
+    console.error('No se pudo conectar a la base de datos:', error);
+  }
 };
 
 module.exports = { sequelize, User, Admin, initDb };
