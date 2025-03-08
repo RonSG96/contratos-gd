@@ -124,53 +124,32 @@ app.post('/submit', async (req, res) => {
     nombre,
     apellido,
     cedula,
-    plan_contratado = null,
     direccion,
     telefono,
     correo,
     firma,
     sucursal,
     foto,
+    plan_contratado = null,
   } = req.body;
 
   const fecha_inscripcion = new Date();
-  let fecha_expiracion;
+  let fecha_expiracion = null;
 
-  if (!plan_contratado) {
-    fecha_expiracion = null;
-  } else {
-    switch (plan_contratado) {
-      case 'Plan Mensual':
-        fecha_expiracion = addMonths(fecha_inscripcion, 1);
-        break;
-      case 'Plan Trimestral':
-        fecha_expiracion = addMonths(fecha_inscripcion, 3);
-        break;
-      case 'Plan Semestral':
-        fecha_expiracion = addMonths(fecha_inscripcion, 6);
-        break;
-      case 'Plan Anual':
-        fecha_expiracion = addMonths(fecha_inscripcion, 12);
-        break;
-      default:
-        return res
-          .status(400)
-          .json({ status: 'error', message: 'Tipo de plan no válido' });
-    }
+  if (plan_contratado) {
+    const meses = { 'Plan Mensual': 1, 'Plan Trimestral': 3, 'Plan Semestral': 6, 'Plan Anual': 12 };
+    fecha_expiracion = addMonths(fecha_inscripcion, meses[plan_contratado]);
   }
 
   const estado = fecha_expiracion > new Date() ? 'activo' : 'inactivo';
 
-  // Convertir datos base64 a buffer para almacenar en PostgreSQL
-  const firmaBuffer = Buffer.from(firma.replace(/^data:image\/png;base64,/, ''), 'base64');
-  const fotoBuffer = foto ? Buffer.from(foto.replace(/^data:image\/jpeg;base64,/, ''), 'base64') : null;
-
   try {
+    const firmaBuffer = Buffer.from(firma.replace(/^data:image\/png;base64,/, ''), 'base64');
+    const fotoBuffer = Buffer.from(foto.replace(/^data:image\/jpeg;base64,/, ''), 'base64');
+
     const existingUser = await User.findOne({ where: { cedula } });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'Ya existe un registro con la misma cedula.' });
+      return res.status(400).json({ status: 'error', message: 'Ya existe un registro con la misma cédula.' });
     }
 
     const user = await User.create({
@@ -183,17 +162,11 @@ app.post('/submit', async (req, res) => {
       direccion,
       telefono,
       correo,
-      firma: firmaBuffer, // Almacenar buffer directamente
+      firma: firmaBuffer,
       sucursal,
-      foto: fotoBuffer, // Almacenar buffer directamente
+      foto: fotoBuffer,
       estado,
     });
-
-    const qrData = `https://contratos-backend.onrender.com/user/${user.id}/qr`;
-    const qrCode = await QRCode.toDataURL(qrData);
-
-    user.qr_code = qrCode;
-    await user.save();
 
     res.json({ status: 'success' });
   } catch (error) {
@@ -201,6 +174,7 @@ app.post('/submit', async (req, res) => {
     res.json({ status: 'error', message: error.message });
   }
 });
+
 
 app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
@@ -320,7 +294,7 @@ app.delete('/user/:id', async (req, res) => {
 app.get('/download/:cedula', async (req, res) => {
   const user = await User.findOne({ where: { cedula: req.params.cedula } });
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: 'Usuario no encontrado' });
   }
 
   const doc = new PDFDocument();
@@ -530,13 +504,9 @@ app.get('/download/:cedula', async (req, res) => {
   doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
 
   if (user.firma && Buffer.isBuffer(user.firma)) {
-    doc.image(Buffer.from(user.firma), {
-      fit: [150, 75],
-      align: 'center',
-      valign: 'top',
-    });
+    doc.image(user.firma, { fit: [150, 75], align: 'left' });
   } else {
-    doc.text('Firma no disponible', { align: 'center' });
+    doc.text('Firma no disponible', { align: 'left' });
   }
 
   // Añadir espacio entre la firma y la foto
@@ -553,13 +523,9 @@ app.get('/download/:cedula', async (req, res) => {
 
   // Añadir foto desde el blob en la base de datos, o mensaje si no está disponible
   if (user.foto && Buffer.isBuffer(user.foto)) {
-    doc.image(Buffer.from(user.foto), {
-      fit: [100, 100],
-      align: 'center',
-      valign: 'top',
-    });
+    doc.image(user.foto, { fit: [100, 100], align: 'left' });
   } else {
-    doc.text('Foto no disponible', { align: 'center' });
+    doc.text('Foto no disponible', { align: 'left' });
   }
 
   // Saltos de línea finales para asegurar que quede bien alineado
