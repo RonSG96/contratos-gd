@@ -508,7 +508,7 @@ app.get('/download/:cedula', async (req, res) => {
   if (user.firma_blob) {
     const firmaImagePath = `temp_firma.png`;
     fs.writeFileSync(firmaImagePath, user.firma_blob);
-    doc.text('Firma del usuario:');
+    // doc.text('Firma del usuario:');
     doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
     fs.unlinkSync(firmaImagePath);
   } else {
@@ -531,7 +531,7 @@ app.get('/download/:cedula', async (req, res) => {
   if (user.foto_blob) {
     const fotoImagePath = `temp_foto.jpg`;
     fs.writeFileSync(fotoImagePath, user.foto_blob);
-    doc.text('Foto del usuario:');
+    // doc.text('Foto del usuario:');
     doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
     fs.unlinkSync(fotoImagePath);
   } else {
