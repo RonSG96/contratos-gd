@@ -6,7 +6,11 @@ const generatePDF = (userData) => {
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
   // Output the PDF to a file
-  doc.pipe(fs.createWriteStream(path.join(__dirname, 'Contrato.pdf')));
+  const fileName = `Contrato-${userData.cedula}.pdf`;
+  const filePath = path.join(__dirname, fileName);
+  doc.pipe(fs.createWriteStream(filePath));
+
+  // doc.pipe(fs.createWriteStream(path.join(__dirname, 'Contrato.pdf')));
 
   // Set font and color for the title
   doc
