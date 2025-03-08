@@ -162,9 +162,11 @@ app.post('/submit', async (req, res) => {
       direccion: direccion.trim(),
       telefono: telefono.trim(),
       correo: correo.trim(),
-      firma: firmaBuffer,
+      firma_blob: firmaBuffer, // <-- Usa la nueva columna blob
+      foto_blob: fotoBuffer,
+      // firma: firmaBuffer,
       sucursal: sucursal.trim(),
-      foto: fotoBuffer,
+      // foto: fotoBuffer,
       estado,
     });
 
