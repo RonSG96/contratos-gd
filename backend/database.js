@@ -10,85 +10,34 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
 });
 
 const User = sequelize.define('User', {
-  nombre: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  apellido: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  cedula: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  fecha_inscripcion: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: Sequelize.NOW,
-  },
-  plan_contratado: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  fecha_expiracion: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  direccion: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  telefono: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  correo: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  firma: {
-    type: DataTypes.BLOB('long'), // Cambiado a BLOB para almacenar datos binarios
-    allowNull: true, // Permitir null para registros existentes sin firma
-  },
-  foto: {
-    type: DataTypes.BLOB('long'), // Cambiado a BLOB para almacenar datos binarios
-    allowNull: true, // Permitir null para registros existentes sin foto
-  },
-  sucursal: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  estado: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: 'activo',
-  },
-  qr_code: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
+  nombre: { type: DataTypes.STRING, allowNull: true },
+  apellido: { type: DataTypes.STRING, allowNull: false },
+  cedula: { type: DataTypes.STRING, allowNull: false, unique: true },
+  fecha_inscripcion: { type: DataTypes.DATE, allowNull: false, defaultValue: Sequelize.NOW },
+  plan_contratado: { type: DataTypes.STRING, allowNull: true },
+  fecha_expiracion: { type: DataTypes.DATE, allowNull: true },
+  direccion: { type: DataTypes.STRING, allowNull: false },
+  telefono: { type: DataTypes.STRING, allowNull: false },
+  correo: { type: DataTypes.STRING, allowNull: false, unique: true },
+  firma: { type: DataTypes.STRING, allowNull: true }, // Mantienes la columna antigua temporalmente
+  foto: { type: DataTypes.STRING, allowNull: true },
+  firma_blob: { type: DataTypes.BLOB('long'), allowNull: true }, // Nueva columna para migración
+  foto_blob: { type: DataTypes.BLOB('long'), allowNull: true },  // Nueva columna para migración
+  sucursal: { type: DataTypes.STRING, allowNull: false },
+  estado: { type: DataTypes.STRING, allowNull: false, defaultValue: 'activo' },
+  qr_code: { type: DataTypes.TEXT, allowNull: true },
 });
 
 const Admin = sequelize.define('Admin', {
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  username: { type: DataTypes.STRING, allowNull: false, unique: true },
+  password: { type: DataTypes.STRING, allowNull: false },
 });
 
 const initDb = async () => {
   try {
     await sequelize.authenticate();
     console.log('Conexión a la base de datos establecida correctamente.');
-    await sequelize.sync({ alter: true }); // Ajusta la tabla si es necesario
+    await sequelize.sync({ alter: true });
   } catch (error) {
     console.error('No se pudo conectar a la base de datos:', error);
   }
