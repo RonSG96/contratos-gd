@@ -519,10 +519,10 @@ app.get('/download/:cedula', async (req, res) => {
   doc.moveDown(4); // Espacio extra entre la firma y la foto
 
   // Foto del usuario alineada a la izquierda
-  doc.text('Foto del usuario:', {
-    align: 'left', // Mantener el texto alineado a la izquierda
-    lineGap: 15, // Espacio extra debajo del texto
-  });
+  // doc.text('Foto del usuario:', {
+  //   align: 'left', // Mantener el texto alineado a la izquierda
+  //   lineGap: 15, // Espacio extra debajo del texto
+  // });
 
   // Añadir espacio entre el texto de la foto y la imagen de la foto
   doc.moveDown(1.5); // Espacio entre "Foto del usuario:" y la imagen
@@ -531,7 +531,7 @@ app.get('/download/:cedula', async (req, res) => {
   if (user.foto_blob) {
     const fotoImagePath = `temp_foto.jpg`;
     fs.writeFileSync(fotoImagePath, user.foto_blob);
-    // doc.text('Foto del usuario:');
+    doc.text('Foto del usuario:');
     doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
     fs.unlinkSync(fotoImagePath);
   } else {
