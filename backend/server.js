@@ -144,26 +144,26 @@ app.post('/submit', async (req, res) => {
   const estado = fecha_expiracion > new Date() ? 'activo' : 'inactivo';
 
   try {
-    const firmaBuffer = Buffer.from(firma.replace(/^data:image\/png;base64,/, ''), 'base64');
-    const fotoBuffer = Buffer.from(foto.replace(/^data:image\/jpeg;base64,/, ''), 'base64');
+    const firmaBuffer = Buffer.from(firma.split(',')[1], 'base64');
+    const fotoBuffer = Buffer.from(foto.split(',')[1], 'base64');
 
-    const existingUser = await User.findOne({ where: { cedula } });
+    const existingUser = await User.findOne({ where: { cedula: cedula.trim() } });
     if (existingUser) {
       return res.status(400).json({ status: 'error', message: 'Ya existe un registro con la misma cédula.' });
     }
 
     const user = await User.create({
-      nombre,
-      apellido,
-      cedula,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      cedula: cedula.trim(),
       fecha_inscripcion,
       plan_contratado,
       fecha_expiracion,
-      direccion,
-      telefono,
-      correo,
+      direccion: direccion.trim(),
+      telefono: telefono.trim(),
+      correo: correo.trim(),
       firma: firmaBuffer,
-      sucursal,
+      sucursal: sucursal.trim(),
       foto: fotoBuffer,
       estado,
     });
@@ -171,9 +171,10 @@ app.post('/submit', async (req, res) => {
     res.json({ status: 'success' });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
-    res.json({ status: 'error', message: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 });
+
 
 
 app.post('/admin/login', async (req, res) => {
