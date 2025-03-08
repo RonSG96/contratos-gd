@@ -309,7 +309,7 @@ app.get('/download/:cedula', async (req, res) => {
     res.writeHead(200, {
       'Content-Length': Buffer.byteLength(pdfData),
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment;filename=${user.cedula}.pdf`,
+      'Content-Disposition': `attachment; filename="Contrato-${user.cedula}.pdf"`
     }).end(pdfData);
   });
 
