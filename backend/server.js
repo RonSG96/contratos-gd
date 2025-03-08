@@ -296,6 +296,7 @@ app.delete('/user/:id', async (req, res) => {
 
 app.get('/download/:cedula', async (req, res) => {
   const user = await User.findOne({ where: { cedula: req.params.cedula } });
+
   if (!user) {
     return res.status(404).json({ message: 'Usuario no encontrado' });
   }
@@ -305,13 +306,11 @@ app.get('/download/:cedula', async (req, res) => {
   doc.on('data', buffers.push.bind(buffers));
   doc.on('end', () => {
     let pdfData = Buffer.concat(buffers);
-    res
-      .writeHead(200, {
-        'Content-Length': Buffer.byteLength(pdfData),
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment;filename=${user.cedula}.pdf`,
-      })
-      .end(pdfData);
+    res.writeHead(200, {
+      'Content-Length': Buffer.byteLength(pdfData),
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment;filename=${user.cedula}.pdf`,
+    }).end(pdfData);
   });
 
   // Añadir logo
@@ -506,14 +505,15 @@ app.get('/download/:cedula', async (req, res) => {
   // Añadir espacio entre el texto de la firma y la imagen de la firma
   doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
 
-  if (user.firma && Buffer.isBuffer(user.firma)) {
-      const firmaImagePath = path.join(__dirname, 'temp_firma.png');
-      fs.writeFileSync(firmaImagePath, user.firma);
-      doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
-      fs.unlinkSync(firmaImagePath); // Eliminar el archivo temporal después de usarlo
-    } else {
-      doc.text('Firma no disponible', { align: 'left' });
-    }
+  if (user.firma_blob) {
+    const firmaImagePath = `temp_firma.png`;
+    fs.writeFileSync(firmaImagePath, user.firma_blob);
+    doc.text('Firma del usuario:');
+    doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
+    fs.unlinkSync(firmaImagePath);
+  } else {
+    doc.text('Firma no disponible');
+  }
 
   // Añadir espacio entre la firma y la foto
   doc.moveDown(4); // Espacio extra entre la firma y la foto
@@ -528,14 +528,16 @@ app.get('/download/:cedula', async (req, res) => {
   doc.moveDown(1.5); // Espacio entre "Foto del usuario:" y la imagen
 
   // Añadir foto desde el blob en la base de datos, o mensaje si no está disponible
-   if (user.foto && Buffer.isBuffer(user.foto)) {
-      const fotoImagePath = path.join(__dirname, 'temp_foto.jpg');
-      fs.writeFileSync(fotoImagePath, user.foto);
-      doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
-      fs.unlinkSync(fotoImagePath); // Eliminar el archivo temporal después de usarlo
-    } else {
-      doc.text('Foto no disponible', { align: 'left' });
-    }
+  if (user.foto_blob) {
+    const fotoImagePath = `temp_foto.jpg`;
+    fs.writeFileSync(fotoImagePath, user.foto_blob);
+    doc.text('Foto del usuario:');
+    doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
+    fs.unlinkSync(fotoImagePath);
+  } else {
+    doc.text('Foto no disponible');
+  }
+
 
   // Saltos de línea finales para asegurar que quede bien alineado
   doc.moveDown(2);
