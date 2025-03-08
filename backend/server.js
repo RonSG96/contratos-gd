@@ -507,10 +507,13 @@ app.get('/download/:cedula', async (req, res) => {
   doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
 
   if (user.firma && Buffer.isBuffer(user.firma)) {
-    doc.image(user.firma, { fit: [150, 75], align: 'left' });
-  } else {
-    doc.text('Firma no disponible', { align: 'left' });
-  }
+      const firmaImagePath = path.join(__dirname, 'temp_firma.png');
+      fs.writeFileSync(firmaImagePath, user.firma);
+      doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
+      fs.unlinkSync(firmaImagePath); // Eliminar el archivo temporal después de usarlo
+    } else {
+      doc.text('Firma no disponible', { align: 'left' });
+    }
 
   // Añadir espacio entre la firma y la foto
   doc.moveDown(4); // Espacio extra entre la firma y la foto
@@ -525,16 +528,23 @@ app.get('/download/:cedula', async (req, res) => {
   doc.moveDown(1.5); // Espacio entre "Foto del usuario:" y la imagen
 
   // Añadir foto desde el blob en la base de datos, o mensaje si no está disponible
-  if (user.foto && Buffer.isBuffer(user.foto)) {
-    doc.image(user.foto, { fit: [100, 100], align: 'left' });
-  } else {
-    doc.text('Foto no disponible', { align: 'left' });
-  }
+   if (user.foto && Buffer.isBuffer(user.foto)) {
+      const fotoImagePath = path.join(__dirname, 'temp_foto.jpg');
+      fs.writeFileSync(fotoImagePath, user.foto);
+      doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
+      fs.unlinkSync(fotoImagePath); // Eliminar el archivo temporal después de usarlo
+    } else {
+      doc.text('Foto no disponible', { align: 'left' });
+    }
 
   // Saltos de línea finales para asegurar que quede bien alineado
   doc.moveDown(2);
 
   doc.end();
+  } catch (error) {
+    console.error('Error al generar el PDF:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
 });
 
 const startServer = async () => {
