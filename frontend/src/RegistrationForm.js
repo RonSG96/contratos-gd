@@ -53,7 +53,10 @@ const RegistrationForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Sanitizar la cédula para eliminar espacios y caracteres no válidos
-    const sanitizedValue = name === 'cedula' ? value.replace(/[^0-9]/g, '').trim() : value;
+    const sanitizedValue = name === 'cedula' 
+      ? value.replace(/[^0-9]/g, '').trim()
+      : value.replace(/^\s+/, ''); // No espacios al inicio
+
     setFormData({
       ...formData,
       [name]: sanitizedValue,
