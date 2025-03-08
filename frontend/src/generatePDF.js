@@ -82,42 +82,37 @@ const generatePDF = (userData) => {
 
   doc.moveDown();
 
-  // Add user details at the end
+  // User details
   doc.text(
     `Yo, ${userData.nombre} ${userData.apellido}, con cédula de ciudadanía ${userData.cedula}, declaro que he leído y acepto los términos y condiciones.`
   );
-  doc.text(
-    `Fecha: ${new Date(userData.fecha_inscripcion).toLocaleDateString()}`
-  );
+  doc.text(`Fecha: ${new Date(userData.fecha_inscripcion).toLocaleDateString()}`);
   doc.text(`Plan contratado: ${userData.plan_contratado}`);
   doc.text(`Dirección: ${userData.direccion}`);
   doc.text(`Teléfono: ${userData.telefono}`);
   doc.text(`Correo: ${userData.correo}`);
   doc.moveDown();
-  doc.text('Firma del usuario:');
-  doc.image(path.join(__dirname, 'signatures', `${userData.cedula}.png`), {
-    fit: [250, 100],
-    align: 'left',
-  });
-  doc.text('Foto del usuario:');
-  doc.image(path.join(__dirname, 'photos', `${userData.cedula}.jpg`), {
-    fit: [100, 100],
-    align: 'left',
-  });
+
+  // Firma
+  if (userData.firma_blob) {
+    doc.text('Firma del usuario:');
+    doc.image(userData.firma_blob, { fit: [250, 100], align: 'left' });
+  } else {
+    doc.text('Firma no disponible');
+  }
+
+  // Foto
+  if (userData.foto_blob) {
+    doc.text('Foto del usuario:');
+    doc.image(userData.foto_blob, { fit: [100, 100], align: 'left' });
+  } else {
+    doc.text('Foto no disponible');
+  }
 
   doc.end();
 };
 
-// Example usage
-const userData = {
-  nombre: 'John',
-  apellido: 'Doe',
-  cedula: '1314613397',
-  fecha_inscripcion: new Date(),
-  plan_contratado: 'Plan Anual',
-  direccion: '123 Main St',
-  telefono: '555-555-5555',
-  correo: 'john.doe@example.com',
-};
+
+module.exports = generatePDF;
 
 generatePDF(userData);
