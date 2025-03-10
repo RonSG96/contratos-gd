@@ -1,4 +1,4 @@
-
+// Frontend (actualizacion.js)
 import React, { useState, useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import Webcam from 'react-webcam';
@@ -19,38 +19,31 @@ import logoDorian from './assets/logo-dorian.png';
 const Actualizacion = () => {
   const [cedula, setCedula] = useState('');
   const [userData, setUserData] = useState(null);
+  const [isContractModalOpen, setContractModalOpen] = useState(false);
+  const [isSignatureModalOpen, setSignatureModalOpen] = useState(false);
+  const [isPhotoModalOpen, setPhotoModalOpen] = useState(false);
+  const sigCanvas = useRef(null);
+  const webcamRef = useRef(null);
   const [firma, setFirma] = useState(null);
   const [foto, setFoto] = useState(null);
 
   const buscarUsuario = async () => {
-  try {
-    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
-    
-    if (!response.ok) {
-      throw new Error('Usuario no encontrado');
+    try {
+      const response = await fetch(`/api/actualizacion/${cedula}`);
+      
+      if (!response.ok) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      const data = await response.json();
+      setUserData(data);
+      setFirma(data.firma_blob || null); // Cargar la firma si existe
+      setFoto(data.foto_blob || null); // Cargar la foto si existe
+
+    } catch (error) {
+      console.error('Error al buscar usuario:', error);
+      alert('Error al buscar usuario. Verifica que la cédula sea correcta.');
     }
-
-    const data = await response.json();
-    setUserData(data);
-  } catch (error) {
-    console.error('Error al buscar usuario:', error);
-    alert('Error al buscar usuario. Verifica que la cédula sea correcta.');
-  }
-};
-
-
-  const handleFirmaUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => setFirma(reader.result.split(',')[1]);
-  };
-
-  const handleFotoUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => setFoto(reader.result.split(',')[1]);
   };
 
   const actualizarDatos = async () => {
@@ -65,7 +58,20 @@ const Actualizacion = () => {
       alert(result.message);
     } catch (error) {
       console.error('Error al actualizar datos:', error);
+      alert('Error al actualizar los datos.');
     }
+  };
+
+  const handleSaveSignature = () => {
+    const signature = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    setFirma(signature);
+    setSignatureModalOpen(false);
+  };
+
+  const handleCapturePhoto = () => {
+    const photo = webcamRef.current.getScreenshot();
+    setFoto(photo);
+    setPhotoModalOpen(false);
   };
 
   return (
