@@ -110,6 +110,11 @@ const RegistrationForm = () => {
       alert('Por favor, firme el contrato.');
       return;
     }
+     if (!photoDataURL) {
+    alert('Por favor, tome una foto.');
+    return;
+  }
+
 
     const data = {
       ...formData,
