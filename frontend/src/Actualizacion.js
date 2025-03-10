@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import Webcam from 'react-webcam';
+import { FormControlLabel, Checkbox } from '@mui/material';
+
 import {
   TextField,
   Button,
@@ -25,6 +27,8 @@ const Actualizacion = () => {
   const webcamRef = useRef(null);
   const [firma, setFirma] = useState(null);
   const [foto, setFoto] = useState(null);
+  const [isAgreementChecked, setAgreementChecked] = useState(false);
+
 
   // Buscar usuario por cédula
   const buscarUsuario = async () => {
