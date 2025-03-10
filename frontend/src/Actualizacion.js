@@ -7,20 +7,21 @@ const Actualizacion = () => {
   const [foto, setFoto] = useState(null);
 
   const buscarUsuario = async () => {
-    try {
-      const response = await fetch(`/api/actualizacion/${cedula}`);
-      const data = await response.json();
-
-      if (response.status === 404) {
-        alert('Usuario no encontrado');
-        return;
-      }
-
-      setUserData(data);
-    } catch (error) {
-      console.error('Error al buscar usuario:', error);
+  try {
+    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
+    
+    if (!response.ok) {
+      throw new Error('Usuario no encontrado');
     }
-  };
+
+    const data = await response.json();
+    setUserData(data);
+  } catch (error) {
+    console.error('Error al buscar usuario:', error);
+    alert('Error al buscar usuario. Verifica que la cédula sea correcta.');
+  }
+};
+
 
   const handleFirmaUpload = (e) => {
     const file = e.target.files[0];
