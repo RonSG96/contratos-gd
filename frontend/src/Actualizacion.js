@@ -29,7 +29,7 @@ const Actualizacion = () => {
 
   const buscarUsuario = async () => {
     try {
-      const response = await fetch(`/api/actualizacion/${cedula}`);
+    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
       
       if (!response.ok) {
         throw new Error('Usuario no encontrado');
