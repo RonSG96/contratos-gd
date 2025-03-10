@@ -73,7 +73,12 @@ const Actualizacion = () => {
 
     const result = await response.json();
     if (response.ok) {
-      alert('Datos actualizados correctamente.');
+      alert('Datos actualizados correctamente. Gracias por ser parte de Gimnasios Dorian.'),
+      
+        setUserData(null);
+        setFirma(null);
+        setFoto(null);
+        setCedula('');
     } else {
       alert(result.message || 'Error al actualizar los datos.');
     }
@@ -85,7 +90,7 @@ const Actualizacion = () => {
 
   return (
     <Container>
-      <Typography variant="h4" align="center">Actualizar Datos</Typography>
+      <Typography variant="h4" align="center" mt={4}>ACTUALIZACIÓN DE DATOS</Typography>
       <Box display="flex" justifyContent="center" mt={2}>
         <TextField
           type="text"
