@@ -296,59 +296,59 @@ app.delete('/user/:id', async (req, res) => {
 
 //para actulizacion de datos
 app.get('/api/actualizacion/:cedula', async (req, res) => {
-  try {
-    const user = await User.findOne({ where: { cedula: req.params.cedula } });
+    const { cedula } = req.params;
 
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+    try {
+        const result = await pool.query(
+            'SELECT nombre, apellido, firma_blob, foto_blob FROM usuarios WHERE cedula = $1',
+            [cedula]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        const user = result.rows[0];
+
+        // Convertir los buffers a base64 para enviarlos al frontend
+        const firmaBase64 = user.firma_blob ? `data:image/png;base64,${user.firma_blob.toString('base64')}` : null;
+        const fotoBase64 = user.foto_blob ? `data:image/jpeg;base64,${user.foto_blob.toString('base64')}` : null;
+
+        res.json({
+            nombre: user.nombre,
+            apellido: user.apellido,
+            firma: firmaBase64,
+            foto: fotoBase64
+        });
+
+    } catch (error) {
+        console.error("Error al obtener datos:", error);
+        res.status(500).json({ error: "Error al obtener datos del usuario" });
     }
-
-    res.json({
-      nombre: user.nombre,
-      apellido: user.apellido,
-      cedula: user.cedula,
-      fecha_inscripcion: user.fecha_inscripcion,
-      plan_contratado: user.plan_contratado,
-      direccion: user.direccion,
-      telefono: user.telefono,
-      correo: user.correo,
-      firma_blob: user.firma ? user.firma.toString('base64') : null,
-      foto_blob: user.foto ? user.foto.toString('base64') : null,
-    });
-  } catch (error) {
-    console.error('Error al obtener usuario:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
 });
+
 
 
 app.put('/api/actualizacion/:cedula', async (req, res) => {
-  try {
-    const { firma, foto } = req.body;
+    const { firma, foto } = req.body; // Firma y foto en Base64
+    const { cedula } = req.params;
 
-    // Buscar usuario por cédula
-    const user = await User.findOne({ where: { cedula: req.params.cedula } });
+    try {
+        const firmaBuffer = firma ? Buffer.from(firma.split(",")[1], 'base64') : null;
+        const fotoBuffer = foto ? Buffer.from(foto.split(",")[1], 'base64') : null;
 
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+        await pool.query(
+            'UPDATE usuarios SET firma_blob = $1, foto_blob = $2 WHERE cedula = $3',
+            [firmaBuffer, fotoBuffer, cedula]
+        );
+
+        res.json({ message: "Datos actualizados correctamente" });
+    } catch (error) {
+        console.error("Error al actualizar datos:", error);
+        res.status(500).json({ error: "Error al actualizar los datos" });
     }
-
-    // Convertir base64 a Buffer si existen datos nuevos
-    const firmaBuffer = firma ? Buffer.from(firma, 'base64') : user.firma_blob;
-    const fotoBuffer = foto ? Buffer.from(foto, 'base64') : user.foto_blob;
-
-    // Actualizar los datos en la base de datos
-    await user.update({
-      firma_blob: firmaBuffer,
-      foto_blob: fotoBuffer,
-    });
-
-    res.json({ message: 'Datos actualizados correctamente' });
-  } catch (error) {
-    console.error('Error al actualizar usuario:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
 });
+
 
 
 
