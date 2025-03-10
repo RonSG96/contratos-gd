@@ -58,10 +58,9 @@ const Actualizacion = () => {
     setPhotoModalOpen(false);
   };
 
-  // Actualizar datos de firma y foto
   const actualizarDatos = async () => {
     try {
-    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
+      const response = await fetch(`/api/actualizacion/${cedula}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firma, foto }),
@@ -314,13 +313,12 @@ const Actualizacion = () => {
               <b>4. Incumplimiento</b>
               <br />
               <br />
-              <b>4.1.</b> En caso de incumplimiento, GIMNASIO DORIAN se reserva
-              la posibilidad de expulsar a dicho usuario...
+              <b>4.1.</b>  En caso de incumplimiento, GIMNASIO DORIAN se reserva la posibilidad de expulsar a dicho usuario, sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.
               <br />
               <br />
               <b>5. Política de Congelamiento de Planes</b>
               <br />
-              Los planes no serán sujetos a devoluciones o extensiones...
+              Los planes no serán sujetos a devoluciones o extensiones, y tendrán validez durante el tiempo y por el monto acordado.
               <br />
             </div>
           </Typography>
@@ -357,5 +355,6 @@ const Actualizacion = () => {
     </Container>
   );
 };
+
 
 export default Actualizacion;
