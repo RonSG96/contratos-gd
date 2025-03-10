@@ -321,6 +321,7 @@ app.get('/api/actualizacion/:cedula', async (req, res) => {
   }
 });
 
+
 app.put('/api/actualizacion/:cedula', async (req, res) => {
   try {
     const { firma, foto } = req.body;
