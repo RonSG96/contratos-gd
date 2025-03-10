@@ -29,7 +29,9 @@ const Actualizacion = () => {
   // Buscar usuario por cédula
   const buscarUsuario = async () => {
     try {
-      const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
+      const response = await fetch(
+        `https://contratos-backend.onrender.com/api/actualizacion/${cedula}`
+      );
       const data = await response.json();
       if (data.message) {
         alert('Usuario no encontrado');
@@ -46,7 +48,9 @@ const Actualizacion = () => {
 
   // Guardar firma en formato imagen
   const handleSaveSignature = () => {
-    const signature = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    const signature = sigCanvas.current
+      .getTrimmedCanvas()
+      .toDataURL('image/png');
     setFirma(signature);
     setSignatureModalOpen(false);
   };
@@ -59,38 +63,46 @@ const Actualizacion = () => {
   };
 
   const actualizarDatos = async () => {
-  if (!firma || !foto) {
-    alert('Debe proporcionar una firma y una foto antes de finalizar.');
-    return;
-  }
+    if (!firma || !foto) {
+      alert('Debe proporcionar una firma y una foto antes de finalizar.');
+      return;
+    }
 
-  try {
-    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firma, foto }),
-    });
+    try {
+      const response = await fetch(
+        `https://contratos-backend.onrender.com/api/actualizacion/${cedula}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firma, foto }),
+        }
+      );
 
-    const result = await response.json();
-    if (response.ok) {
-      alert('Datos actualizados correctamente. Gracias por ser parte de Gimnasios Dorian.'),
-      
+      const result = await response.json();
+      if (response.ok) {
+        alert(
+          'Datos actualizados correctamente. Gracias por ser parte de Gimnasios Dorian.'
+        );
         setUserData(null);
         setFirma(null);
         setFoto(null);
         setCedula('');
-    } else {
-      alert(result.message || 'Error al actualizar los datos.');
+      } else {
+        alert(result.message || 'Error al actualizar los datos.');
+      }
+    } catch (error) {
+      console.error('Error al actualizar datos:', error);
+      alert('Hubo un problema al actualizar los datos.');
     }
-  } catch (error) {
-    console.error('Error al actualizar datos:', error);
-    alert('Hubo un problema al actualizar los datos.');
-  }
-};
+  };
 
   return (
     <Container>
-      <Typography variant="h4" align="center" mt={4}>ACTUALIZACIÓN DE DATOS</Typography>
+      <Box mb={4}>
+        <Typography variant="h4" align="center">
+          ACTUALIZACIÓN DE DATOS
+        </Typography>
+      </Box>
       <Box display="flex" justifyContent="center" mt={2}>
         <TextField
           type="text"
@@ -100,18 +112,35 @@ const Actualizacion = () => {
           variant="outlined"
           size="small"
         />
-        <Button onClick={buscarUsuario} color="primary">Buscar</Button>
+        <Button onClick={buscarUsuario} color="primary">
+          Buscar
+        </Button>
       </Box>
 
       {userData && (
         <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography><b>Nombre:</b> {userData.nombre} {userData.apellido}</Typography>
-          <Typography><b>Plan contratado:</b> {userData.plan_contratado}</Typography>
-          <Typography><b>Fecha de inscripción:</b> {new Date(userData.fecha_inscripcion).toLocaleDateString()}</Typography>
-          <Typography><b>Dirección:</b> {userData.direccion}</Typography>
-          <Typography><b>Teléfono:</b> {userData.telefono}</Typography>
-          <Typography><b>Correo:</b> {userData.correo}</Typography>
-          <Button onClick={() => setContractModalOpen(true)} color="primary">Ver Contrato</Button>
+          <Typography>
+            <b>Nombre:</b> {userData.nombre} {userData.apellido}
+          </Typography>
+          <Typography>
+            <b>Plan contratado:</b> {userData.plan_contratado}
+          </Typography>
+          <Typography>
+            <b>Fecha de inscripción:</b>{' '}
+            {new Date(userData.fecha_inscripcion).toLocaleDateString()}
+          </Typography>
+          <Typography>
+            <b>Dirección:</b> {userData.direccion}
+          </Typography>
+          <Typography>
+            <b>Teléfono:</b> {userData.telefono}
+          </Typography>
+          <Typography>
+            <b>Correo:</b> {userData.correo}
+          </Typography>
+          <Button onClick={() => setContractModalOpen(true)} color="primary">
+            Ver Contrato
+          </Button>
 
           {/* Firma */}
           <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
@@ -130,7 +159,12 @@ const Actualizacion = () => {
           <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
             <Typography variant="h6">Foto actual:</Typography>
             {foto ? (
-              <img src={foto} alt="Foto" width="150" style={{ borderRadius: '8px' }} />
+              <img
+                src={foto}
+                alt="Foto"
+                width="150"
+                style={{ borderRadius: '8px' }}
+              />
             ) : (
               <Typography>No disponible</Typography>
             )}
@@ -141,7 +175,11 @@ const Actualizacion = () => {
 
           {/* Botón Finalizar */}
           <Box display="flex" justifyContent="center" mt={3}>
-            <Button onClick={actualizarDatos} variant="contained" color="primary">
+            <Button
+              onClick={actualizarDatos}
+              variant="contained"
+              color="primary"
+            >
               FINALIZAR
             </Button>
           </Box>
@@ -149,7 +187,12 @@ const Actualizacion = () => {
       )}
 
       {/* Modal para ver contrato */}
-      <Dialog open={isContractModalOpen} onClose={() => setContractModalOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={isContractModalOpen}
+        onClose={() => setContractModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>CONTRATO GIMNASIOS DORIAN</DialogTitle>
         <DialogContent dividers style={{ height: '400px', overflowY: 'auto' }}>
           <Typography variant="body2" component="div">
@@ -327,12 +370,16 @@ const Actualizacion = () => {
               <b>4. Incumplimiento</b>
               <br />
               <br />
-              <b>4.1.</b>  En caso de incumplimiento, GIMNASIO DORIAN se reserva la posibilidad de expulsar a dicho usuario, sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.
+              <b>4.1.</b> En caso de incumplimiento, GIMNASIO DORIAN se reserva
+              la posibilidad de expulsar a dicho usuario, sin restitución de
+              gastos y sin perjuicio de las acciones legales que pudieran
+              derivar.
               <br />
               <br />
               <b>5. Política de Congelamiento de Planes</b>
               <br />
-              Los planes no serán sujetos a devoluciones o extensiones, y tendrán validez durante el tiempo y por el monto acordado.
+              Los planes no serán sujetos a devoluciones o extensiones, y
+              tendrán validez durante el tiempo y por el monto acordado.
               <br />
             </div>
           </Typography>
@@ -342,11 +389,18 @@ const Actualizacion = () => {
         </DialogActions>
       </Dialog>
 
-     {/* Modal para firmar */}
-      <Dialog open={isSignatureModalOpen} onClose={() => setSignatureModalOpen(false)}>
+      {/* Modal para firmar */}
+      <Dialog
+        open={isSignatureModalOpen}
+        onClose={() => setSignatureModalOpen(false)}
+      >
         <DialogTitle>Firmar Contrato</DialogTitle>
         <DialogContent>
-          <SignatureCanvas penColor="black" ref={sigCanvas} canvasProps={{ width: 300, height: 150, className: 'sigCanvas' }} />
+          <SignatureCanvas
+            penColor="black"
+            ref={sigCanvas}
+            canvasProps={{ width: 300, height: 150, className: 'sigCanvas' }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => sigCanvas.current.clear()}>Borrar</Button>
@@ -359,7 +413,12 @@ const Actualizacion = () => {
       <Dialog open={isPhotoModalOpen} onClose={() => setPhotoModalOpen(false)}>
         <DialogTitle>Tomar Foto</DialogTitle>
         <DialogContent>
-          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" width="100%" />
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width="100%"
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPhotoModalOpen(false)}>Cerrar</Button>
@@ -369,6 +428,5 @@ const Actualizacion = () => {
     </Container>
   );
 };
-
 
 export default Actualizacion;
