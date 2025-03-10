@@ -173,12 +173,27 @@ const Actualizacion = () => {
             </Button>
           </Box>
 
+           {/* Aceptar cláusulas */}
+          <Box display="flex" justifyContent="center" mt={3}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isAgreementChecked}
+                  onChange={(e) => setAgreementChecked(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Declaro haber leído y estar de acuerdo con las cláusulas del contrato y las políticas de Gimnasios Dorian."
+            />
+          </Box>
+
           {/* Botón Finalizar */}
           <Box display="flex" justifyContent="center" mt={3}>
             <Button
               onClick={actualizarDatos}
               variant="contained"
               color="primary"
+              disabled={!isAgreementChecked} // Se deshabilita hasta que el usuario acepte
             >
               FINALIZAR
             </Button>
