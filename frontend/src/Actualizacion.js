@@ -59,20 +59,29 @@ const Actualizacion = () => {
   };
 
   const actualizarDatos = async () => {
-    try {
-      const response = await fetch(`/api/actualizacion/${cedula}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firma, foto }),
-      });
+  if (!firma || !foto) {
+    alert('Debe proporcionar una firma y una foto antes de finalizar.');
+    return;
+  }
 
-      const result = await response.json();
-      alert(result.message || 'Datos actualizados correctamente');
-    } catch (error) {
-      console.error('Error al actualizar datos:', error);
-      alert('Error al actualizar la información.');
+  try {
+    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firma, foto }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert('Datos actualizados correctamente.');
+    } else {
+      alert(result.message || 'Error al actualizar los datos.');
     }
-  };
+  } catch (error) {
+    console.error('Error al actualizar datos:', error);
+    alert('Hubo un problema al actualizar los datos.');
+  }
+};
 
   return (
     <Container>
