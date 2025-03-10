@@ -12,6 +12,8 @@ import Login from './Login';
 import Header from './Header';
 import './App.css';
 import UserQRCode from './UserQRCode';
+import Actualizacion from './Actualizacion';
+
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -35,6 +37,8 @@ const App = () => {
         <Route path="/" element={<RegistrationForm />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
         <Route path="/user/:id/qr" element={<UserQRCode />} />
+        <Route path="/actualizacion" element={<Actualizacion />} />
+
         <Route
           path="/admin"
           element={
