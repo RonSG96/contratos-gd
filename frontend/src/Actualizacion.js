@@ -1,4 +1,3 @@
-// Frontend (actualizacion.js)
 import React, { useState, useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import Webcam from 'react-webcam';
@@ -22,68 +21,74 @@ const Actualizacion = () => {
   const [isContractModalOpen, setContractModalOpen] = useState(false);
   const [isSignatureModalOpen, setSignatureModalOpen] = useState(false);
   const [isPhotoModalOpen, setPhotoModalOpen] = useState(false);
-  const sigCanvas = useRef(null);
+  const sigCanvas = useRef({});
   const webcamRef = useRef(null);
   const [firma, setFirma] = useState(null);
   const [foto, setFoto] = useState(null);
 
+  // Buscar usuario por cédula
   const buscarUsuario = async () => {
     try {
-    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
-      
-      if (!response.ok) {
-        throw new Error('Usuario no encontrado');
-      }
-
+      const response = await fetch(`/api/actualizacion/${cedula}`);
       const data = await response.json();
-      setUserData(data);
-      setFirma(data.firma_blob || null); // Cargar la firma si existe
-      setFoto(data.foto_blob || null); // Cargar la foto si existe
-
+      if (data.message) {
+        alert('Usuario no encontrado');
+      } else {
+        setUserData(data);
+        setFirma(data.firma || null);
+        setFoto(data.foto || null);
+      }
     } catch (error) {
       console.error('Error al buscar usuario:', error);
-      alert('Error al buscar usuario. Verifica que la cédula sea correcta.');
+      alert('Hubo un error al buscar el usuario.');
     }
   };
 
-  const actualizarDatos = async () => {
-    try {
-      const response = await fetch(`/api/actualizacion/${cedula}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firma, foto }),
-      });
-
-      const result = await response.json();
-      alert(result.message);
-    } catch (error) {
-      console.error('Error al actualizar datos:', error);
-      alert('Error al actualizar los datos.');
-    }
-  };
-
+  // Guardar firma en formato imagen
   const handleSaveSignature = () => {
     const signature = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
     setFirma(signature);
     setSignatureModalOpen(false);
   };
 
+  // Capturar foto desde la cámara
   const handleCapturePhoto = () => {
     const photo = webcamRef.current.getScreenshot();
     setFoto(photo);
     setPhotoModalOpen(false);
   };
 
+  // Actualizar datos de firma y foto
+  const actualizarDatos = async () => {
+    try {
+    const response = await fetch(`https://contratos-backend.onrender.com/api/actualizacion/${cedula}`);
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firma, foto }),
+      });
+
+      const result = await response.json();
+      alert(result.message || 'Datos actualizados correctamente');
+    } catch (error) {
+      console.error('Error al actualizar datos:', error);
+      alert('Error al actualizar la información.');
+    }
+  };
+
   return (
     <Container>
       <Typography variant="h4" align="center">Actualizar Datos</Typography>
-      <TextField
-        type="text"
-        placeholder="Ingrese su cédula"
-        value={cedula}
-        onChange={(e) => setCedula(e.target.value)}
-      />
-      <Button onClick={buscarUsuario}>Buscar</Button>
+      <Box display="flex" justifyContent="center" mt={2}>
+        <TextField
+          type="text"
+          placeholder="Ingrese su cédula"
+          value={cedula}
+          onChange={(e) => setCedula(e.target.value)}
+          variant="outlined"
+          size="small"
+        />
+        <Button onClick={buscarUsuario} color="primary">Buscar</Button>
+      </Box>
 
       {userData && (
         <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -93,17 +98,40 @@ const Actualizacion = () => {
           <Typography><b>Dirección:</b> {userData.direccion}</Typography>
           <Typography><b>Teléfono:</b> {userData.telefono}</Typography>
           <Typography><b>Correo:</b> {userData.correo}</Typography>
-          <Button onClick={() => setContractModalOpen(true)}>Ver Contrato</Button>
+          <Button onClick={() => setContractModalOpen(true)} color="primary">Ver Contrato</Button>
 
-          <Typography variant="h6">Firma actual:</Typography>
-          {firma ? <img src={firma} alt="Firma" width="200" /> : <Typography>No disponible</Typography>}
-          <Button onClick={() => setSignatureModalOpen(true)}>Actualizar Firma</Button>
+          {/* Firma */}
+          <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
+            <Typography variant="h6">Firma actual:</Typography>
+            {firma ? (
+              <img src={firma} alt="Firma" width="200" />
+            ) : (
+              <Typography>No disponible</Typography>
+            )}
+            <Button onClick={() => setSignatureModalOpen(true)} color="primary">
+              ACTUALIZAR FIRMA
+            </Button>
+          </Box>
 
-          <Typography variant="h6">Foto actual:</Typography>
-          {foto ? <img src={foto} alt="Foto" width="100" /> : <Typography>No disponible</Typography>}
-          <Button onClick={() => setPhotoModalOpen(true)}>Actualizar Foto</Button>
+          {/* Foto */}
+          <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
+            <Typography variant="h6">Foto actual:</Typography>
+            {foto ? (
+              <img src={foto} alt="Foto" width="150" style={{ borderRadius: '8px' }} />
+            ) : (
+              <Typography>No disponible</Typography>
+            )}
+            <Button onClick={() => setPhotoModalOpen(true)} color="primary">
+              ACTUALIZAR FOTO
+            </Button>
+          </Box>
 
-          <Button onClick={actualizarDatos}>Finalizar</Button>
+          {/* Botón Finalizar */}
+          <Box display="flex" justifyContent="center" mt={3}>
+            <Button onClick={actualizarDatos} variant="contained" color="primary">
+              FINALIZAR
+            </Button>
+          </Box>
         </Paper>
       )}
 
@@ -302,7 +330,7 @@ const Actualizacion = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal para firmar */}
+     {/* Modal para firmar */}
       <Dialog open={isSignatureModalOpen} onClose={() => setSignatureModalOpen(false)}>
         <DialogTitle>Firmar Contrato</DialogTitle>
         <DialogContent>
