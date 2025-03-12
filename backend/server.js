@@ -561,20 +561,20 @@ app.get('/download/:cedula', async (req, res) => {
 
   doc.moveDown(2);
 
-  // Firma del usuario alineada a la izquierda
-  doc.text('Firma del usuario:', {
-    align: 'left', // Mantener el texto alineado a la izquierda
-    lineGap: 15, // Espacio extra debajo del texto
-  });
+  // // Firma del usuario alineada a la izquierda
+  // doc.text('Firma del usuario:', {
+  //   align: 'left', // Mantener el texto alineado a la izquierda
+  //   lineGap: 15, // Espacio extra debajo del texto
+  // });
 
   // Añadir espacio entre el texto de la firma y la imagen de la firma
   doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
   
 // Firma del usuario
 doc.text(
-  `Firma del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, la cual constituye prueba fehaciente del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio. La firma debe corresponder exactamente con la registrada en la cédula de ciudadanía; de no ser así, las fotos de la cédula aportadas por el Cliente serán tomadas como respaldo válido y vinculante del acuerdo, conforme a los términos y condiciones aquí establecidos.`,
+  `La siguiente firma y fotos de cédula del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, la cual constituye prueba fehaciente del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio. La firma debe corresponder exactamente con la registrada en la cédula de ciudadanía; de no ser así, las fotos de la cédula aportadas por el Cliente serán tomadas como respaldo válido y vinculante del acuerdo, conforme a los términos y condiciones aquí establecidos.`,
   {
-    align: 'left',
+    align: 'justify',
     lineGap: 15,
   }
 );
@@ -590,31 +590,51 @@ doc.moveDown(1.5); // Espacio entre el
 }
 
 // Añadir espacio entre la firma y las fotos
-doc.moveDown(4); // Espacio extra entre la firma y las fotos
+doc.moveDown(2); // Espacio extra entre la firma y las fotos
 
-// Título para las fotos
-doc.text(
-  `Fotos de la cédula del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, las cuales constituyen prueba fehaciente y garantía del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio, conforme a los términos y condiciones establecidos en el presente documento.`,
-  {
-    align: 'left',
-    lineGap: 15,
-  }
-);
-doc.moveDown(1.5);
+// // Posicionar las fotos horizontalmente
+// if (user.foto_blob) {
+//   const fotoImagePath = `temp_foto.jpg`;
+//   fs.writeFileSync(fotoImagePath, user.foto_blob);
+//   doc.image(fotoImagePath, { fit: [100, 100], x: 50, y: doc.y }); // Primera foto a la izquierda
+//   fs.unlinkSync(fotoImagePath);
+// }
+
+// if (user.foto_2_blob) {
+//   const foto2ImagePath = `temp_foto_2.jpg`;
+//   fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
+//   doc.image(foto2ImagePath, { fit: [100, 100], x: 160, y: doc.y }); // Segunda foto a la derecha
+//   fs.unlinkSync(foto2ImagePath);
+// }
 
 
-// Posicionar las fotos horizontalmente
+  // Posicionar las fotos horizontalmente
+const photoWidth = 220; // Ancho deseado para cada foto
+const photoHeight = 140; // Alto deseado para cada foto (proporcional a las imágenes originales)
+const marginLeft = 50; // Margen izquierdo de la primera foto
+const spacing = 20; // Espacio entre las dos fotos
+
 if (user.foto_blob) {
   const fotoImagePath = `temp_foto.jpg`;
   fs.writeFileSync(fotoImagePath, user.foto_blob);
-  doc.image(fotoImagePath, { fit: [100, 100], x: 50, y: doc.y }); // Primera foto a la izquierda
+  doc.image(fotoImagePath, {
+    fit: [photoWidth, photoHeight], // Tamaño más grande y proporcional
+    x: marginLeft, // Posición izquierda
+    y: doc.y,
+    rotate: 90, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
+  });
   fs.unlinkSync(fotoImagePath);
 }
 
 if (user.foto_2_blob) {
   const foto2ImagePath = `temp_foto_2.jpg`;
   fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
-  doc.image(foto2ImagePath, { fit: [100, 100], x: 160, y: doc.y }); // Segunda foto a la derecha
+  doc.image(foto2ImagePath, {
+    fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
+    x: marginLeft + photoWidth + spacing, // Posición a la derecha de la primera foto
+    y: doc.y,
+    rotate: 90, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
+  });
   fs.unlinkSync(foto2ImagePath);
 }
 
@@ -623,7 +643,7 @@ doc.moveDown(2); // Espacio antes del texto final
 doc.text(
   `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
   {
-    align: 'left',
+    align: 'justify',
     lineGap: 15,
   }
 );
