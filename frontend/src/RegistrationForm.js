@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react'; // Añadimos useCallback
 import SignatureCanvas from 'react-signature-canvas';
 import Webcam from 'react-webcam';
 import {
@@ -36,14 +36,18 @@ const RegistrationForm = () => {
 
   const [signatureDataURL, setSignatureDataURL] = useState('');
   const [photoDataURL, setPhotoDataURL] = useState('');
+  const [photo2DataURL, setPhoto2DataURL] = useState(''); // Nueva estado para foto 2
   const [isSignatureModalOpen, setSignatureModalOpen] = useState(false);
   const [isPhotoModalOpen, setPhotoModalOpen] = useState(false);
+  const [isPhoto2ModalOpen, setPhoto2ModalOpen] = useState(false); // Nuevo modal para foto 2
   const [isContractModalOpen, setContractModalOpen] = useState(false);
   const [isAgreeChecked, setAgreeChecked] = useState(false);
   const [isSignatureDone, setSignatureDone] = useState(false);
   const [isPhotoTaken, setPhotoTaken] = useState(false);
+  const [isPhoto2Taken, setPhoto2Taken] = useState(false); // Estado para foto 2
   const [isFinalButtonDisabled, setFinalButtonDisabled] = useState(true);
   const [isSignButtonEnabled, setSignButtonEnabled] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment'); // Cámara trasera por defecto
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null);
@@ -52,11 +56,10 @@ const RegistrationForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Sanitizar la cédula para eliminar espacios y caracteres no válidos
-    const sanitizedValue = name === 'cedula' 
-      ? value.replace(/[^0-9]/g, '').trim()
-      : value.replace(/^\s+/, ''); // No espacios al inicio
-
+    const sanitizedValue =
+      name === 'cedula'
+        ? value.replace(/[^0-9]/g, '').trim()
+        : value.replace(/^\s+/, '');
     setFormData({
       ...formData,
       [name]: sanitizedValue,
@@ -64,7 +67,9 @@ const RegistrationForm = () => {
   };
 
   const handleSaveSignature = () => {
-    const signature = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    const signature = sigCanvas.current
+      .getTrimmedCanvas()
+      .toDataURL('image/png');
     setSignatureDataURL(signature);
     setSignatureModalOpen(false);
     setSignatureDone(true);
@@ -74,7 +79,14 @@ const RegistrationForm = () => {
   const handleClearSignature = () => {
     sigCanvas.current.clear();
     setSignatureDataURL('');
+    setSignatureDone(false);
+    checkIfCanEnableAgree();
   };
+
+  // Cambiar cámara
+  const toggleCamera = useCallback(() => {
+    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
+  }, []);
 
   const handleCapturePhoto = () => {
     const photo = webcamRef.current.getScreenshot();
@@ -84,9 +96,18 @@ const RegistrationForm = () => {
     checkIfCanEnableAgree();
   };
 
+  const handleCapturePhoto2 = () => {
+    const photo2 = webcamRef.current.getScreenshot();
+    setPhoto2DataURL(photo2);
+    setPhoto2ModalOpen(false);
+    setPhoto2Taken(true);
+    checkIfCanEnableAgree();
+  };
+
   const checkIfCanEnableAgree = () => {
-    if (signatureDataURL && photoDataURL) {
-      setAgreeChecked(false); // Resetear el check si hay cambios
+    if (signatureDataURL && photoDataURL && photo2DataURL) {
+      // Incluimos photo2DataURL
+      setAgreeChecked(false);
     }
   };
 
@@ -104,67 +125,80 @@ const RegistrationForm = () => {
     setSignButtonEnabled(true);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!signatureDataURL) {
-      alert('Por favor, firme el contrato.');
-      return;
-    }
-     if (!photoDataURL) {
-    alert('Por favor, tome una foto.');
-    return;
-  }
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+   if (!signatureDataURL) {
+     alert('Por favor, firme el contrato.');
+     return;
+   }
+   if (!photoDataURL) {
+     alert('Por favor, tome la foto 1.');
+     return;
+   }
+   if (!photo2DataURL) {
+     alert('Por favor, tome la foto 2.');
+     return;
+   }
 
+   const data = {
+     ...formData,
+     firma: signatureDataURL,
+     foto: photoDataURL,
+     foto_2: photo2DataURL, // Nueva foto 2
+     plan_contratado: formData.planContratado,
+   };
 
-    const data = {
-      ...formData,
-      firma: signatureDataURL,
-      foto: photoDataURL,
-      plan_contratado: formData.planContratado,
-    };
+   try {
+     const response = await fetch(`${apiUrl}/submit`, {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify(data),
+     });
+     const result = await response.json();
 
-    try {
-      const response = await fetch(`${apiUrl}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
+     console.log('Respuesta del backend:', result); // Depuración
 
-      console.log('Respuesta del backend:', result); // Depuración
-
-      if (response.ok && result.status === 'success') {
-        alert('Registro completado con éxito.');
-        if (sigCanvas.current) {
-          sigCanvas.current.clear();
-        }
-        setFormData({
-          nombre: '',
-          apellido: '',
-          cedula: '',
-          telefono: '',
-          correo: '',
-          direccion: '',
-          sucursal: '',
-          planContratado: '',
-        });
-        setSignatureDataURL('');
-        setPhotoDataURL('');
-        setAgreeChecked(false);
-        setFinalButtonDisabled(true);
-        setSignButtonEnabled(false);
-      } else if (result.message === 'Ya existe un registro con la misma cedula.') {
-        alert('Ya existe un registro con la misma cedula.');
-      } else {
-        alert('Hubo un problema con el registro: ' + (result.message || 'Error desconocido'));
-      }
-    } catch (error) {
-      console.error('Error de red:', error);
-      alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
-    }
-  };
+     if (response.ok && result.status === 'success') {
+       alert('Registro completado con éxito.');
+       if (sigCanvas.current) {
+         sigCanvas.current.clear();
+       }
+       setFormData({
+         nombre: '',
+         apellido: '',
+         cedula: '',
+         telefono: '',
+         correo: '',
+         direccion: '',
+         sucursal: '',
+         planContratado: '',
+       });
+       setSignatureDataURL('');
+       setPhotoDataURL('');
+       setPhoto2DataURL(''); // Resetear foto 2
+       setAgreeChecked(false);
+       setFinalButtonDisabled(true);
+       setSignButtonEnabled(false);
+       setSignatureDone(false);
+       setPhotoTaken(false);
+       setPhoto2Taken(false); // Resetear estado de foto 2
+     } else if (
+       result.message === 'Ya existe un registro con la misma cedula.'
+     ) {
+       alert('Ya existe un registro con la misma cédula.');
+     } else {
+       alert(
+         'Hubo un problema con el registro: ' +
+           (result.message || 'Error desconocido')
+       );
+     }
+   } catch (error) {
+     console.error('Error de red:', error);
+     alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
+   }
+ };
 
   return (
     <Container component="main" className="registration-container">
@@ -275,6 +309,23 @@ const RegistrationForm = () => {
               )}
             </Box>
 
+            <Box mt={2}>
+              <Button
+                onClick={() => setSignatureModalOpen(true)}
+                variant="outlined"
+                color="primary"
+                disabled={!isSignButtonEnabled}
+              >
+                Firmar
+              </Button>
+              {signatureDataURL && (
+                <img
+                  src={signatureDataURL}
+                  alt="Firma"
+                  style={{ width: '100%', marginTop: 10 }}
+                />
+              )}
+            </Box>
             {signatureDataURL && (
               <Box mt={2}>
                 <Button
@@ -282,12 +333,30 @@ const RegistrationForm = () => {
                   variant="outlined"
                   color="primary"
                 >
-                  Tomar Foto
+                  Tomar Foto 1
                 </Button>
                 {photoDataURL && (
                   <img
                     src={photoDataURL}
-                    alt="Foto"
+                    alt="Foto 1"
+                    style={{ width: '100%', marginTop: 10 }}
+                  />
+                )}
+              </Box>
+            )}
+            {photoDataURL && (
+              <Box mt={2}>
+                <Button
+                  onClick={() => setPhoto2ModalOpen(true)}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Tomar Foto 2
+                </Button>
+                {photo2DataURL && (
+                  <img
+                    src={photo2DataURL}
+                    alt="Foto 2"
                     style={{ width: '100%', marginTop: 10 }}
                   />
                 )}
@@ -299,10 +368,12 @@ const RegistrationForm = () => {
                 <Checkbox
                   checked={isAgreeChecked}
                   onChange={handleAgreeChange}
-                  disabled={!signatureDataURL || !photoDataURL}
+                  disabled={
+                    !signatureDataURL || !photoDataURL || !photo2DataURL
+                  } // Requiere foto 2
                 />
               }
-              label="Estoy de acuerdo con el contrato"
+              label="Declaro haber leído y estar de acuerdo con las cláusulas del contrato y las políticas de Gimnasios Dorian."
               style={{ marginTop: 20 }}
             />
 
@@ -567,23 +638,22 @@ const RegistrationForm = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal para tomar foto */}
+      {/* Modal para tomar foto 1 */}
       <Dialog open={isPhotoModalOpen} onClose={() => setPhotoModalOpen(false)}>
-        <DialogTitle>Tomar Foto</DialogTitle>
+        <DialogTitle>Tomar Foto 1</DialogTitle>
         <DialogContent>
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             width="100%"
-            videoConstraints={{
-              width: 1280,
-              height: 720,
-              facingMode: 'user',
-            }}
+            videoConstraints={{ width: 1280, height: 720, facingMode }} // Cámara trasera por defecto
           />
         </DialogContent>
         <DialogActions>
+          <Button onClick={toggleCamera} variant="outlined" color="primary">
+            Cambiar Cámara
+          </Button>
           <Button
             onClick={() => setPhotoModalOpen(false)}
             variant="contained"
@@ -593,6 +663,41 @@ const RegistrationForm = () => {
           </Button>
           <Button
             onClick={handleCapturePhoto}
+            variant="contained"
+            color="primary"
+          >
+            Guardar Foto
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Modal para tomar foto 2 */}
+      <Dialog
+        open={isPhoto2ModalOpen}
+        onClose={() => setPhoto2ModalOpen(false)}
+      >
+        <DialogTitle>Tomar Foto 2</DialogTitle>
+        <DialogContent>
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width="100%"
+            videoConstraints={{ width: 1280, height: 720, facingMode }} // Cámara trasera por defecto
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={toggleCamera} variant="outlined" color="primary">
+            Cambiar Cámara
+          </Button>
+          <Button
+            onClick={() => setPhoto2ModalOpen(false)}
+            variant="contained"
+            color="secondary"
+          >
+            Cerrar
+          </Button>
+          <Button
+            onClick={handleCapturePhoto2}
             variant="contained"
             color="primary"
           >
