@@ -138,7 +138,12 @@ app.post('/submit', async (req, res) => {
   let fecha_expiracion = null;
 
   if (plan_contratado) {
-    const meses = { 'Plan Mensual': 1, 'Plan Trimestral': 3, 'Plan Semestral': 6, 'Plan Anual': 12 };
+    const meses = {
+      'Plan Mensual': 1,
+      'Plan Trimestral': 3,
+      'Plan Semestral': 6,
+      'Plan Anual': 12,
+    };
     fecha_expiracion = addMonths(fecha_inscripcion, meses[plan_contratado]);
   }
 
@@ -147,11 +152,20 @@ app.post('/submit', async (req, res) => {
   try {
     const firmaBuffer = Buffer.from(firma.split(',')[1], 'base64');
     const fotoBuffer = Buffer.from(foto.split(',')[1], 'base64');
-    const foto2Buffer = foto_2 ? Buffer.from(foto_2.split(',')[1], 'base64') : null;
+    const foto2Buffer = foto_2
+      ? Buffer.from(foto_2.split(',')[1], 'base64')
+      : null;
 
-    const existingUser = await User.findOne({ where: { cedula: cedula.trim() } });
+    const existingUser = await User.findOne({
+      where: { cedula: cedula.trim() },
+    });
     if (existingUser) {
-      return res.status(400).json({ status: 'error', message: 'Ya existe un registro con la misma cédula.' });
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Ya existe un registro con la misma cédula.',
+        });
     }
 
     const user = await User.create({
@@ -173,13 +187,12 @@ app.post('/submit', async (req, res) => {
       estado,
     });
 
-   res.json({ status: 'success' });
+    res.json({ status: 'success' });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
-
 
 app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
@@ -323,14 +336,15 @@ app.get('/api/actualizacion/:cedula', async (req, res) => {
   }
 });
 
-
 app.put('/api/actualizacion/:cedula', async (req, res) => {
   try {
     const { firma, foto } = req.body;
     const { cedula } = req.params;
 
     // Verificar si la firma y la foto están en base64
-    const firmaBuffer = firma ? Buffer.from(firma.split(',')[1], 'base64') : null;
+    const firmaBuffer = firma
+      ? Buffer.from(firma.split(',')[1], 'base64')
+      : null;
     const fotoBuffer = foto ? Buffer.from(foto.split(',')[1], 'base64') : null;
 
     // Buscar usuario por cédula
@@ -353,10 +367,6 @@ app.put('/api/actualizacion/:cedula', async (req, res) => {
   }
 });
 
-
-
-
-
 //termina la actualizacion
 
 app.get('/download/:cedula', async (req, res) => {
@@ -371,11 +381,13 @@ app.get('/download/:cedula', async (req, res) => {
   doc.on('data', buffers.push.bind(buffers));
   doc.on('end', () => {
     let pdfData = Buffer.concat(buffers);
-    res.writeHead(200, {
-      'Content-Length': Buffer.byteLength(pdfData),
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="Contrato-${user.cedula}.pdf"`
-    }).end(pdfData);
+    res
+      .writeHead(200, {
+        'Content-Length': Buffer.byteLength(pdfData),
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="Contrato-${user.cedula}.pdf"`,
+      })
+      .end(pdfData);
   });
 
   // Añadir logo
@@ -533,7 +545,7 @@ app.get('/download/:cedula', async (req, res) => {
 
   // Espacio para separar la firma
   doc.moveDown();
-// Agregar detalles del contrato con espacio entre cada línea
+  // Agregar detalles del contrato con espacio entre cada línea
   doc.text(`Fecha: ${new Date(user.fecha_inscripcion).toLocaleDateString()}`, {
     align: 'left',
     lineGap: 5,
@@ -560,75 +572,74 @@ app.get('/download/:cedula', async (req, res) => {
   });
 
   doc.moveDown(1);
-  
-// Firma del usuario
-doc.text(
-  `La siguiente firma y fotos de cédula del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, la cual constituye prueba fehaciente del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio. La firma debe corresponder exactamente con la registrada en la cédula de ciudadanía; de no ser así, las fotos de la cédula aportadas por el Cliente serán tomadas como respaldo válido y vinculante del acuerdo, conforme a los términos y condiciones aquí establecidos.`,
-  {
-    align: 'justify',
-    lineGap: 15,
-  }
-);
-doc.moveDown(1.5);
 
-  
+  // Firma del usuario
+  doc.text(
+    `La siguiente firma y fotos de cédula del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, la cual constituye prueba fehaciente del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio. La firma debe corresponder exactamente con la registrada en la cédula de ciudadanía; de no ser así, las fotos de la cédula aportadas por el Cliente serán tomadas como respaldo válido y vinculante del acuerdo, conforme a los términos y condiciones aquí establecidos.`,
+    {
+      align: 'justify',
+      lineGap: 15,
+    }
+  );
+  doc.moveDown(1.5);
+
   if (user.firma_blob) {
-  const firmaImagePath = `temp_firma.png`;
-  fs.writeFileSync(firmaImagePath, user.firma_blob);
-  // doc.text('Firma del usuario:');
-  doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
-  fs.unlinkSync(firmaImagePath);
-} else {
-  doc.text('Firma no disponible');
-}
-
-// Añadir espacio entre la firma y las fotos
-doc.moveDown(2); // Espacio extra entre la firma y las fotos
-  
-// Posicionar las fotos horizontalmente a la derecha de la firma
-const firmaWidth = 150; // Ancho de la firma
-const photoWidth = 250; // Ancho deseado para cada foto
-const photoHeight = 120; // Alto deseado para cada foto
-const marginLeft = firmaWidth + 5; // Margen después de la firma (20 de espacio)
-const spacing = 10; // Espacio reducido entre las dos fotos
-
-if (user.foto_blob) {
-  const fotoImagePath = `temp_foto.jpg`;
-  fs.writeFileSync(fotoImagePath, user.foto_blob);
-  doc.image(fotoImagePath, {
-    fit: [photoWidth, photoHeight], // Tamaño proporcional
-    x: 350, // Posición justo después de la firma
-    y: doc.y,
-    // No se necesita rotate porque la imagen ya llega rotada
-  });
-  fs.unlinkSync(fotoImagePath);
-}
-
-if (user.foto_2_blob) {
-  const foto2ImagePath = `temp_foto_2.jpg`;
-  fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
-  doc.image(foto2ImagePath, {
-    fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
-    x: 450, // Posición a la derecha de la primera foto
-    y: doc.y,
-    // No se necesita rotate porque la imagen ya llega rotada
-  });
-  fs.unlinkSync(foto2ImagePath);
-}
-
-// Texto final de constancia
-doc.moveDown(25); // Espacio antes del texto final
-doc.text(
-  `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
-  {
-    align: 'justify',
-    lineGap: 15,
+    const firmaImagePath = `temp_firma.png`;
+    fs.writeFileSync(firmaImagePath, user.firma_blob);
+    // doc.text('Firma del usuario:');
+    doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
+    fs.unlinkSync(firmaImagePath);
+  } else {
+    doc.text('Firma no disponible');
   }
-);
+
+  // Añadir espacio entre la firma y las fotos
+  doc.moveDown(2); // Espacio extra entre la firma y las fotos
+
+  // Posicionar las fotos horizontalmente a la derecha de la firma
+  const firmaWidth = 150; // Ancho de la firma
+  const photoWidth = 250; // Ancho deseado para cada foto
+  const photoHeight = 120; // Alto deseado para cada foto
+  const marginLeft = firmaWidth + 5; // Margen después de la firma (20 de espacio)
+  const spacing = 10; // Espacio reducido entre las dos fotos
+
+  if (user.foto_blob) {
+    const fotoImagePath = `temp_foto.jpg`;
+    fs.writeFileSync(fotoImagePath, user.foto_blob);
+    doc.image(fotoImagePath, {
+      fit: [photoWidth, photoHeight], // Tamaño proporcional
+      x: 350, // Posición justo después de la firma
+      y: doc.y,
+      // No se necesita rotate porque la imagen ya llega rotada
+    });
+    fs.unlinkSync(fotoImagePath);
+  }
+
+  if (user.foto_2_blob) {
+    const foto2ImagePath = `temp_foto_2.jpg`;
+    fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
+    doc.image(foto2ImagePath, {
+      fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
+      x: 450, // Posición a la derecha de la primera foto
+      y: doc.y,
+      // No se necesita rotate porque la imagen ya llega rotada
+    });
+    fs.unlinkSync(foto2ImagePath);
+  }
+
+  // Texto final de constancia
+  doc.moveDown(25); // Espacio antes del texto final
+  doc.text(
+    `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
+    {
+      align: 'justify',
+      lineGap: 15,
+    }
+  );
+    console.log(`Posición actual (doc.y): ${doc.y}`);
 
 
-doc.end();
-  
+  doc.end();
 });
 
 const startServer = async () => {
@@ -645,8 +656,6 @@ const startServer = async () => {
   app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
   });
-
-  console.log(`Posición actual (doc.y): ${doc.y}`);
 
 };
 
