@@ -569,45 +569,69 @@ app.get('/download/:cedula', async (req, res) => {
 
   // Añadir espacio entre el texto de la firma y la imagen de la firma
   doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
-
+  
+// Firma del usuario
+doc.text(
+  `Firma del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, la cual constituye prueba fehaciente del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio. La firma debe corresponder exactamente con la registrada en la cédula de ciudadanía; de no ser así, las fotos de la cédula aportadas por el Cliente serán tomadas como respaldo válido y vinculante del acuerdo, conforme a los términos y condiciones aquí establecidos.`,
+  {
+    align: 'left',
+    lineGap: 15,
+  }
+);
+doc.moveDown(1.5); // Espacio entre el
   if (user.firma_blob) {
-    const firmaImagePath = `temp_firma.png`;
-    fs.writeFileSync(firmaImagePath, user.firma_blob);
-    // doc.text('Firma del usuario:');
-    doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
-    fs.unlinkSync(firmaImagePath);
-  } else {
-    doc.text('Firma no disponible');
+  const firmaImagePath = `temp_firma.png`;
+  fs.writeFileSync(firmaImagePath, user.firma_blob);
+  // doc.text('Firma del usuario:');
+  doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
+  fs.unlinkSync(firmaImagePath);
+} else {
+  doc.text('Firma no disponible');
+}
+
+// Añadir espacio entre la firma y las fotos
+doc.moveDown(4); // Espacio extra entre la firma y las fotos
+
+// Título para las fotos
+doc.text(
+  `Fotos de la cédula del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, las cuales constituyen prueba fehaciente y garantía del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio, conforme a los términos y condiciones establecidos en el presente documento.`,
+  {
+    align: 'left',
+    lineGap: 15,
   }
+);
+doc.moveDown(1.5);
 
-  // Añadir espacio entre la firma y la foto
-  doc.moveDown(4); // Espacio extra entre la firma y la foto
 
-  // Foto del usuario alineada a la izquierda
-  // doc.text('Foto del usuario:', {
-  //   align: 'left', // Mantener el texto alineado a la izquierda
-  //   lineGap: 15, // Espacio extra debajo del texto
-  // });
+// Posicionar las fotos horizontalmente
+if (user.foto_blob) {
+  const fotoImagePath = `temp_foto.jpg`;
+  fs.writeFileSync(fotoImagePath, user.foto_blob);
+  doc.image(fotoImagePath, { fit: [100, 100], x: 50, y: doc.y }); // Primera foto a la izquierda
+  fs.unlinkSync(fotoImagePath);
+}
 
-  // Añadir espacio entre el texto de la foto y la imagen de la foto
-  doc.moveDown(1.5); // Espacio entre "Foto del usuario:" y la imagen
+if (user.foto_2_blob) {
+  const foto2ImagePath = `temp_foto_2.jpg`;
+  fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
+  doc.image(foto2ImagePath, { fit: [100, 100], x: 160, y: doc.y }); // Segunda foto a la derecha
+  fs.unlinkSync(foto2ImagePath);
+}
 
-  // Añadir foto desde el blob en la base de datos, o mensaje si no está disponible
-  if (user.foto_blob) {
-    const fotoImagePath = `temp_foto.jpg`;
-    fs.writeFileSync(fotoImagePath, user.foto_blob);
-    doc.text('Foto del usuario:');
-    doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
-    fs.unlinkSync(fotoImagePath);
-  } else {
-    doc.text('Foto no disponible');
+// Texto final de constancia
+doc.moveDown(2); // Espacio antes del texto final
+doc.text(
+  `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
+  {
+    align: 'left',
+    lineGap: 15,
   }
+);
+  
+// Saltos de línea finales para asegurar que quede bien alineado
+doc.moveDown(2);
 
-
-  // Saltos de línea finales para asegurar que quede bien alineado
-  doc.moveDown(2);
-
-  doc.end();
+doc.end();
   
 });
 
