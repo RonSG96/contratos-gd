@@ -397,7 +397,7 @@ app.get('/download/:cedula', async (req, res) => {
       align: 'center',
       valign: 'center',
     });
-    doc.opacity(1); // Restaurar la opacidad para el contenido principal
+    doc.opacity(3); // Restaurar la opacidad para el contenido principal
     doc.restore(); // Restaurar el estado del documento
   };
 
