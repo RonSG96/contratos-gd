@@ -97,20 +97,43 @@ const generatePDF = (userData) => {
   doc.text(`Correo: ${userData.correo}`);
   doc.moveDown();
 
-  // Firma
-  if (userData.firma_blob) {
-    doc.text('Firma del usuario:');
-    doc.image(userData.firma_blob, { fit: [250, 100], align: 'left' });
+ // Foto 1
+  doc.moveDown(4);
+  doc.text('Foto del usuario 1:', { align: 'left', lineGap: 15 });
+  doc.moveDown(1.5);
+  if (user.foto_blob) {
+    const fotoImagePath = `temp_foto.jpg`;
+    fs.writeFileSync(fotoImagePath, user.foto_blob);
+    doc.image(fotoImagePath, { fit: [100, 100], align: 'left' });
+    fs.unlinkSync(fotoImagePath);
   } else {
-    doc.text('Firma no disponible');
+    doc.text('Foto 1 no disponible');
   }
 
-  // Foto
-  if (userData.foto_blob) {
-    doc.text('Foto del usuario:');
-    doc.image(userData.foto_blob, { fit: [100, 100], align: 'left' });
+  // Foto 2
+  doc.moveDown(4);
+  doc.text('Foto del usuario 2:', { align: 'left', lineGap: 15 });
+  doc.moveDown(1.5);
+  if (user.foto_2_blob) {
+    const foto2ImagePath = `temp_foto_2.jpg`;
+    fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
+    doc.image(foto2ImagePath, { fit: [100, 100], align: 'left' });
+    fs.unlinkSync(foto2ImagePath);
   } else {
-    doc.text('Foto no disponible');
+    doc.text('Foto 2 no disponible');
+  }
+
+  // Firma
+  doc.moveDown(4);
+  doc.text('Firma del usuario:', { align: 'left', lineGap: 15 });
+  doc.moveDown(1.5);
+  if (user.firma_blob) {
+    const firmaImagePath = `temp_firma.png`;
+    fs.writeFileSync(firmaImagePath, user.firma_blob);
+    doc.image(firmaImagePath, { fit: [100, 100], align: 'left' });
+    fs.unlinkSync(firmaImagePath);
+  } else {
+    doc.text('Firma no disponible');
   }
 
   doc.end();
