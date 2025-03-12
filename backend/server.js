@@ -160,12 +160,10 @@ app.post('/submit', async (req, res) => {
       where: { cedula: cedula.trim() },
     });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Ya existe un registro con la misma cédula.',
-        });
+      return res.status(400).json({
+        status: 'error',
+        message: 'Ya existe un registro con la misma cédula.',
+      });
     }
 
     const user = await User.create({
@@ -388,6 +386,27 @@ app.get('/download/:cedula', async (req, res) => {
         'Content-Disposition': `attachment; filename="Contrato-${user.cedula}.pdf"`,
       })
       .end(pdfData);
+  });
+
+  // Función para agregar la marca de agua en cada página
+  const addWatermark = () => {
+    doc.save(); // Guardar el estado actual del documento
+    doc.opacity(0.1); // Ajustar la opacidad para que sea sutil (0.1 es muy tenue, ajusta según necesites)
+    doc.image(path.join(__dirname, 'assets', 'marca.png'), {
+      fit: [doc.page.width, doc.page.height], // Ajustar la imagen al tamaño de la página
+      align: 'center',
+      valign: 'center',
+    });
+    doc.opacity(1); // Restaurar la opacidad para el contenido principal
+    doc.restore(); // Restaurar el estado del documento
+  };
+
+  // Agregar la marca de agua a la primera página
+  addWatermark();
+
+  // Escuchar el evento 'pageAdded' para agregar la marca de agua a las nuevas páginas
+  doc.on('pageAdded', () => {
+    addWatermark();
   });
 
   // Añadir logo
@@ -637,7 +656,6 @@ app.get('/download/:cedula', async (req, res) => {
     }
   );
 
-
   doc.end();
 });
 
@@ -655,7 +673,6 @@ const startServer = async () => {
   app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
   });
-
 };
 
 startServer();
