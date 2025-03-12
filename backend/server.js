@@ -609,7 +609,7 @@ if (user.foto_2_blob) {
   fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
   doc.image(foto2ImagePath, {
     fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
-    x: marginLeft + photoWidth + spacing, // Posición a la derecha de la primera foto
+    x: 10, // Posición a la derecha de la primera foto
     y: doc.y,
     // No se necesita rotate porque la imagen ya llega rotada
   });
