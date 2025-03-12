@@ -597,7 +597,7 @@ if (user.foto_blob) {
   fs.writeFileSync(fotoImagePath, user.foto_blob);
   doc.image(fotoImagePath, {
     fit: [photoWidth, photoHeight], // Tamaño proporcional
-    x: 250, // Posición justo después de la firma
+    x: 5, // Posición justo después de la firma
     y: doc.y,
     // No se necesita rotate porque la imagen ya llega rotada
   });
