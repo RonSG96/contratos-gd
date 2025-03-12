@@ -559,16 +559,7 @@ app.get('/download/:cedula', async (req, res) => {
     lineGap: 5,
   });
 
-  doc.moveDown(2);
-
-  // // Firma del usuario alineada a la izquierda
-  // doc.text('Firma del usuario:', {
-  //   align: 'left', // Mantener el texto alineado a la izquierda
-  //   lineGap: 15, // Espacio extra debajo del texto
-  // });
-
-  // Añadir espacio entre el texto de la firma y la imagen de la firma
-  doc.moveDown(1.5); // Espacio entre "Firma del usuario:" y la imagen
+  doc.moveDown(1);
   
 // Firma del usuario
 doc.text(
@@ -591,27 +582,11 @@ doc.moveDown(1.5); // Espacio entre el
 
 // Añadir espacio entre la firma y las fotos
 doc.moveDown(2); // Espacio extra entre la firma y las fotos
-
-// // Posicionar las fotos horizontalmente
-// if (user.foto_blob) {
-//   const fotoImagePath = `temp_foto.jpg`;
-//   fs.writeFileSync(fotoImagePath, user.foto_blob);
-//   doc.image(fotoImagePath, { fit: [100, 100], x: 50, y: doc.y }); // Primera foto a la izquierda
-//   fs.unlinkSync(fotoImagePath);
-// }
-
-// if (user.foto_2_blob) {
-//   const foto2ImagePath = `temp_foto_2.jpg`;
-//   fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
-//   doc.image(foto2ImagePath, { fit: [100, 100], x: 160, y: doc.y }); // Segunda foto a la derecha
-//   fs.unlinkSync(foto2ImagePath);
-// }
-
-
+  
   // Posicionar las fotos horizontalmente
-const photoWidth = 220; // Ancho deseado para cada foto
-const photoHeight = 140; // Alto deseado para cada foto (proporcional a las imágenes originales)
-const marginLeft = 50; // Margen izquierdo de la primera foto
+const photoWidth = 250; // Ancho deseado para cada foto
+const photoHeight = 160; // Alto deseado para cada foto (proporcional a las imágenes originales)
+const marginLeft = 20; // Margen izquierdo de la primera foto
 const spacing = 20; // Espacio entre las dos fotos
 
 if (user.foto_blob) {
@@ -639,7 +614,7 @@ if (user.foto_2_blob) {
 }
 
 // Texto final de constancia
-doc.moveDown(2); // Espacio antes del texto final
+doc.moveDown(5); // Espacio antes del texto final
 doc.text(
   `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
   {
