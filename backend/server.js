@@ -569,7 +569,9 @@ doc.text(
     lineGap: 15,
   }
 );
-doc.moveDown(1.5); // Espacio entre el
+doc.moveDown(1.5);
+
+  
   if (user.firma_blob) {
   const firmaImagePath = `temp_firma.png`;
   fs.writeFileSync(firmaImagePath, user.firma_blob);
@@ -581,13 +583,14 @@ doc.moveDown(1.5); // Espacio entre el
 }
 
 // Añadir espacio entre la firma y las fotos
-doc.moveDown(5); // Espacio extra entre la firma y las fotos
+doc.moveDown(2); // Espacio extra entre la firma y las fotos
   
-  // Posicionar las fotos horizontalmente
+// Posicionar las fotos horizontalmente a la derecha de la firma
+const firmaWidth = 150; // Ancho de la firma
 const photoWidth = 250; // Ancho deseado para cada foto
-const photoHeight = 160; // Alto deseado para cada foto (proporcional a las imágenes originales)
-const marginLeft = 20; // Margen izquierdo de la primera foto
-const spacing = 20; // Espacio entre las dos fotos
+const photoHeight = 160; // Alto deseado para cada foto
+const marginLeft = firmaWidth + 20; // Margen después de la firma (20 de espacio)
+const spacing = 10; // Espacio reducido entre las dos fotos
 
 if (user.foto_blob) {
   const fotoImagePath = `temp_foto.jpg`;
@@ -596,7 +599,7 @@ if (user.foto_blob) {
     fit: [photoWidth, photoHeight], // Tamaño más grande y proporcional
     x: marginLeft, // Posición izquierda
     y: doc.y,
-    rotate: 90, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
+    rotate: 0, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
   });
   fs.unlinkSync(fotoImagePath);
 }
@@ -608,7 +611,7 @@ if (user.foto_2_blob) {
     fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
     x: marginLeft + photoWidth + spacing, // Posición a la derecha de la primera foto
     y: doc.y,
-    rotate: 90, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
+    rotate: 0, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
   });
   fs.unlinkSync(foto2ImagePath);
 }
@@ -622,9 +625,7 @@ doc.text(
     lineGap: 15,
   }
 );
-  
-// Saltos de línea finales para asegurar que quede bien alineado
-doc.moveDown(2);
+
 
 doc.end();
   
