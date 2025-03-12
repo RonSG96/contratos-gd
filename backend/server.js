@@ -581,7 +581,7 @@ doc.moveDown(1.5); // Espacio entre el
 }
 
 // Añadir espacio entre la firma y las fotos
-doc.moveDown(2); // Espacio extra entre la firma y las fotos
+doc.moveDown(5); // Espacio extra entre la firma y las fotos
   
   // Posicionar las fotos horizontalmente
 const photoWidth = 250; // Ancho deseado para cada foto
@@ -614,7 +614,7 @@ if (user.foto_2_blob) {
 }
 
 // Texto final de constancia
-doc.moveDown(5); // Espacio antes del texto final
+doc.moveDown(25); // Espacio antes del texto final
 doc.text(
   `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
   {
