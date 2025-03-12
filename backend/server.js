@@ -588,8 +588,8 @@ doc.moveDown(2); // Espacio extra entre la firma y las fotos
 // Posicionar las fotos horizontalmente a la derecha de la firma
 const firmaWidth = 150; // Ancho de la firma
 const photoWidth = 250; // Ancho deseado para cada foto
-const photoHeight = 160; // Alto deseado para cada foto
-const marginLeft = firmaWidth + 20; // Margen después de la firma (20 de espacio)
+const photoHeight = 120; // Alto deseado para cada foto
+const marginLeft = firmaWidth + 5; // Margen después de la firma (20 de espacio)
 const spacing = 10; // Espacio reducido entre las dos fotos
 
 if (user.foto_blob) {
