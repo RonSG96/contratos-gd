@@ -622,7 +622,7 @@ const RegistrationForm = () => {
 
       {/* Modal para tomar foto 1 */}
       <Dialog open={isPhotoModalOpen} onClose={() => setPhotoModalOpen(false)}>
-        <DialogTitle>Tomar Foto 1</DialogTitle>
+        <DialogTitle>Cédula Frontal</DialogTitle>
         <DialogContent>
           <Webcam
             audio={false}
@@ -657,7 +657,7 @@ const RegistrationForm = () => {
         open={isPhoto2ModalOpen}
         onClose={() => setPhoto2ModalOpen(false)}
       >
-        <DialogTitle>Tomar Foto 2</DialogTitle>
+        <DialogTitle>Cédula Posterior</DialogTitle>
         <DialogContent>
           <Webcam
             audio={false}
