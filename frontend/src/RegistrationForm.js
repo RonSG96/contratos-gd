@@ -125,80 +125,80 @@ const RegistrationForm = () => {
     setSignButtonEnabled(true);
   };
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
-   if (!signatureDataURL) {
-     alert('Por favor, firme el contrato.');
-     return;
-   }
-   if (!photoDataURL) {
-     alert('Por favor, tome la foto 1.');
-     return;
-   }
-   if (!photo2DataURL) {
-     alert('Por favor, tome la foto 2.');
-     return;
-   }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!signatureDataURL) {
+      alert('Por favor, firme el contrato.');
+      return;
+    }
+    if (!photoDataURL) {
+      alert('Por favor, tome la foto 1.');
+      return;
+    }
+    if (!photo2DataURL) {
+      alert('Por favor, tome la foto 2.');
+      return;
+    }
 
-   const data = {
-     ...formData,
-     firma: signatureDataURL,
-     foto: photoDataURL,
-     foto_2: photo2DataURL, // Nueva foto 2
-     plan_contratado: formData.planContratado,
-   };
+    const data = {
+      ...formData,
+      firma: signatureDataURL,
+      foto: photoDataURL,
+      foto_2: photo2DataURL, // Nueva foto 2
+      plan_contratado: formData.planContratado,
+    };
 
-   try {
-     const response = await fetch(`${apiUrl}/submit`, {
-       method: 'POST',
-       headers: {
-         'Content-Type': 'application/json',
-       },
-       body: JSON.stringify(data),
-     });
-     const result = await response.json();
+    try {
+      const response = await fetch(`${apiUrl}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
 
-     console.log('Respuesta del backend:', result); // Depuración
+      console.log('Respuesta del backend:', result); // Depuración
 
-     if (response.ok && result.status === 'success') {
-       alert('Registro completado con éxito.');
-       if (sigCanvas.current) {
-         sigCanvas.current.clear();
-       }
-       setFormData({
-         nombre: '',
-         apellido: '',
-         cedula: '',
-         telefono: '',
-         correo: '',
-         direccion: '',
-         sucursal: '',
-         planContratado: '',
-       });
-       setSignatureDataURL('');
-       setPhotoDataURL('');
-       setPhoto2DataURL(''); // Resetear foto 2
-       setAgreeChecked(false);
-       setFinalButtonDisabled(true);
-       setSignButtonEnabled(false);
-       setSignatureDone(false);
-       setPhotoTaken(false);
-       setPhoto2Taken(false); // Resetear estado de foto 2
-     } else if (
-       result.message === 'Ya existe un registro con la misma cedula.'
-     ) {
-       alert('Ya existe un registro con la misma cédula.');
-     } else {
-       alert(
-         'Hubo un problema con el registro: ' +
-           (result.message || 'Error desconocido')
-       );
-     }
-   } catch (error) {
-     console.error('Error de red:', error);
-     alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
-   }
- };
+      if (response.ok && result.status === 'success') {
+        alert('Registro completado con éxito.');
+        if (sigCanvas.current) {
+          sigCanvas.current.clear();
+        }
+        setFormData({
+          nombre: '',
+          apellido: '',
+          cedula: '',
+          telefono: '',
+          correo: '',
+          direccion: '',
+          sucursal: '',
+          planContratado: '',
+        });
+        setSignatureDataURL('');
+        setPhotoDataURL('');
+        setPhoto2DataURL(''); // Resetear foto 2
+        setAgreeChecked(false);
+        setFinalButtonDisabled(true);
+        setSignButtonEnabled(false);
+        setSignatureDone(false);
+        setPhotoTaken(false);
+        setPhoto2Taken(false); // Resetear estado de foto 2
+      } else if (
+        result.message === 'Ya existe un registro con la misma cedula.'
+      ) {
+        alert('Ya existe un registro con la misma cédula.');
+      } else {
+        alert(
+          'Hubo un problema con el registro: ' +
+            (result.message || 'Error desconocido')
+        );
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
+    }
+  };
 
   return (
     <Container component="main" className="registration-container">
@@ -305,24 +305,6 @@ const RegistrationForm = () => {
                   src={signatureDataURL}
                   alt="Firma"
                   style={{ width: '50%', marginTop: 10 }}
-                />
-              )}
-            </Box>
-
-            <Box mt={2}>
-              <Button
-                onClick={() => setSignatureModalOpen(true)}
-                variant="outlined"
-                color="primary"
-                disabled={!isSignButtonEnabled}
-              >
-                Firmar
-              </Button>
-              {signatureDataURL && (
-                <img
-                  src={signatureDataURL}
-                  alt="Firma"
-                  style={{ width: '100%', marginTop: 10 }}
                 />
               )}
             </Box>
