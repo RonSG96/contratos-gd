@@ -597,7 +597,7 @@ if (user.foto_blob) {
   fs.writeFileSync(fotoImagePath, user.foto_blob);
   doc.image(fotoImagePath, {
     fit: [photoWidth, photoHeight], // Tamaño proporcional
-    x: marginLeft, // Posición justo después de la firma
+    x: 250, // Posición justo después de la firma
     y: doc.y,
     // No se necesita rotate porque la imagen ya llega rotada
   });
@@ -609,7 +609,7 @@ if (user.foto_2_blob) {
   fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
   doc.image(foto2ImagePath, {
     fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
-    x: 10, // Posición a la derecha de la primera foto
+    x: 5, // Posición a la derecha de la primera foto
     y: doc.y,
     // No se necesita rotate porque la imagen ya llega rotada
   });
