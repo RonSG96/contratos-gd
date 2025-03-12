@@ -609,7 +609,7 @@ app.get('/download/:cedula', async (req, res) => {
     doc.image(fotoImagePath, {
       fit: [photoWidth, photoHeight], // Tamaño proporcional
       x: 350, // Posición justo después de la firma
-      y: 268,
+      y: doc.y,
       // No se necesita rotate porque la imagen ya llega rotada
     });
     fs.unlinkSync(fotoImagePath);
@@ -621,7 +621,7 @@ app.get('/download/:cedula', async (req, res) => {
     doc.image(foto2ImagePath, {
       fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
       x: 450, // Posición a la derecha de la primera foto
-      y: 268,
+      y: doc.y,
       // No se necesita rotate porque la imagen ya llega rotada
     });
     fs.unlinkSync(foto2ImagePath);
@@ -636,7 +636,6 @@ app.get('/download/:cedula', async (req, res) => {
       lineGap: 15,
     }
   );
-    console.log(`Posición actual (doc.y): ${doc.y}`);
 
 
   doc.end();
