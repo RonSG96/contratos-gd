@@ -132,11 +132,11 @@ const RegistrationForm = () => {
       return;
     }
     if (!photoDataURL) {
-      alert('Por favor, tome la foto 1.');
+      alert('Por favor, tome la foto de la cedula frontal.');
       return;
     }
     if (!photo2DataURL) {
-      alert('Por favor, tome la foto 2.');
+      alert('Por favor, tome la foto de la cedula posterior.');
       return;
     }
 
@@ -315,12 +315,12 @@ const RegistrationForm = () => {
                   variant="outlined"
                   color="primary"
                 >
-                  Tomar Foto 1
+                  Cédula frontal
                 </Button>
                 {photoDataURL && (
                   <img
                     src={photoDataURL}
-                    alt="Foto 1"
+                    alt="Cédula frontal"
                     style={{ width: '100%', marginTop: 10 }}
                   />
                 )}
@@ -333,12 +333,12 @@ const RegistrationForm = () => {
                   variant="outlined"
                   color="primary"
                 >
-                  Tomar Foto 2
+                  Cédula posterior
                 </Button>
                 {photo2DataURL && (
                   <img
                     src={photo2DataURL}
-                    alt="Foto 2"
+                    alt="Cédula Posterior 2"
                     style={{ width: '100%', marginTop: 10 }}
                   />
                 )}
