@@ -130,6 +130,7 @@ app.post('/submit', async (req, res) => {
     firma,
     sucursal,
     foto,
+    foto_2, // Nueva foto 2
     plan_contratado = null,
   } = req.body;
 
@@ -146,6 +147,7 @@ app.post('/submit', async (req, res) => {
   try {
     const firmaBuffer = Buffer.from(firma.split(',')[1], 'base64');
     const fotoBuffer = Buffer.from(foto.split(',')[1], 'base64');
+    const foto2Buffer = foto_2 ? Buffer.from(foto_2.split(',')[1], 'base64') : null;
 
     const existingUser = await User.findOne({ where: { cedula: cedula.trim() } });
     if (existingUser) {
@@ -164,19 +166,19 @@ app.post('/submit', async (req, res) => {
       correo: correo.trim(),
       firma_blob: firmaBuffer, // <-- Usa la nueva columna blob
       foto_blob: fotoBuffer,
+      foto_2_blob: foto2Buffer, // Guardar la segunda foto como BLOB
       // firma: firmaBuffer,
       sucursal: sucursal.trim(),
       // foto: fotoBuffer,
       estado,
     });
 
-    res.json({ status: 'success' });
+   res.json({ status: 'success' });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
-
 
 
 app.post('/admin/login', async (req, res) => {
