@@ -609,7 +609,7 @@ if (user.foto_2_blob) {
   fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
   doc.image(foto2ImagePath, {
     fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
-    x: 400, // Posición a la derecha de la primera foto
+    x: 450, // Posición a la derecha de la primera foto
     y: doc.y,
     // No se necesita rotate porque la imagen ya llega rotada
   });
@@ -645,6 +645,9 @@ const startServer = async () => {
   app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
   });
+
+  console.log(`Posición actual (doc.y): ${doc.y}`);
+
 };
 
 startServer();
