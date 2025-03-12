@@ -391,13 +391,13 @@ app.get('/download/:cedula', async (req, res) => {
   // Función para agregar la marca de agua en cada página
   const addWatermark = () => {
     doc.save(); // Guardar el estado actual del documento
-    doc.opacity(0.1); // Ajustar la opacidad para que sea sutil (0.1 es muy tenue, ajusta según necesites)
+    doc.opacity(0.5); // Ajustar la opacidad para que sea sutil (0.1 es muy tenue, ajusta según necesites)
     doc.image(path.join(__dirname, 'assets', 'marca.png'), {
       fit: [doc.page.width, doc.page.height], // Ajustar la imagen al tamaño de la página
       align: 'center',
       valign: 'center',
     });
-    doc.opacity(3); // Restaurar la opacidad para el contenido principal
+    doc.opacity(1); // Restaurar la opacidad para el contenido principal
     doc.restore(); // Restaurar el estado del documento
   };
 
