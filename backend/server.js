@@ -396,6 +396,8 @@ app.get('/download/:cedula', async (req, res) => {
       fit: [doc.page.width, doc.page.height], // Ajustar la imagen al tamaño de la página
       align: 'center',
       valign: 'center',
+      x: (doc.page.width - doc.page.width) / 2, // Centrar explícitamente en x
+      y: (doc.page.height - doc.page.height) / 2, // Centrar explícitamente en y
     });
     doc.opacity(1); // Restaurar la opacidad para el contenido principal
     doc.restore(); // Restaurar el estado del documento
