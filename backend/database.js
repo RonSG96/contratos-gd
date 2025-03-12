@@ -13,16 +13,17 @@ const User = sequelize.define('User', {
   nombre: { type: DataTypes.STRING, allowNull: true },
   apellido: { type: DataTypes.STRING, allowNull: false },
   cedula: { type: DataTypes.STRING, allowNull: false, unique: true },
-  fecha_inscripcion: { type: DataTypes.DATE, allowNull: false, defaultValue: Sequelize.NOW },
+  fecha_inscripcion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
   plan_contratado: { type: DataTypes.STRING, allowNull: true },
   fecha_expiracion: { type: DataTypes.DATE, allowNull: true },
   direccion: { type: DataTypes.STRING, allowNull: false },
   telefono: { type: DataTypes.STRING, allowNull: false },
   correo: { type: DataTypes.STRING, allowNull: false, unique: true },
-  firma: { type: DataTypes.STRING, allowNull: true }, // Mantienes la columna antigua temporalmente
+  firma: { type: DataTypes.STRING, allowNull: true },
   foto: { type: DataTypes.STRING, allowNull: true },
-  firma_blob: { type: DataTypes.BLOB('long'), allowNull: true }, // Nueva columna para migración
-  foto_blob: { type: DataTypes.BLOB('long'), allowNull: true },  // Nueva columna para migración
+  firma_blob: { type: DataTypes.BLOB('long'), allowNull: true },
+  foto_blob: { type: DataTypes.BLOB('long'), allowNull: true },
+  foto_2_blob: { type: DataTypes.BLOB('long'), allowNull: true }, // Nuevo campo para la segunda foto
   sucursal: { type: DataTypes.STRING, allowNull: false },
   estado: { type: DataTypes.STRING, allowNull: false, defaultValue: 'activo' },
   qr_code: { type: DataTypes.TEXT, allowNull: true },
