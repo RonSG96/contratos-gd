@@ -596,10 +596,10 @@ if (user.foto_blob) {
   const fotoImagePath = `temp_foto.jpg`;
   fs.writeFileSync(fotoImagePath, user.foto_blob);
   doc.image(fotoImagePath, {
-    fit: [photoWidth, photoHeight], // Tamaño más grande y proporcional
-    x: marginLeft, // Posición izquierda
+    fit: [photoWidth, photoHeight], // Tamaño proporcional
+    x: marginLeft, // Posición justo después de la firma
     y: doc.y,
-    rotate: 0, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
+    // No se necesita rotate porque la imagen ya llega rotada
   });
   fs.unlinkSync(fotoImagePath);
 }
@@ -611,7 +611,7 @@ if (user.foto_2_blob) {
     fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
     x: marginLeft + photoWidth + spacing, // Posición a la derecha de la primera foto
     y: doc.y,
-    rotate: 0, // Rotar 90 grados para corregir orientación (ajusta según sea necesario)
+    // No se necesita rotate porque la imagen ya llega rotada
   });
   fs.unlinkSync(foto2ImagePath);
 }
