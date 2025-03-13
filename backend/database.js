@@ -27,6 +27,7 @@ const User = sequelize.define('User', {
   sucursal: { type: DataTypes.STRING, allowNull: false },
   estado: { type: DataTypes.STRING, allowNull: false, defaultValue: 'activo' },
   qr_code: { type: DataTypes.TEXT, allowNull: true },
+  is_data_updated: { type: DataTypes.BOOLEAN, defaultValue: false }, // Campo ya añadido
 });
 
 const Admin = sequelize.define('Admin', {
