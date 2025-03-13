@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'; // Añadimos useCallback
+import React, { useState, useRef, useCallback } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import Webcam from 'react-webcam';
 import {
@@ -36,22 +36,21 @@ const RegistrationForm = () => {
 
   const [signatureDataURL, setSignatureDataURL] = useState('');
   const [photoDataURL, setPhotoDataURL] = useState('');
-  const [photo2DataURL, setPhoto2DataURL] = useState(''); // Nueva estado para foto 2
+  const [photo2DataURL, setPhoto2DataURL] = useState('');
   const [isSignatureModalOpen, setSignatureModalOpen] = useState(false);
   const [isPhotoModalOpen, setPhotoModalOpen] = useState(false);
-  const [isPhoto2ModalOpen, setPhoto2ModalOpen] = useState(false); // Nuevo modal para foto 2
+  const [isPhoto2ModalOpen, setPhoto2ModalOpen] = useState(false);
   const [isContractModalOpen, setContractModalOpen] = useState(false);
   const [isAgreeChecked, setAgreeChecked] = useState(false);
   const [isSignatureDone, setSignatureDone] = useState(false);
   const [isPhotoTaken, setPhotoTaken] = useState(false);
-  const [isPhoto2Taken, setPhoto2Taken] = useState(false); // Estado para foto 2
+  const [isPhoto2Taken, setPhoto2Taken] = useState(false);
   const [isFinalButtonDisabled, setFinalButtonDisabled] = useState(true);
   const [isSignButtonEnabled, setSignButtonEnabled] = useState(false);
   const [facingMode, setFacingMode] = useState('environment'); // Cámara trasera por defecto
 
   const sigCanvas = useRef({});
-  const webcamRef = useRef(null);
-  const webcamRef2 = useRef(null); // Nueva referencia para la segunda cámara
+  const webcamRef = useRef(null); // Usaremos una sola referencia para ambas cámaras
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -84,74 +83,50 @@ const RegistrationForm = () => {
     checkIfCanEnableAgree();
   };
 
-  // Cambiar cámara
   const toggleCamera = useCallback(() => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
   }, []);
 
   const handleCapturePhoto = () => {
+    if (!webcamRef.current) {
+      console.error('Webcam no está inicializada');
+      return;
+    }
+
     const photo = webcamRef.current.getScreenshot();
     if (!photo) {
       console.error('No se pudo capturar la foto');
       return;
     }
 
-    const img = new Image();
-    img.src = photo;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Invertir las dimensiones para rotar
-      canvas.width = img.height;
-      canvas.height = img.width;
-
-      // Rotar la imagen 90 grados en sentido antihorario
-      ctx.translate(0, canvas.width);
-      ctx.rotate((-90 * Math.PI) / 180);
-      ctx.drawImage(img, 0, 0, img.width, img.height);
-
-      const rotatedPhoto = canvas.toDataURL('image/jpeg');
-      setPhotoDataURL(rotatedPhoto);
-      setPhotoModalOpen(false);
-      setPhotoTaken(true);
-      checkIfCanEnableAgree();
-    };
+    // Quitamos la rotación automática para evitar que la imagen gire innecesariamente
+    setPhotoDataURL(photo);
+    setPhotoModalOpen(false);
+    setPhotoTaken(true);
+    checkIfCanEnableAgree();
   };
 
   const handleCapturePhoto2 = () => {
-    const photo2 = webcamRef2.current.getScreenshot();
+    if (!webcamRef.current) {
+      console.error('Webcam no está inicializada');
+      return;
+    }
+
+    const photo2 = webcamRef.current.getScreenshot();
     if (!photo2) {
       console.error('No se pudo capturar la foto 2');
       return;
     }
 
-    const img = new Image();
-    img.src = photo2;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Invertir las dimensiones para rotar
-      canvas.width = img.height;
-      canvas.height = img.width;
-
-      // Rotar la imagen 90 grados en sentido antihorario
-      ctx.translate(0, canvas.width);
-      ctx.rotate((-90 * Math.PI) / 180);
-      ctx.drawImage(img, 0, 0, img.width, img.height);
-
-      const rotatedPhoto2 = canvas.toDataURL('image/jpeg');
-      setPhoto2DataURL(rotatedPhoto2);
-      setPhoto2ModalOpen(false);
-      setPhoto2Taken(true);
-      checkIfCanEnableAgree();
-    };
+    // Quitamos la rotación automática para evitar que la imagen gire innecesariamente
+    setPhoto2DataURL(photo2);
+    setPhoto2ModalOpen(false);
+    setPhoto2Taken(true);
+    checkIfCanEnableAgree();
   };
 
   const checkIfCanEnableAgree = () => {
     if (signatureDataURL && photoDataURL && photo2DataURL) {
-      // Incluimos photo2DataURL
       setAgreeChecked(false);
     }
   };
@@ -177,11 +152,11 @@ const RegistrationForm = () => {
       return;
     }
     if (!photoDataURL) {
-      alert('Por favor, tome la foto de la cedula frontal.');
+      alert('Por favor, tome la foto de la cédula frontal.');
       return;
     }
     if (!photo2DataURL) {
-      alert('Por favor, tome la foto de la cedula posterior.');
+      alert('Por favor, tome la foto de la cédula posterior.');
       return;
     }
 
@@ -189,7 +164,7 @@ const RegistrationForm = () => {
       ...formData,
       firma: signatureDataURL,
       foto: photoDataURL,
-      foto_2: photo2DataURL, // Nueva foto 2
+      foto_2: photo2DataURL,
       plan_contratado: formData.planContratado,
     };
 
@@ -203,7 +178,7 @@ const RegistrationForm = () => {
       });
       const result = await response.json();
 
-      console.log('Respuesta del backend:', result); // Depuración
+      console.log('Respuesta del backend:', result);
 
       if (response.ok && result.status === 'success') {
         alert('Registro completado con éxito.');
@@ -222,15 +197,15 @@ const RegistrationForm = () => {
         });
         setSignatureDataURL('');
         setPhotoDataURL('');
-        setPhoto2DataURL(''); // Resetear foto 2
+        setPhoto2DataURL('');
         setAgreeChecked(false);
         setFinalButtonDisabled(true);
         setSignButtonEnabled(false);
         setSignatureDone(false);
         setPhotoTaken(false);
-        setPhoto2Taken(false); // Resetear estado de foto 2
+        setPhoto2Taken(false);
       } else if (
-        result.message === 'Ya existe un registro con la misma cedula.'
+        result.message === 'Ya existe un registro con la misma cédula.'
       ) {
         alert('Ya existe un registro con la misma cédula.');
       } else {
@@ -382,6 +357,7 @@ const RegistrationForm = () => {
                 </Button>
                 {photo2DataURL && (
                   <img
+                    kısa
                     src={photo2DataURL}
                     alt="Cédula Posterior 2"
                     style={{ width: '100%', marginTop: 10 }}
@@ -397,7 +373,7 @@ const RegistrationForm = () => {
                   onChange={handleAgreeChange}
                   disabled={
                     !signatureDataURL || !photoDataURL || !photo2DataURL
-                  } // Requiere foto 2
+                  }
                 />
               }
               label="Declaro haber leído y estar de acuerdo con las cláusulas del contrato y las políticas de Gimnasios Dorian."
@@ -674,7 +650,7 @@ const RegistrationForm = () => {
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             width="100%"
-            videoConstraints={{ width: 1280, height: 720, facingMode }} // Cámara trasera por defecto
+            videoConstraints={{ width: 1280, height: 720, facingMode }}
           />
         </DialogContent>
         <DialogActions>
@@ -697,6 +673,7 @@ const RegistrationForm = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       {/* Modal para tomar foto 2 */}
       <Dialog
         open={isPhoto2ModalOpen}
@@ -706,10 +683,10 @@ const RegistrationForm = () => {
         <DialogContent>
           <Webcam
             audio={false}
-            ref={webcamRef}
+            ref={webcamRef} // Usamos la misma referencia para evitar conflictos
             screenshotFormat="image/jpeg"
             width="100%"
-            videoConstraints={{ width: 1280, height: 720, facingMode }} // Cámara trasera por defecto
+            videoConstraints={{ width: 1280, height: 720, facingMode }}
           />
         </DialogContent>
         <DialogActions>
