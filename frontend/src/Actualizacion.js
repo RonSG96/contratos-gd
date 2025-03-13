@@ -610,31 +610,22 @@ const Actualizacion = () => {
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
 >
   <DialogTitle>Firmar Contrato</DialogTitle>
-  <DialogContent sx={{ padding: 0, margin: 0, overflow: 'hidden' }}>
-    <Box sx={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
-      <SignatureCanvas
-        penColor="black"
-        ref={sigCanvas}
-        canvasProps={{
-          width: 400,
-          height: 200,
-          className: 'sigCanvas',
-          style: {
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            touchAction: 'none', // Desactiva el desplazamiento predeterminado
-            backgroundColor: '#fff', // Fondo blanco para mejor visibilidad
-          },
-        }}
-        onBegin={() => {
-          const ctx = sigCanvas.current.getCanvas().getContext('2d');
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.lineWidth = 2;
-        }}
-      />
-    </Box>
- </DialogContent>
+  <DialogContent>
+    <SignatureCanvas
+      penColor="black"
+      ref={sigCanvas}
+      canvasProps={{
+        width: 300, // Igual que en RegistrationForm.js
+        height: 150, // Igual que en RegistrationForm.js
+        className: 'sigCanvas',
+        style: {
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          backgroundColor: '#fff',
+        },
+      }}
+    />
+  </DialogContent>
   <DialogActions>
     <IconButton
       onClick={() => sigCanvas.current.clear()}
