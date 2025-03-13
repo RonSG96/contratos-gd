@@ -330,6 +330,7 @@ app.get('/api/actualizacion/:cedula', async (req, res) => {
       foto_2_blob: user.foto_2_blob
         ? user.foto_2_blob.toString('base64')
         : null, // Agregar foto_2_blob
+    is_data_updated: user.is_data_updated // Añadir este campo
     });
   } catch (error) {
     console.error('Error al obtener usuario:', error);
@@ -363,12 +364,34 @@ app.put('/api/actualizacion/:cedula', async (req, res) => {
       firma_blob: firmaBuffer || usuario.firma_blob, // Mantener los valores existentes si no se actualizan
       foto_blob: fotoBuffer || usuario.foto_blob,
       foto_2_blob: foto2Buffer || usuario.foto_2_blob, // Agregar actualización de foto_2_blob
+      is_data_updated: true, // Establecer a true después de la actualización
     });
 
     res.json({ message: 'Datos actualizados correctamente' });
   } catch (error) {
     console.error('Error al actualizar datos:', error);
     res.status(500).json({ error: 'Error al actualizar los datos' });
+  }
+});
+// Nueva ruta para permitir edición
+app.put('/api/admin/allow-edit/:cedula', verifyToken, async (req, res) => {
+  try {
+    const { cedula } = req.params;
+
+    const usuario = await User.findOne({ where: { cedula } });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    await usuario.update({
+      is_data_updated: false, // Permitir edición nuevamente
+    });
+
+    res.json({ message: 'Edición habilitada para el usuario' });
+  } catch (error) {
+    console.error('Error al habilitar edición:', error);
+    res.status(500).json({ error: 'Error al habilitar edición' });
   }
 });
 
