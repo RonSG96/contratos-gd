@@ -139,25 +139,32 @@ const Actualizacion = () => {
   };
 
   return (
-    <Container
-      maxWidth="md"
+   <Container
+  maxWidth="md"
+  sx={{
+    background: '#d3d3d3', // Fondo gris
+    minHeight: '100vh',
+    padding: '20px',
+    borderRadius: '10px',
+  }}
+>
+  <Box sx={{ textAlign: 'center', mb: 4 }}>
+    <img
+      src={logoDorian}
+      alt="Gimnasios Dorian Logo"
+      style={{ width: '200px', marginBottom: '10px' }}
+    />
+    <Typography
+      variant="h4"
       sx={{
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        minHeight: '100vh',
-        padding: '20px',
-        borderRadius: '10px',
+        color: '#000', // Color negro
+        fontFamily: 'Montserrat, sans-serif', // Fuente Montserrat
       }}
+      gutterBottom
     >
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <img
-          src={logoDorian}
-          alt="Gimnasios Dorian Logo"
-          style={{ width: '200px', marginBottom: '10px' }}
-        />
-        <Typography variant="h4" color="primary" gutterBottom>
-          ACTUALIZACIÓN DE DATOS
-        </Typography>
-      </Box>
+      ACTUALIZACIÓN DE DATOS
+    </Typography>
+  </Box>
 
       <Paper elevation={3} sx={{ p: 3, borderRadius: '12px' }}>
         <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
@@ -594,89 +601,64 @@ const Actualizacion = () => {
           <Button onClick={() => setContractModalOpen(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
-
-      {/* Modal para firmar */}
-      <Dialog
-        open={isSignatureModalOpen}
-        onClose={() => setSignatureModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
-      >
-        <DialogTitle>Firmar Contrato</DialogTitle>
-        <DialogContent>
-          <SignatureCanvas
-            penColor="black"
-            ref={sigCanvas}
-            canvasProps={{ width: 400, height: 200, className: 'sigCanvas' }}
-            style={{ border: '1px solid #ccc', borderRadius: '8px', touchAction: 'none' }} // touchAction para mejorar la interacción táctil
-          />
-        </DialogContent>
-        <DialogActions>
-          <IconButton
-            onClick={() => sigCanvas.current.clear()}
-            sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
-          >
-            <DeleteIcon sx={{ color: '#000' }} />
-          </IconButton>
-          <IconButton
-            onClick={() => setSignatureModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-          >
-            <CloseIcon sx={{ color: '#fff' }} />
-          </IconButton>
-          <IconButton
-            onClick={handleSaveSignature}
-            sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
-          >
-            <SaveIcon sx={{ color: '#fff' }} />
-          </IconButton>
-        </DialogActions>
-      </Dialog>
-
-      {/* Modal para tomar foto 1 */}
-      <Dialog
-        open={isPhotoModalOpen}
-        onClose={() => setPhotoModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
-      >
-        <DialogTitle>Tomar Foto 1 (Frente de Cédula)</DialogTitle>
-        <DialogContent>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="100%"
-            videoConstraints={videoConstraints}
-            style={{
-              borderRadius: '8px',
-              overflow: 'hidden',
-              transform: `rotate(${rotation}deg)`,
-              transformOrigin: 'center center',
-            }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-            <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
-              <SwitchCameraIcon sx={{ color: '#fff' }} />
-            </IconButton>
-            <IconButton onClick={rotateCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
-              <RotateIcon sx={{ color: '#fff' }} />
-            </IconButton>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <IconButton
-            onClick={() => setPhotoModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-          >
-            <CloseIcon sx={{ color: '#fff' }} />
-          </IconButton>
-          <IconButton
-            onClick={handleCapturePhoto}
-            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            <CameraIcon sx={{ color: '#fff' }} />
-          </IconButton>
-        </DialogActions>
-      </Dialog>
+                
+//Modal para fimar
+     <Dialog
+  open={isSignatureModalOpen}
+  onClose={() => setSignatureModalOpen(false)}
+  sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+>
+  <DialogTitle>Firmar Contrato</DialogTitle>
+  <DialogContent sx={{ padding: 0, margin: 0, overflow: 'hidden' }}>
+    <Box sx={{ padding: '16px', display: 'flex', justifyContent: 'center' }}>
+      <SignatureCanvas
+        penColor="black"
+        ref={sigCanvas}
+        canvasProps={{
+          width: 400,
+          height: 200,
+          className: 'sigCanvas',
+          style: {
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            touchAction: 'none', // Desactiva el desplazamiento predeterminado
+            position: 'relative', // Usa coordenadas relativas
+            margin: 0,
+            padding: 0,
+            display: 'block', // Asegura que el canvas ocupe el espacio correcto
+            backgroundColor: '#fff', // Fondo blanco para mejor visibilidad
+          },
+        }}
+        onBegin={() => {
+          const ctx = sigCanvas.current.getCanvas().getContext('2d');
+          ctx.lineCap = 'round'; // Suaviza las líneas
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = 2; // Grosor del trazo
+        }}
+      />
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <IconButton
+      onClick={() => sigCanvas.current.clear()}
+      sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
+    >
+      <DeleteIcon sx={{ color: '#000' }} />
+    </IconButton>
+    <IconButton
+      onClick={() => setSignatureModalOpen(false)}
+      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+    >
+      <CloseIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
+      onClick={handleSaveSignature}
+      sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
+    >
+      <SaveIcon sx={{ color: '#fff' }} />
+    </IconButton>
+  </DialogActions>
+</Dialog>
 
       {/* Modal para tomar foto 2 */}
       <Dialog
