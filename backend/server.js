@@ -325,8 +325,11 @@ app.get('/api/actualizacion/:cedula', async (req, res) => {
       direccion: user.direccion,
       telefono: user.telefono,
       correo: user.correo,
-      firma_blob: user.firma ? user.firma.toString('base64') : null,
-      foto_blob: user.foto ? user.foto.toString('base64') : null,
+      firma_blob: user.firma_blob ? user.firma_blob.toString('base64') : null, // Corregir para usar firma_blob
+      foto_blob: user.foto_blob ? user.foto_blob.toString('base64') : null, // Corregir para usar foto_blob
+      foto_2_blob: user.foto_2_blob
+        ? user.foto_2_blob.toString('base64')
+        : null, // Agregar foto_2_blob
     });
   } catch (error) {
     console.error('Error al obtener usuario:', error);
@@ -336,14 +339,17 @@ app.get('/api/actualizacion/:cedula', async (req, res) => {
 
 app.put('/api/actualizacion/:cedula', async (req, res) => {
   try {
-    const { firma, foto } = req.body;
+    const { firma, foto, foto_2 } = req.body; // Agregar foto_2
     const { cedula } = req.params;
 
-    // Verificar si la firma y la foto están en base64
+    // Verificar si la firma, foto y foto_2 están en base64
     const firmaBuffer = firma
       ? Buffer.from(firma.split(',')[1], 'base64')
       : null;
     const fotoBuffer = foto ? Buffer.from(foto.split(',')[1], 'base64') : null;
+    const foto2Buffer = foto_2
+      ? Buffer.from(foto_2.split(',')[1], 'base64')
+      : null;
 
     // Buscar usuario por cédula
     const usuario = await User.findOne({ where: { cedula } });
@@ -352,10 +358,11 @@ app.put('/api/actualizacion/:cedula', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Actualizar usuario con firma y foto en formato BLOB
+    // Actualizar usuario con firma, foto y foto_2 en formato BLOB
     await usuario.update({
       firma_blob: firmaBuffer || usuario.firma_blob, // Mantener los valores existentes si no se actualizan
       foto_blob: fotoBuffer || usuario.foto_blob,
+      foto_2_blob: foto2Buffer || usuario.foto_2_blob, // Agregar actualización de foto_2_blob
     });
 
     res.json({ message: 'Datos actualizados correctamente' });
@@ -364,8 +371,6 @@ app.put('/api/actualizacion/:cedula', async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar los datos' });
   }
 });
-
-//termina la actualizacion
 
 app.get('/download/:cedula', async (req, res) => {
   const user = await User.findOne({ where: { cedula: req.params.cedula } });
