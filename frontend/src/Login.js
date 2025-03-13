@@ -20,8 +20,9 @@ const Login = ({ setToken }) => {
 
     const data = await response.json();
     if (data.token) {
-      setToken(data.token);
-      navigate('/admin');
+      localStorage.setItem('token', data.token); // Guardar el token en localStorage
+      setToken(data.token); // Actualizar el estado
+      navigate('/admin'); // Redirigir al panel de administración
     } else {
       alert('Credenciales inválidas');
     }
