@@ -51,6 +51,7 @@ const RegistrationForm = () => {
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null);
+  const webcamRef2 = useRef(null); // Nueva referencia para la segunda cámara
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -88,65 +89,65 @@ const RegistrationForm = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
   }, []);
 
-const handleCapturePhoto = () => {
-  const photo = webcamRef.current.getScreenshot();
-  if (!photo) {
-    console.error('No se pudo capturar la foto');
-    return;
-  }
+  const handleCapturePhoto = () => {
+    const photo = webcamRef.current.getScreenshot();
+    if (!photo) {
+      console.error('No se pudo capturar la foto');
+      return;
+    }
 
-  const img = new Image();
-  img.src = photo;
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = photo;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
 
-    // Invertir las dimensiones para rotar
-    canvas.width = img.height; // La altura de la imagen original se convierte en el ancho
-    canvas.height = img.width; // El ancho de la imagen original se convierte en la altura
+      // Invertir las dimensiones para rotar
+      canvas.width = img.height; // La altura de la imagen original se convierte en el ancho
+      canvas.height = img.width; // El ancho de la imagen original se convierte en la altura
 
-    // Rotar la imagen 90 grados en sentido antihorario
-    ctx.translate(0, canvas.width); // Mover el punto de origen al borde inferior izquierdo
-    ctx.rotate((-90 * Math.PI) / 180); // Rotar -90 grados
-    ctx.drawImage(img, 0, 0, img.width, img.height); // Dibujar la imagen rotada
+      // Rotar la imagen 90 grados en sentido antihorario
+      ctx.translate(0, canvas.width); // Mover el punto de origen al borde inferior izquierdo
+      ctx.rotate((-90 * Math.PI) / 180); // Rotar -90 grados
+      ctx.drawImage(img, 0, 0, img.width, img.height); // Dibujar la imagen rotada
 
-    const rotatedPhoto = canvas.toDataURL('image/jpeg');
-    setPhotoDataURL(rotatedPhoto);
-    setPhotoModalOpen(false);
-    setPhotoTaken(true);
-    checkIfCanEnableAgree();
+      const rotatedPhoto = canvas.toDataURL('image/jpeg');
+      setPhotoDataURL(rotatedPhoto);
+      setPhotoModalOpen(false);
+      setPhotoTaken(true);
+      checkIfCanEnableAgree();
+    };
   };
-};
 
-const handleCapturePhoto2 = () => {
-  const photo2 = webcamRef2.current.getScreenshot();
-  if (!photo2) {
-    console.error('No se pudo capturar la foto 2');
-    return;
-  }
+  const handleCapturePhoto2 = () => {
+    const photo2 = webcamRef2.current.getScreenshot();
+    if (!photo2) {
+      console.error('No se pudo capturar la foto 2');
+      return;
+    }
 
-  const img = new Image();
-  img.src = photo2;
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = photo2;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
 
-    // Invertir las dimensiones para rotar
-    canvas.width = img.height;
-    canvas.height = img.width;
+      // Invertir las dimensiones para rotar
+      canvas.width = img.height;
+      canvas.height = img.width;
 
-    // Rotar la imagen 90 grados en sentido antihorario
-    ctx.translate(0, canvas.width);
-    ctx.rotate((-90 * Math.PI) / 180);
-    ctx.drawImage(img, 0, 0, img.width, img.height);
+      // Rotar la imagen 90 grados en sentido antihorario
+      ctx.translate(0, canvas.width);
+      ctx.rotate((-90 * Math.PI) / 180);
+      ctx.drawImage(img, 0, 0, img.width, img.height);
 
-    const rotatedPhoto2 = canvas.toDataURL('image/jpeg');
-    setPhoto2DataURL(rotatedPhoto2);
-    setPhoto2ModalOpen(false);
-    setPhoto2Taken(true);
-    checkIfCanEnableAgree();
+      const rotatedPhoto2 = canvas.toDataURL('image/jpeg');
+      setPhoto2DataURL(rotatedPhoto2);
+      setPhoto2ModalOpen(false);
+      setPhoto2Taken(true);
+      checkIfCanEnableAgree();
+    };
   };
-};
 
   const checkIfCanEnableAgree = () => {
     if (signatureDataURL && photoDataURL && photo2DataURL) {
