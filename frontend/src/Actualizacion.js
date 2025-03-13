@@ -602,8 +602,9 @@ const Actualizacion = () => {
         </DialogActions>
       </Dialog>
                 
-//Modal para fimar
-     <Dialog
+      {/* Modal para firmar */}
+
+    <Dialog
   open={isSignatureModalOpen}
   onClose={() => setSignatureModalOpen(false)}
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
@@ -622,22 +623,18 @@ const Actualizacion = () => {
             border: '1px solid #ccc',
             borderRadius: '8px',
             touchAction: 'none', // Desactiva el desplazamiento predeterminado
-            position: 'relative', // Usa coordenadas relativas
-            margin: 0,
-            padding: 0,
-            display: 'block', // Asegura que el canvas ocupe el espacio correcto
             backgroundColor: '#fff', // Fondo blanco para mejor visibilidad
           },
         }}
         onBegin={() => {
           const ctx = sigCanvas.current.getCanvas().getContext('2d');
-          ctx.lineCap = 'round'; // Suaviza las líneas
+          ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
-          ctx.lineWidth = 2; // Grosor del trazo
+          ctx.lineWidth = 2;
         }}
       />
     </Box>
-  </DialogContent>
+ </DialogContent>
   <DialogActions>
     <IconButton
       onClick={() => sigCanvas.current.clear()}
@@ -660,51 +657,88 @@ const Actualizacion = () => {
   </DialogActions>
 </Dialog>
 
+{/* Modal para tomar foto 1 */}
+
+<Dialog
+  open={isPhotoModalOpen}
+  onClose={() => setPhotoModalOpen(false)}
+  sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+>
+  <DialogTitle>Tomar Foto 1 (Frente de Cédula)</DialogTitle>
+  <DialogContent>
+    <Webcam
+      audio={false}
+      ref={webcamRef}
+      screenshotFormat="image/jpeg"
+      width="100%"
+      videoConstraints={videoConstraints}
+      style={{
+        borderRadius: '8px',
+        overflow: 'hidden',
+      }}
+    />
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+      <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
+        <SwitchCameraIcon sx={{ color: '#fff' }} />
+      </IconButton>
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <IconButton
+      onClick={() => setPhotoModalOpen(false)}
+      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+    >
+      <CloseIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
+      onClick={handleCapturePhoto}
+      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+    >
+      <CameraIcon sx={{ color: '#fff' }} />
+    </IconButton>
+  </DialogActions>
+</Dialog>
+
       {/* Modal para tomar foto 2 */}
       <Dialog
-        open={isPhoto2ModalOpen}
-        onClose={() => setPhoto2ModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
-      >
-        <DialogTitle>Tomar Foto 2 (Reverso de Cédula)</DialogTitle>
-        <DialogContent>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="100%"
-            videoConstraints={videoConstraints}
-            style={{
-              borderRadius: '8px',
-              overflow: 'hidden',
-              transform: `rotate(${rotation}deg)`,
-              transformOrigin: 'center center',
-            }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-            <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
-              <SwitchCameraIcon sx={{ color: '#fff' }} />
-            </IconButton>
-            <IconButton onClick={rotateCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
-              <RotateIcon sx={{ color: '#fff' }} />
-            </IconButton>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <IconButton
-            onClick={() => setPhoto2ModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-          >
-            <CloseIcon sx={{ color: '#fff' }} />
-          </IconButton>
-          <IconButton
-            onClick={handleCapturePhoto2}
-            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            <CameraIcon sx={{ color: '#fff' }} />
-          </IconButton>
-        </DialogActions>
-      </Dialog>
+  open={isPhoto2ModalOpen}
+  onClose={() => setPhoto2ModalOpen(false)}
+  sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+>
+  <DialogTitle>Tomar Foto 2 (Reverso de Cédula)</DialogTitle>
+  <DialogContent>
+    <Webcam
+      audio={false}
+      ref={webcamRef}
+      screenshotFormat="image/jpeg"
+      width="100%"
+      videoConstraints={videoConstraints}
+      style={{
+        borderRadius: '8px',
+        overflow: 'hidden',
+      }}
+    />
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+      <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
+        <SwitchCameraIcon sx={{ color: '#fff' }} />
+      </IconButton>
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <IconButton
+      onClick={() => setPhoto2ModalOpen(false)}
+      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+    >
+      <CloseIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
+      onClick={handleCapturePhoto2}
+      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+    >
+      <CameraIcon sx={{ color: '#fff' }} />
+    </IconButton>
+  </DialogActions>
+</Dialog>
     </Container>
   );
 };
