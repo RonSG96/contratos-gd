@@ -67,30 +67,42 @@ const AdminPanel = ({ setToken }) => {
     setPage(0);
   };
 
-  const handleAllowEdit = async (cedula) => {
-    try {
-      const response = await fetch(
-        `https://contratos-backend.onrender.com/api/admin/allow-edit/${cedula}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-      const result = await response.json();
-      if (response.ok) {
-        alert('Edición habilitada para el usuario');
-        // Opcional: Recarga la lista de usuarios para reflejar el cambio
-        const updatedUsers = await fetch(`${apiUrl}/users`);
-        const data = await updatedUsers.json();
-        setUsers(data);
-      } else {
-        alert(result.message || 'Error al habilitar edición');
-      }
-    } catch (error) {
-      console.error('Error al habilitar edición:', error);
-      alert('Error de conexión con el servidor');
+ const handleAllowEdit = async (cedula) => {
+  try {
+    const token = localStorage.getItem('token');
+    console.log('Token enviado:', token); // Depuración: Verificar el token
+    if (!token) {
+      alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
+      return;
     }
-  };
+
+    const response = await fetch(
+      `https://contratos-backend.onrender.com/api/admin/allow-edit/${cedula}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+      }
+    );
+    const result = await response.json();
+    if (response.ok) {
+      alert('Edición habilitada para el usuario');
+      const updatedUsers = await fetch(`${apiUrl}/users`, {
+        headers: { 'x-access-token': token },
+      });
+      const data = await updatedUsers.json();
+      setUsers(data);
+    } else {
+      console.log('Error en la respuesta:', result); // Depuración: Verificar el error
+      alert(result.message || 'Error al habilitar edición');
+    }
+  } catch (error) {
+    console.error('Error al habilitar edición:', error);
+    alert('Error de conexión con el servidor');
+  }
+};
 
   const filteredUsers = users.filter(
     (user) =>
