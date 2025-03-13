@@ -134,20 +134,28 @@ const Actualizacion = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 3, borderRadius: '12px' }}>
-        <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
+        {/* Ajuste: Botón "Buscar" debajo del input */}
+        <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
           <TextField
             label="Ingrese su cédula"
             value={cedula}
             onChange={(e) => setCedula(e.target.value)}
             variant="outlined"
             size="small"
-            sx={{ mr: 2, width: '300px' }} // Aumentamos el ancho del input
+            sx={{
+              width: { xs: '100%', sm: '300px' }, // Responsivo: 100% en pantallas pequeñas, 300px en pantallas más grandes
+              mb: 2, // Espacio entre el input y el botón
+            }}
           />
           <Button
             variant="contained"
             color="primary"
             onClick={buscarUsuario}
-            sx={{ height: '40px', padding: '6px 16px' }} // Botón más pequeño y alineado
+            sx={{
+              width: { xs: '100%', sm: '150px' }, // Responsivo: 100% en pantallas pequeñas, 150px en pantallas más grandes
+              height: '40px',
+              padding: '6px 16px',
+            }}
           >
             Buscar
           </Button>
@@ -160,74 +168,83 @@ const Actualizacion = () => {
             </Typography>
             <Box
               sx={{
-                border: '2px solid #F28C38', // Color del borde similar al botón "Ver Contrato"
+                border: '2px solid #F28C38',
                 borderRadius: '8px',
                 padding: '10px',
                 backgroundColor: '#fff',
+                overflow: 'hidden', // Evita que el contenido se salga del cuadro
               }}
             >
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Nombre:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
                     {userData.nombre} {userData.apellido}
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Cédula:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">{userData.cedula}</Typography>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                    {userData.cedula}
+                  </Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Plan:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
                     {userData.plan_contratado || 'No especificado'}
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Fecha Inscripción:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
                     {new Date(userData.fecha_inscripcion).toLocaleDateString()}
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Dirección:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">{userData.direccion}</Typography>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                    {userData.direccion}
+                  </Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Teléfono:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">{userData.telefono}</Typography>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                    {userData.telefono}
+                  </Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                     Correo:
                   </Typography>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body1">{userData.correo}</Typography>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                    {userData.correo}
+                  </Typography>
                 </Grid>
               </Grid>
             </Box>
