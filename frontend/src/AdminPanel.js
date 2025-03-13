@@ -67,6 +67,31 @@ const AdminPanel = ({ setToken }) => {
     setPage(0);
   };
 
+  const handleAllowEdit = async (cedula) => {
+    try {
+      const response = await fetch(
+        `https://contratos-backend.onrender.com/api/admin/allow-edit/${cedula}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        alert('Edición habilitada para el usuario');
+        // Opcional: Recarga la lista de usuarios para reflejar el cambio
+        const updatedUsers = await fetch(`${apiUrl}/users`);
+        const data = await updatedUsers.json();
+        setUsers(data);
+      } else {
+        alert(result.message || 'Error al habilitar edición');
+      }
+    } catch (error) {
+      console.error('Error al habilitar edición:', error);
+      alert('Error de conexión con el servidor');
+    }
+  };
+
   const filteredUsers = users.filter(
     (user) =>
       user.nombre.toLowerCase().includes(search.toLowerCase()) ||
@@ -300,6 +325,13 @@ const AdminPanel = ({ setToken }) => {
                       onClick={() => handleDownloadQR(user.id)}
                     >
                       <QrCodeIcon />
+                    </IconButton>
+                    <IconButton
+                      color="secondary" // Usamos el color secundario para distinguirlo (naranja según tu CSS)
+                      onClick={() => handleAllowEdit(user.cedula)}
+                    >
+                      <EditIcon />{' '}
+                      {/* Podemos usar un ícono diferente si prefieres, como EditIcon */}
                     </IconButton>
                   </TableCell>
                 </TableRow>
