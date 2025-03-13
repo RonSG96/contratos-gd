@@ -103,13 +103,13 @@ const RegistrationForm = () => {
       const ctx = canvas.getContext('2d');
 
       // Invertir las dimensiones para rotar
-      canvas.width = img.height; // La altura de la imagen original se convierte en el ancho
-      canvas.height = img.width; // El ancho de la imagen original se convierte en la altura
+      canvas.width = img.height;
+      canvas.height = img.width;
 
       // Rotar la imagen 90 grados en sentido antihorario
-      ctx.translate(0, canvas.width); // Mover el punto de origen al borde inferior izquierdo
-      ctx.rotate((-90 * Math.PI) / 180); // Rotar -90 grados
-      ctx.drawImage(img, 0, 0, img.width, img.height); // Dibujar la imagen rotada
+      ctx.translate(0, canvas.width);
+      ctx.rotate((-90 * Math.PI) / 180);
+      ctx.drawImage(img, 0, 0, img.width, img.height);
 
       const rotatedPhoto = canvas.toDataURL('image/jpeg');
       setPhotoDataURL(rotatedPhoto);
