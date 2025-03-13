@@ -40,8 +40,9 @@ const Actualizacion = () => {
   const [foto, setFoto] = useState(null);
   const [foto2, setFoto2] = useState(null);
   const [isAgreementChecked, setAgreementChecked] = useState(false);
-  const [facingMode, setFacingMode] = useState('user'); // 'user' para frontal, 'environment' para trasera
-  const [rotation, setRotation] = useState(0); // Para manejar la rotación de la cámara
+  const [facingMode, setFacingMode] = useState('user');
+  const [rotation, setRotation] = useState(0);
+  const [isDataUpdated, setIsDataUpdated] = useState(false); // Nuevo estado para is_data_updated
 
   const buscarUsuario = async () => {
     try {
@@ -51,11 +52,17 @@ const Actualizacion = () => {
       const data = await response.json();
       if (data.message) {
         alert('Usuario no encontrado');
+        setUserData(null);
+        setFirma(null);
+        setFoto(null);
+        setFoto2(null);
+        setIsDataUpdated(false); // Resetear al buscar un usuario no encontrado
       } else {
         setUserData(data);
         setFirma(data.firma_blob ? `data:image/jpeg;base64,${data.firma_blob}` : null);
         setFoto(data.foto_blob ? `data:image/jpeg;base64,${data.foto_blob}` : null);
         setFoto2(data.foto_2_blob ? `data:image/jpeg;base64,${data.foto_2_blob}` : null);
+        setIsDataUpdated(data.is_data_updated || false); // Inicializar con el valor del servidor
       }
     } catch (error) {
       console.error('Error al buscar usuario:', error);
@@ -64,9 +71,7 @@ const Actualizacion = () => {
   };
 
   const handleSaveSignature = () => {
-    const signature = sigCanvas.current
-      .getTrimmedCanvas()
-      .toDataURL('image/png');
+    const signature = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
     setFirma(signature);
     setSignatureModalOpen(false);
   };
@@ -108,12 +113,17 @@ const Actualizacion = () => {
         alert(
           'Datos actualizados correctamente. Gracias por ser parte de Gimnasios Dorian.'
         );
-        setUserData(null);
-        setFirma(null);
-        setFoto(null);
-        setFoto2(null);
-        setCedula('');
-        setAgreementChecked(false);
+        // Recargar los datos del usuario para reflejar is_data_updated
+        const updatedResponse = await fetch(
+          `https://contratos-backend.onrender.com/api/actualizacion/${cedula}`
+        );
+        const updatedData = await updatedResponse.json();
+        setUserData(updatedData);
+        setFirma(updatedData.firma_blob ? `data:image/jpeg;base64,${updatedData.firma_blob}` : null);
+        setFoto(updatedData.foto_blob ? `data:image/jpeg;base64,${updatedData.foto_blob}` : null);
+        setFoto2(updatedData.foto_2_blob ? `data:image/jpeg;base64,${updatedData.foto_2_blob}` : null);
+        setIsDataUpdated(updatedData.is_data_updated || true); // Actualizar el estado
+        setAgreementChecked(false); // Resetear el checkbox
       } else {
         alert(result.message || 'Error al actualizar los datos.');
       }
@@ -123,48 +133,42 @@ const Actualizacion = () => {
     }
   };
 
-  // Cambiar entre cámara frontal y trasera
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
   };
 
-  // Rotar la cámara
   const rotateCamera = () => {
     setRotation((prev) => (prev + 90) % 360);
   };
 
-  // Configuración de videoConstraints para la cámara
   const videoConstraints = {
     facingMode: facingMode,
   };
 
   return (
-   <Container
-  maxWidth="md"
-  sx={{
-    background: '#d3d3d3', // Fondo gris
-    minHeight: '100vh',
-    padding: '20px',
-    borderRadius: '10px',
-  }}
->
-  <Box sx={{ textAlign: 'center', mb: 4 }}>
-    <img
-      src={logoDorian}
-      alt="Gimnasios Dorian Logo"
-      style={{ width: '200px', marginBottom: '10px' }}
-    />
-    <Typography
-      variant="h4"
+    <Container
+      maxWidth="md"
       sx={{
-        color: '#000', // Color negro
-        fontFamily: 'Montserrat, sans-serif', // Fuente Montserrat
+        background: '#d3d3d3',
+        minHeight: '100vh',
+        padding: '20px',
+        borderRadius: '10px',
       }}
-      gutterBottom
     >
-      ACTUALIZACIÓN DE DATOS
-    </Typography>
-  </Box>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <img
+          src={logoDorian}
+          alt="Gimnasios Dorian Logo"
+          style={{ width: '200px', marginBottom: '10px' }}
+        />
+        <Typography
+          variant="h4"
+          sx={{ color: '#000', fontFamily: 'Montserrat, sans-serif' }}
+          gutterBottom
+        >
+          ACTUALIZACIÓN DE DATOS
+        </Typography>
+      </Box>
 
       <Paper elevation={3} sx={{ p: 3, borderRadius: '12px' }}>
         <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
@@ -174,20 +178,13 @@ const Actualizacion = () => {
             onChange={(e) => setCedula(e.target.value)}
             variant="outlined"
             size="small"
-            sx={{
-              width: { xs: '100%', sm: '300px' },
-              mb: 2,
-            }}
+            sx={{ width: { xs: '100%', sm: '300px' }, mb: 2 }}
           />
           <Button
             variant="contained"
             color="primary"
             onClick={buscarUsuario}
-            sx={{
-              width: { xs: '100%', sm: '150px' },
-              height: '40px',
-              padding: '6px 16px',
-            }}
+            sx={{ width: { xs: '100%', sm: '150px' }, height: '40px', padding: '6px 16px' }}
           >
             Buscar
           </Button>
@@ -311,6 +308,7 @@ const Actualizacion = () => {
                 variant="contained"
                 color="secondary"
                 onClick={() => setSignatureModalOpen(true)}
+                disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
                 sx={{ mt: 1 }}
               >
                 Actualizar Firma
@@ -336,6 +334,7 @@ const Actualizacion = () => {
                 variant="contained"
                 color="secondary"
                 onClick={() => setPhotoModalOpen(true)}
+                disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
                 sx={{ mt: 1 }}
               >
                 Actualizar Foto 1
@@ -361,6 +360,7 @@ const Actualizacion = () => {
                 variant="contained"
                 color="secondary"
                 onClick={() => setPhoto2ModalOpen(true)}
+                disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
                 sx={{ mt: 1 }}
               >
                 Actualizar Foto 2
@@ -374,6 +374,7 @@ const Actualizacion = () => {
                     checked={isAgreementChecked}
                     onChange={(e) => setAgreementChecked(e.target.checked)}
                     color="primary"
+                    disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
                   />
                 }
                 label={
@@ -389,7 +390,7 @@ const Actualizacion = () => {
                 variant="contained"
                 color="primary"
                 onClick={actualizarDatos}
-                disabled={!isAgreementChecked || !firma || !foto || !foto2}
+                disabled={!isAgreementChecked || !firma || !foto || !foto2 || isDataUpdated} // Deshabilitar si isDataUpdated es true
                 sx={{ px: 4, py: 1 }}
               >
                 Finalizar
@@ -399,7 +400,7 @@ const Actualizacion = () => {
         )}
       </Paper>
 
-     {/* Modal para ver contrato */}
+      {/* Modal para ver contrato */}
       <Dialog
         open={isContractModalOpen}
         onClose={() => setContractModalOpen(false)}
@@ -601,141 +602,133 @@ const Actualizacion = () => {
           <Button onClick={() => setContractModalOpen(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
-                
+
       {/* Modal para firmar */}
-
-    <Dialog
-  open={isSignatureModalOpen}
-  onClose={() => setSignatureModalOpen(false)}
-  sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
->
-  <DialogTitle>Firmar Contrato</DialogTitle>
-  <DialogContent>
-    <SignatureCanvas
-      penColor="black"
-      ref={sigCanvas}
-      canvasProps={{
-        width: 300, // Igual que en RegistrationForm.js
-        height: 150, // Igual que en RegistrationForm.js
-        className: 'sigCanvas',
-        style: {
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          backgroundColor: '#fff',
-        },
-      }}
-    />
-  </DialogContent>
-  <DialogActions>
-    <IconButton
-      onClick={() => sigCanvas.current.clear()}
-      sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
-    >
-      <DeleteIcon sx={{ color: '#000' }} />
-    </IconButton>
-    <IconButton
-      onClick={() => setSignatureModalOpen(false)}
-      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-    >
-      <CloseIcon sx={{ color: '#fff' }} />
-    </IconButton>
-    <IconButton
-      onClick={handleSaveSignature}
-      sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
-    >
-      <SaveIcon sx={{ color: '#fff' }} />
-    </IconButton>
-  </DialogActions>
-</Dialog>
-
-{/* Modal para tomar foto 1 */}
-
-<Dialog
-  open={isPhotoModalOpen}
-  onClose={() => setPhotoModalOpen(false)}
-  sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
->
-  <DialogTitle>Tomar Foto 1 (Frente de Cédula)</DialogTitle>
-  <DialogContent>
-    <Webcam
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      width="100%"
-      videoConstraints={videoConstraints}
-      style={{
-        borderRadius: '8px',
-        overflow: 'hidden',
-      }}
-    />
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-      <IconButton
-        onClick={handleCapturePhoto}
-        sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+      <Dialog
+        open={isSignatureModalOpen}
+        onClose={() => setSignatureModalOpen(false)}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
       >
-        <CameraIcon sx={{ color: '#fff' }} />
-      </IconButton>
-    </Box>
-  </DialogContent>
-  <DialogActions>
-    <IconButton
-      onClick={toggleCamera}
-      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-    >
-      <SwitchCameraIcon sx={{ color: '#fff' }} />
-    </IconButton>
-    <IconButton
-      onClick={() => setPhotoModalOpen(false)}
-      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-    >
-      <CloseIcon sx={{ color: '#fff' }} />
-    </IconButton>
-  </DialogActions>
-</Dialog>
+        <DialogTitle>Firmar Contrato</DialogTitle>
+        <DialogContent>
+          <SignatureCanvas
+            penColor="black"
+            ref={sigCanvas}
+            canvasProps={{
+              width: 300,
+              height: 150,
+              className: 'sigCanvas',
+              style: {
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                backgroundColor: '#fff',
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <IconButton
+            onClick={() => sigCanvas.current.clear()}
+            sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
+          >
+            <DeleteIcon sx={{ color: '#000' }} />
+          </IconButton>
+          <IconButton
+            onClick={() => setSignatureModalOpen(false)}
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+          >
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={handleSaveSignature}
+            sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
+          >
+            <SaveIcon sx={{ color: '#fff' }} />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal para tomar foto 1 */}
+      <Dialog
+        open={isPhotoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+      >
+        <DialogTitle>Tomar Foto 1 (Frente de Cédula)</DialogTitle>
+        <DialogContent>
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width="100%"
+            videoConstraints={videoConstraints}
+            style={{ borderRadius: '8px', overflow: 'hidden' }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+            <IconButton
+              onClick={handleCapturePhoto}
+              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+            >
+              <CameraIcon sx={{ color: '#fff' }} />
+            </IconButton>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <IconButton
+            onClick={toggleCamera}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <SwitchCameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={() => setPhotoModalOpen(false)}
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+          >
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal para tomar foto 2 */}
       <Dialog
-  open={isPhoto2ModalOpen}
-  onClose={() => setPhoto2ModalOpen(false)}
-  sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
->
-  <DialogTitle>Tomar Foto 2 (Reverso de Cédula)</DialogTitle>
-  <DialogContent>
-    <Webcam
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      width="100%"
-      videoConstraints={videoConstraints}
-      style={{
-        borderRadius: '8px',
-        overflow: 'hidden',
-      }}
-    />
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-      <IconButton
-        onClick={handleCapturePhoto2}
-        sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+        open={isPhoto2ModalOpen}
+        onClose={() => setPhoto2ModalOpen(false)}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
       >
-        <CameraIcon sx={{ color: '#fff' }} />
-      </IconButton>
-    </Box>
-  </DialogContent>
-  <DialogActions>
-    <IconButton
-      onClick={toggleCamera}
-      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-    >
-      <SwitchCameraIcon sx={{ color: '#fff' }} />
-    </IconButton>
-    <IconButton
-      onClick={() => setPhoto2ModalOpen(false)}
-      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-    >
-      <CloseIcon sx={{ color: '#fff' }} />
-    </IconButton>
-  </DialogActions>
-</Dialog>
+        <DialogTitle>Tomar Foto 2 (Reverso de Cédula)</DialogTitle>
+        <DialogContent>
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width="100%"
+            videoConstraints={videoConstraints}
+            style={{ borderRadius: '8px', overflow: 'hidden' }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+            <IconButton
+              onClick={handleCapturePhoto2}
+              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+            >
+              <CameraIcon sx={{ color: '#fff' }} />
+            </IconButton>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <IconButton
+            onClick={toggleCamera}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <SwitchCameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={() => setPhoto2ModalOpen(false)}
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+          >
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
