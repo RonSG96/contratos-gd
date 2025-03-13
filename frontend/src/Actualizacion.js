@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import Webcam from 'react-webcam';
 import {
@@ -15,7 +15,16 @@ import {
   FormControlLabel,
   Checkbox,
   Grid,
+  IconButton,
 } from '@mui/material';
+import {
+  Close as CloseIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon,
+  CameraAlt as CameraIcon,
+  SwitchCamera as SwitchCameraIcon,
+  Rotate90DegreesCcw as RotateIcon,
+} from '@mui/icons-material';
 import logoDorian from './assets/logo-dorian.png';
 
 const Actualizacion = () => {
@@ -31,6 +40,8 @@ const Actualizacion = () => {
   const [foto, setFoto] = useState(null);
   const [foto2, setFoto2] = useState(null);
   const [isAgreementChecked, setAgreementChecked] = useState(false);
+  const [facingMode, setFacingMode] = useState('user'); // 'user' para frontal, 'environment' para trasera
+  const [rotation, setRotation] = useState(0); // Para manejar la rotación de la cámara
 
   const buscarUsuario = async () => {
     try {
@@ -112,6 +123,21 @@ const Actualizacion = () => {
     }
   };
 
+  // Cambiar entre cámara frontal y trasera
+  const toggleCamera = () => {
+    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
+  };
+
+  // Rotar la cámara
+  const rotateCamera = () => {
+    setRotation((prev) => (prev + 90) % 360);
+  };
+
+  // Configuración de videoConstraints para la cámara
+  const videoConstraints = {
+    facingMode: facingMode,
+  };
+
   return (
     <Container
       maxWidth="md"
@@ -134,7 +160,6 @@ const Actualizacion = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 3, borderRadius: '12px' }}>
-        {/* Ajuste: Botón "Buscar" debajo del input */}
         <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
           <TextField
             label="Ingrese su cédula"
@@ -143,8 +168,8 @@ const Actualizacion = () => {
             variant="outlined"
             size="small"
             sx={{
-              width: { xs: '100%', sm: '300px' }, // Responsivo: 100% en pantallas pequeñas, 300px en pantallas más grandes
-              mb: 2, // Espacio entre el input y el botón
+              width: { xs: '100%', sm: '300px' },
+              mb: 2,
             }}
           />
           <Button
@@ -152,7 +177,7 @@ const Actualizacion = () => {
             color="primary"
             onClick={buscarUsuario}
             sx={{
-              width: { xs: '100%', sm: '150px' }, // Responsivo: 100% en pantallas pequeñas, 150px en pantallas más grandes
+              width: { xs: '100%', sm: '150px' },
               height: '40px',
               padding: '6px 16px',
             }}
@@ -172,7 +197,7 @@ const Actualizacion = () => {
                 borderRadius: '8px',
                 padding: '10px',
                 backgroundColor: '#fff',
-                overflow: 'hidden', // Evita que el contenido se salga del cuadro
+                overflow: 'hidden',
               }}
             >
               <Grid container spacing={2}>
@@ -367,7 +392,7 @@ const Actualizacion = () => {
         )}
       </Paper>
 
-      {/* Modal para ver contrato */}
+     {/* Modal para ver contrato */}
       <Dialog
         open={isContractModalOpen}
         onClose={() => setContractModalOpen(false)}
@@ -570,7 +595,6 @@ const Actualizacion = () => {
         </DialogActions>
       </Dialog>
 
-
       {/* Modal para firmar */}
       <Dialog
         open={isSignatureModalOpen}
@@ -583,19 +607,28 @@ const Actualizacion = () => {
             penColor="black"
             ref={sigCanvas}
             canvasProps={{ width: 400, height: 200, className: 'sigCanvas' }}
-            style={{ border: '1px solid #ccc', borderRadius: '8px' }}
+            style={{ border: '1px solid #ccc', borderRadius: '8px', touchAction: 'none' }} // touchAction para mejorar la interacción táctil
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => sigCanvas.current.clear()} color="error">
-            Borrar
-          </Button>
-          <Button onClick={() => setSignatureModalOpen(false)} color="secondary">
-            Cerrar
-          </Button>
-          <Button onClick={handleSaveSignature} variant="contained" color="primary">
-            Guardar
-          </Button>
+          <IconButton
+            onClick={() => sigCanvas.current.clear()}
+            sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
+          >
+            <DeleteIcon sx={{ color: '#000' }} />
+          </IconButton>
+          <IconButton
+            onClick={() => setSignatureModalOpen(false)}
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+          >
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={handleSaveSignature}
+            sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
+          >
+            <SaveIcon sx={{ color: '#fff' }} />
+          </IconButton>
         </DialogActions>
       </Dialog>
 
@@ -612,16 +645,36 @@ const Actualizacion = () => {
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             width="100%"
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
+            videoConstraints={videoConstraints}
+            style={{
+              borderRadius: '8px',
+              overflow: 'hidden',
+              transform: `rotate(${rotation}deg)`,
+              transformOrigin: 'center center',
+            }}
           />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+            <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
+              <SwitchCameraIcon sx={{ color: '#fff' }} />
+            </IconButton>
+            <IconButton onClick={rotateCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
+              <RotateIcon sx={{ color: '#fff' }} />
+            </IconButton>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPhotoModalOpen(false)} color="secondary">
-            Cerrar
-          </Button>
-          <Button onClick={handleCapturePhoto} variant="contained" color="primary">
-            Guardar Foto
-          </Button>
+          <IconButton
+            onClick={() => setPhotoModalOpen(false)}
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+          >
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={handleCapturePhoto}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <CameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
         </DialogActions>
       </Dialog>
 
@@ -638,16 +691,36 @@ const Actualizacion = () => {
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             width="100%"
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
+            videoConstraints={videoConstraints}
+            style={{
+              borderRadius: '8px',
+              overflow: 'hidden',
+              transform: `rotate(${rotation}deg)`,
+              transformOrigin: 'center center',
+            }}
           />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+            <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
+              <SwitchCameraIcon sx={{ color: '#fff' }} />
+            </IconButton>
+            <IconButton onClick={rotateCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
+              <RotateIcon sx={{ color: '#fff' }} />
+            </IconButton>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPhoto2ModalOpen(false)} color="secondary">
-            Cerrar
-          </Button>
-          <Button onClick={handleCapturePhoto2} variant="contained" color="primary">
-            Guardar Foto
-          </Button>
+          <IconButton
+            onClick={() => setPhoto2ModalOpen(false)}
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+          >
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={handleCapturePhoto2}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <CameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
         </DialogActions>
       </Dialog>
     </Container>
