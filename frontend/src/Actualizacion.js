@@ -669,23 +669,26 @@ const Actualizacion = () => {
       }}
     />
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-      <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
-        <SwitchCameraIcon sx={{ color: '#fff' }} />
+      <IconButton
+        onClick={handleCapturePhoto}
+        sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+      >
+        <CameraIcon sx={{ color: '#fff' }} />
       </IconButton>
     </Box>
   </DialogContent>
   <DialogActions>
     <IconButton
+      onClick={toggleCamera}
+      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+    >
+      <SwitchCameraIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
       onClick={() => setPhotoModalOpen(false)}
       sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
     >
       <CloseIcon sx={{ color: '#fff' }} />
-    </IconButton>
-    <IconButton
-      onClick={handleCapturePhoto}
-      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-    >
-      <CameraIcon sx={{ color: '#fff' }} />
     </IconButton>
   </DialogActions>
 </Dialog>
@@ -710,23 +713,26 @@ const Actualizacion = () => {
       }}
     />
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-      <IconButton onClick={toggleCamera} sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}>
-        <SwitchCameraIcon sx={{ color: '#fff' }} />
+      <IconButton
+        onClick={handleCapturePhoto2}
+        sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+      >
+        <CameraIcon sx={{ color: '#fff' }} />
       </IconButton>
     </Box>
   </DialogContent>
   <DialogActions>
     <IconButton
+      onClick={toggleCamera}
+      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+    >
+      <SwitchCameraIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
       onClick={() => setPhoto2ModalOpen(false)}
       sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
     >
       <CloseIcon sx={{ color: '#fff' }} />
-    </IconButton>
-    <IconButton
-      onClick={handleCapturePhoto2}
-      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-    >
-      <CameraIcon sx={{ color: '#fff' }} />
     </IconButton>
   </DialogActions>
 </Dialog>
