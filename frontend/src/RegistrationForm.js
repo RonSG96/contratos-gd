@@ -650,7 +650,7 @@ const RegistrationForm = () => {
       <Dialog
         open={isPhotoModalOpen}
         onClose={() => setPhotoModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '80vh' } }}
       >
         <DialogTitle>Cédula Frontal</DialogTitle>
         <DialogContent>
@@ -691,7 +691,7 @@ const RegistrationForm = () => {
       <Dialog
         open={isPhoto2ModalOpen}
         onClose={() => setPhoto2ModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '80vh' } }}
       >
         <DialogTitle>Cédula Posterior</DialogTitle>
         <DialogContent>
