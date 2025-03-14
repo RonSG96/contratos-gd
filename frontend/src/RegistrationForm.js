@@ -204,7 +204,7 @@ const RegistrationForm = () => {
         setSignatureDone(false);
         setPhotoTaken(false);
         setPhoto2Taken(false);
-      } } else {
+      } else {
       // Mostrar el mensaje específico devuelto por el servidor
       alert(result.message || 'Hubo un problema con el registro: Notificar en counter');
     }
