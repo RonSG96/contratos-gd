@@ -18,14 +18,15 @@ import {
   DialogActions,
   Checkbox,
   FormControlLabel,
+  IconButton, // Correctamente importado
 } from '@mui/material';
 import {
-  Close as CloseIcon, // Icono de cerrar
-  Delete as DeleteIcon, // Icono de borrar
-  Save as SaveIcon, // Icono de guardar
-  CameraAlt as CameraIcon, // Icono de capturar foto
-  SwitchCamera as SwitchCameraIcon, // Icono de cambiar cámara
-} from '@mui/icons-material'; // Importamos los iconos necesarios
+  Close as CloseIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon,
+  CameraAlt as CameraIcon,
+  SwitchCamera as SwitchCameraIcon,
+} from '@mui/icons-material';
 import './RegistrationForm.css';
 import logoDorian from './assets/logo-dorian.png';
 
