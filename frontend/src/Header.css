@@ -1,114 +1,83 @@
 @import url('https://fonts.googleapis.com/css2?family=Eurostile+LT:wght@400;700&display=swap');
+/* Asegúrate de importar la fuente */
 
 .header-appbar {
-  background: linear-gradient(90deg, #f97316 0%, #ffedd5 100%) !important; /* Degradado naranja suave */
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15) !important; /* Sombra más pronunciada */
-  padding: 8px 0 !important;
-  transition: all 0.3s ease-in-out; /* Transición suave para cambios */
+    background-color: #FFFFFF !important;
+    /* Fondo blanco */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1) !important;
+    /* Sombreado */
 }
 
 .header-toolbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 20px; /* Más espacio interno */
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
 }
 
 .header-content {
-  display: flex;
-  align-items: center;
-  width: 100%;
+    display: flex;
+    align-items: center;
+    width: 100%;
 }
 
 .header-logo {
-  width: 200px;
-  height: auto;
-  margin-right: 15px;
-  transition: transform 0.3s ease; /* Efecto suave al hacer hover */
-}
-
-.header-logo:hover {
-  transform: scale(1.05); /* Pequeño aumento al pasar el mouse */
+    width: 200px;
+    /* Ajusta el tamaño según sea necesario */
+    height: auto;
+    margin-right: 10px;
 }
 
 .header-divider {
-  height: 40px;
-  width: 3px; /* Separador más grueso */
-  margin: 0 15px;
-  background-color: #f97316;
-  border-radius: 2px; /* Bordes redondeados para el separador */
+    height: 40px;
+    /* Altura del separador */
+    width: 2px;
+    /* Ancho del separador */
+    margin: 0 10px;
+    /* Margen entre el logo y el texto */
+    background-color: #f97316;
+    /* Color del separador */
 }
 
 .header-subtitle {
-  font-size: 26px !important; /* Tamaño más grande */
-  font-family: 'Eurostile LT', sans-serif !important;
-  font-weight: 700 !important; /* Negrita */
-  color: #f97316;
-  margin-left: 20px !important;
-  letter-spacing: 1px; /* Espaciado entre letras */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Sombra sutil en el texto */
-}
-
-/* Estilo del botón de logout */
-.logout-button {
-  background-color: #d32f2f !important; /* Rojo oscuro para el botón */
-  color: #ffffff !important;
-  border-radius: 25px !important; /* Bordes más redondeados */
-  padding: 8px 20px !important;
-  font-size: 16px !important;
-  font-family: 'Eurostile LT', sans-serif !important;
-  text-transform: uppercase !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2) !important; /* Sombra para darle profundidad */
-}
-
-.logout-button:hover {
-  background-color: #b71c1c !important; /* Rojo más oscuro al hover */
-  transform: translateY(-2px) !important; /* Elevación al pasar el mouse */
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3) !important; /* Sombra más pronunciada */
-}
-
-/* Media Queries para Responsividad */
-@media (max-width: 768px) {
-  .header-logo {
-    width: 150px;
-  }
-  .header-subtitle {
     font-size: 20px !important;
-    margin-left: 10px !important;
-  }
-  .header-divider {
-    height: 30px;
-    width: 2px;
-    margin: 0 8px;
-  }
-  .logout-button {
-    padding: 6px 15px !important;
-    font-size: 14px !important;
-  }
-  .header-toolbar {
-    padding: 8px 10px;
-  }
+    /* Tamaño más grande de la fuente */
+    font-family: 'Eurostile LT', sans-serif !important;
+    /* Fuente Eurostile LT */
+    color: #f97316;
+    /* Color del texto */
+    margin-left: 20px !important;
+    /* Mover el texto más a la derecha */
+}
+
+/* Media Queries para Responsividad en Dispositivos Móviles */
+@media (max-width: 768px) {
+    .header-logo {
+        width: 150px;
+    }
+
+    .header-divider {
+        height: 30px;
+        width: 1px;
+        margin: 0 5px;
+    }
+
+    .header-subtitle {
+        font-size: 16px !important;
+        margin-left: 10px !important;
+    }
 }
 
 @media (max-width: 480px) {
-  .header-logo {
-    width: 120px;
-  }
-  .header-subtitle {
-    font-size: 16px !important;
-    margin-left: 5px !important;
-  }
-  .header-divider {
-    height: 25px;
-    width: 1px;
-    margin: 0 5px;
-  }
-  .logout-button {
-    padding: 5px 10px !important;
-    font-size: 12px !important;
-  }
-  .header-toolbar {
-    padding: 5px 8px;
-  }
+    .header-logo {
+        width: 100px;
+    }
+
+    .header-divider {
+        height: 20px;
+    }
+
+    .header-subtitle {
+        font-size: 14px !important;
+        margin-left: 5px !important;
+    }
 }
