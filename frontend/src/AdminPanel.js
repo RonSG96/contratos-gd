@@ -34,11 +34,6 @@ import {
 } from '@mui/icons-material';
 import { toPng } from 'html-to-image';
 import './AdminPanel.css';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Divider from '@mui/material/Divider';
-import './Header.css'; // Asegúrate de que este archivo CSS esté disponible
-import logoDorian from '../src/assets/logo-dorian.png'; // Ajusta la ruta según tu proyecto
 
 const AdminPanel = ({ setToken }) => {
   const [users, setUsers] = useState([]);
@@ -59,43 +54,6 @@ const AdminPanel = ({ setToken }) => {
     fetchUsers();
   }, [apiUrl]);
 
-
-const Header = () => {
-  return (
-    <AppBar position="static" className="header-appbar">
-      <Toolbar className="header-toolbar">
-        <Box display="flex" alignItems="center" className="header-content">
-          <img
-            src={logoDorian}
-            alt="Gimnasio Dorian Logo"
-            className="header-logo"
-          />
-          <Box display="flex" alignItems="center">
-            <Divider
-              orientation="vertical"
-              flexItem
-              className="header-divider"
-            />
-            <Typography variant="subtitle1" className="header-subtitle">
-              PANEL DE ADMINISTRACIÓN
-            </Typography>
-          </Box>
-          <Box flexGrow={1} /> {/* Espacio flexible para empujar el botón a la derecha */}
-          <Button
-            variant="contained"
-            className="logout-button"
-            startIcon={<LogoutIcon />}
-            onClick={handleLogout}
-            sx={{ ml: 2 }}
-          >
-            Cerrar Sesión
-          </Button>
-        </Box>
-      </Toolbar>
-    </AppBar>
-  );
-};
-  
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
@@ -109,42 +67,42 @@ const Header = () => {
     setPage(0);
   };
 
- const handleAllowEdit = async (cedula) => {
-  try {
-    const token = localStorage.getItem('token');
-    console.log('Token enviado:', token); // Depuración: Verificar el token
-    if (!token) {
-      alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
-      return;
-    }
-
-    const response = await fetch(
-      `https://contratos-backend.onrender.com/api/admin/allow-edit/${cedula}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': token,
-        },
+  const handleAllowEdit = async (cedula) => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token enviado:', token); // Depuración: Verificar el token
+      if (!token) {
+        alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
+        return;
       }
-    );
-    const result = await response.json();
-    if (response.ok) {
-      alert('Edición habilitada para el usuario');
-      const updatedUsers = await fetch(`${apiUrl}/users`, {
-        headers: { 'x-access-token': token },
-      });
-      const data = await updatedUsers.json();
-      setUsers(data);
-    } else {
-      console.log('Error en la respuesta:', result); // Depuración: Verificar el error
-      alert(result.message || 'Error al habilitar edición');
+
+      const response = await fetch(
+        `https://contratos-backend.onrender.com/api/admin/allow-edit/${cedula}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': token,
+          },
+        }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        alert('Edición habilitada para el usuario');
+        const updatedUsers = await fetch(`${apiUrl}/users`, {
+          headers: { 'x-access-token': token },
+        });
+        const data = await updatedUsers.json();
+        setUsers(data);
+      } else {
+        console.log('Error en la respuesta:', result); // Depuración: Verificar el error
+        alert(result.message || 'Error al habilitar edición');
+      }
+    } catch (error) {
+      console.error('Error al habilitar edición:', error);
+      alert('Error de conexión con el servidor');
     }
-  } catch (error) {
-    console.error('Error al habilitar edición:', error);
-    alert('Error de conexión con el servidor');
-  }
-};
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -286,10 +244,25 @@ const Header = () => {
   };
 
   return (
-    <>
-    <Header />
     <Container className="admin-panel-container">
-      
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h4" gutterBottom>
+          Panel de Administración
+        </Typography>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+        >
+          Cerrar Sesión
+        </Button>
+      </Box>
       <TextField
         label="Buscar por nombre, apellido o cédula"
         variant="outlined"
@@ -496,8 +469,9 @@ const Header = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  </>
   );
 };
 
 export default AdminPanel;
+
+
