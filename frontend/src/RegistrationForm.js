@@ -204,21 +204,15 @@ const RegistrationForm = () => {
         setSignatureDone(false);
         setPhotoTaken(false);
         setPhoto2Taken(false);
-      } else if (
-        result.message === 'Ya existe un registro con la misma cédula.'
-      ) {
-        alert('Ya existe un registro con la misma cédula.');
-      } else {
-        alert(
-          'Hubo un problema con el registro: ' +
-            (result.message || 'Error desconocido')
-        );
-      }
-    } catch (error) {
-      console.error('Error de red:', error);
-      alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
+      } } else {
+      // Mostrar el mensaje específico devuelto por el servidor
+      alert(result.message || 'Hubo un problema con el registro: Notificar en counter');
     }
-  };
+  } catch (error) {
+    console.error('Error de red:', error);
+    alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
+  }
+};
 
   return (
     <Container component="main" className="registration-container">
