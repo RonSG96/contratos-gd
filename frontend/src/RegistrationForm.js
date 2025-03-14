@@ -647,21 +647,24 @@ const RegistrationForm = () => {
       </Dialog>
 
       {/* Modal para tomar foto 1 */}
+      {/* Modal para tomar foto 1 */}
       <Dialog
         open={isPhotoModalOpen}
         onClose={() => setPhotoModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '80vh' } }}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }} // Reducir altura y ajustar ancho del modal
       >
         <DialogTitle>Cédula Frontal</DialogTitle>
-        <DialogContent>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="100%"
-            videoConstraints={{ width: 1280, height: 720, facingMode }}
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
-          />
+        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}> {/* Evitar scroll interno */}
+          <Box sx={{ flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}> {/* Limitar altura del contenedor del Webcam */}
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              width="100%"
+              videoConstraints={{ width: 1280, height: 720, facingMode }}
+              style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }} // Altura fija más pequeña
+            />
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
             <IconButton
               onClick={handleCapturePhoto}
@@ -691,18 +694,20 @@ const RegistrationForm = () => {
       <Dialog
         open={isPhoto2ModalOpen}
         onClose={() => setPhoto2ModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '80vh' } }}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }} // Reducir altura y ajustar ancho del modal
       >
         <DialogTitle>Cédula Posterior</DialogTitle>
-        <DialogContent>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="100%"
-            videoConstraints={{ width: 1280, height: 720, facingMode }}
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
-          />
+        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}> {/* Evitar scroll interno */}
+          <Box sx={{ flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}> {/* Limitar altura del contenedor del Webcam */}
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              width="100%"
+              videoConstraints={{ width: 1280, height: 720, facingMode }}
+              style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }} // Altura fija más pequeña
+            />
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
             <IconButton
               onClick={handleCapturePhoto2}
