@@ -156,16 +156,7 @@ app.post('/submit', async (req, res) => {
       ? Buffer.from(foto_2.split(',')[1], 'base64')
       : null;
 
-    const existingUser = await User.findOne({
-      where: { cedula: cedula.trim() },
-    });
-    if (existingUser) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Ya existe un registro con la misma cédula.',
-      });
-    }
-
+ 
     const user = await User.create({
       nombre: nombre.trim(),
       apellido: apellido.trim(),
@@ -183,11 +174,29 @@ app.post('/submit', async (req, res) => {
       sucursal: sucursal.trim(),
       // foto: fotoBuffer,
       estado,
+      is_data_updated: false, // Asegúrate de incluir este campo
     });
 
     res.json({ status: 'success' });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
+
+    // Manejar errores de unicidad
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      if (error.fields.cedula) {
+        return res.status(400).json({
+          status: 'error',
+          message: `El número de cédula ${req.body.cedula} ya tiene un registro. Por favor, informe en counter.`,
+        });
+      }
+      if (error.fields.correo) {
+        return res.status(400).json({
+          status: 'error',
+          message: `El correo ${req.body.correo} ya está registrado. Ingrese otro o por favor pida asistencia en counter.`,
+        });
+      }
+    }
+    
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
