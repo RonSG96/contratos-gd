@@ -594,9 +594,10 @@ const RegistrationForm = () => {
       </Dialog>
 
       {/* Modal para firmar */}
-      <Dialog
+     <Dialog
         open={isSignatureModalOpen}
         onClose={() => setSignatureModalOpen(false)}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }} // Estilo consistente
       >
         <DialogTitle>Firmar Contrato</DialogTitle>
         <DialogContent>
@@ -607,36 +608,42 @@ const RegistrationForm = () => {
               width: 300,
               height: 150,
               className: 'sigCanvas',
+              style: {
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                backgroundColor: '#fff',
+              },
             }}
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleClearSignature}
-            variant="outlined"
-            color="secondary"
+          <IconButton
+            onClick={handleClearSignature} // Cambiado a la función existente
+            sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
           >
-            Borrar Firma
-          </Button>
-          <Button
+            <DeleteIcon sx={{ color: '#000' }} />
+          </IconButton>
+          <IconButton
             onClick={() => setSignatureModalOpen(false)}
-            variant="contained"
-            color="secondary"
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
           >
-            Cerrar
-          </Button>
-          <Button
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
             onClick={handleSaveSignature}
-            variant="contained"
-            color="primary"
+            sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
           >
-            Guardar Firma
-          </Button>
+            <SaveIcon sx={{ color: '#fff' }} />
+          </IconButton>
         </DialogActions>
       </Dialog>
 
       {/* Modal para tomar foto 1 */}
-      <Dialog open={isPhotoModalOpen} onClose={() => setPhotoModalOpen(false)}>
+      <Dialog
+        open={isPhotoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+      >
         <DialogTitle>Cédula Frontal</DialogTitle>
         <DialogContent>
           <Webcam
@@ -645,26 +652,30 @@ const RegistrationForm = () => {
             screenshotFormat="image/jpeg"
             width="100%"
             videoConstraints={{ width: 1280, height: 720, facingMode }}
+            style={{ borderRadius: '8px', overflow: 'hidden' }}
           />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+            <IconButton
+              onClick={handleCapturePhoto}
+              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+            >
+              <CameraIcon sx={{ color: '#fff' }} />
+            </IconButton>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={toggleCamera} variant="outlined" color="primary">
-            Cambiar Cámara
-          </Button>
-          <Button
+          <IconButton
+            onClick={toggleCamera}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <SwitchCameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
             onClick={() => setPhotoModalOpen(false)}
-            variant="contained"
-            color="secondary"
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
           >
-            Cerrar
-          </Button>
-          <Button
-            onClick={handleCapturePhoto}
-            variant="contained"
-            color="primary"
-          >
-            Guardar Foto
-          </Button>
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
         </DialogActions>
       </Dialog>
 
@@ -672,35 +683,40 @@ const RegistrationForm = () => {
       <Dialog
         open={isPhoto2ModalOpen}
         onClose={() => setPhoto2ModalOpen(false)}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
       >
         <DialogTitle>Cédula Posterior</DialogTitle>
         <DialogContent>
           <Webcam
             audio={false}
-            ref={webcamRef} // Usamos la misma referencia para evitar conflictos
+            ref={webcamRef}
             screenshotFormat="image/jpeg"
             width="100%"
             videoConstraints={{ width: 1280, height: 720, facingMode }}
+            style={{ borderRadius: '8px', overflow: 'hidden' }}
           />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+            <IconButton
+              onClick={handleCapturePhoto2}
+              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+            >
+              <CameraIcon sx={{ color: '#fff' }} />
+            </IconButton>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={toggleCamera} variant="outlined" color="primary">
-            Cambiar Cámara
-          </Button>
-          <Button
+          <IconButton
+            onClick={toggleCamera}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <SwitchCameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
             onClick={() => setPhoto2ModalOpen(false)}
-            variant="contained"
-            color="secondary"
+            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
           >
-            Cerrar
-          </Button>
-          <Button
-            onClick={handleCapturePhoto2}
-            variant="contained"
-            color="primary"
-          >
-            Guardar Foto
-          </Button>
+            <CloseIcon sx={{ color: '#fff' }} />
+          </IconButton>
         </DialogActions>
       </Dialog>
     </Container>
