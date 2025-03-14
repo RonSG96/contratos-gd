@@ -34,6 +34,11 @@ import {
 } from '@mui/icons-material';
 import { toPng } from 'html-to-image';
 import './AdminPanel.css';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Divider from '@mui/material/Divider';
+import './Header.css'; // Asegúrate de que este archivo CSS esté disponible
+import logoDorian from '../src/assets/logo-dorian.png'; // Ajusta la ruta según tu proyecto
 
 const AdminPanel = ({ setToken }) => {
   const [users, setUsers] = useState([]);
@@ -54,6 +59,43 @@ const AdminPanel = ({ setToken }) => {
     fetchUsers();
   }, [apiUrl]);
 
+
+const Header = () => {
+  return (
+    <AppBar position="static" className="header-appbar">
+      <Toolbar className="header-toolbar">
+        <Box display="flex" alignItems="center" className="header-content">
+          <img
+            src={logoDorian}
+            alt="Gimnasio Dorian Logo"
+            className="header-logo"
+          />
+          <Box display="flex" alignItems="center">
+            <Divider
+              orientation="vertical"
+              flexItem
+              className="header-divider"
+            />
+            <Typography variant="subtitle1" className="header-subtitle">
+              PANEL DE ADMINISTRACIÓN
+            </Typography>
+          </Box>
+          <Box flexGrow={1} /> {/* Espacio flexible para empujar el botón a la derecha */}
+          <Button
+            variant="contained"
+            className="logout-button"
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            sx={{ ml: 2 }}
+          >
+            Cerrar Sesión
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+};
+  
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
@@ -244,25 +286,10 @@ const AdminPanel = ({ setToken }) => {
   };
 
   return (
+    <>
+    <Header />
     <Container className="admin-panel-container">
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Typography variant="h4" gutterBottom>
-          Panel de Administración
-        </Typography>
-        <Button
-          variant="contained"
-          color="secondary"
-          startIcon={<LogoutIcon />}
-          onClick={handleLogout}
-        >
-          Cerrar Sesión
-        </Button>
-      </Box>
+      
       <TextField
         label="Buscar por nombre, apellido o cédula"
         variant="outlined"
@@ -469,6 +496,7 @@ const AdminPanel = ({ setToken }) => {
         </DialogActions>
       </Dialog>
     </Container>
+  </>
   );
 };
 
