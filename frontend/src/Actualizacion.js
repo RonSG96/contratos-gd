@@ -596,7 +596,15 @@ const Actualizacion = () => {
               tendrán validez durante el tiempo y por el monto acordado.
               <br />
               <br /> 
-              <b>Nota Importante:</b> El cliente declara haber leído y comprendido el contrato de Gimnasios Dorian, por lo que acepta expresamente sus términos y condiciones. En consecuencia, al firmar de manera digital el presente acuerdo y adjuntar fotos de su cédula de identidad, reconoce la validez de estas condiciones para la relación contractual entre el usuario, en calidad de cliente, y Gimnasios Dorian, como prestador del servicio. En caso de incumplimiento, Gimnasios Dorian se reserva el derecho de expulsar al usuario sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.
+             <b>Importante:</b> La siguiente firma y fotos de cédula del
+              cliente la cual constituye prueba fehaciente del presente contrato
+              será declarada como correcta y veraz bajo su responsabilidad,
+              en virtud de la identificación presentada. En caso de discrepancia
+              entre la información registrada y los datos consignados en la
+              cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de
+              analizar la situación y adoptar las medidas legales y
+              administrativas pertinentes, conforme a lo establecido en el
+              presente contrato.
               <br />
             </div>
           </Typography>
