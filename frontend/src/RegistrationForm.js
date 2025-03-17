@@ -579,13 +579,15 @@ const RegistrationForm = () => {
               <b>4. Incumplimiento</b>
               <br />
               <br />
-              <b>4.1.</b> En caso de incumplimiento, GIMNASIO DORIAN se reserva
-              la posibilidad de expulsar a dicho usuario...
+              <b>4.1.</b> En caso de incumplimiento, GIMNASIO DORIAN se reserva la posibilidad de expulsar a dicho usuario, sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.
               <br />
               <br />
               <b>5. Política de Congelamiento de Planes</b>
               <br />
-              Los planes no serán sujetos a devoluciones o extensiones...
+              Los planes no serán sujetos a devoluciones o extensiones, y tendrán validez durante el tiempo y por el monto acordado.
+              <br />
+              <br />
+              <b>Nota Importante:</b> El cliente declara haber leído y comprendido el contrato de Gimnasios Dorian, por lo que acepta expresamente sus términos y condiciones. En consecuencia, al firmar de manera digital el presente acuerdo y adjuntar fotos de su cédula de identidad, reconoce la validez de estas condiciones para la relación contractual entre el usuario, en calidad de cliente, y Gimnasios Dorian, como prestador del servicio. En caso de incumplimiento, Gimnasios Dorian se reserva el derecho de expulsar al usuario sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.
               <br />
             </div>
           </Typography>
