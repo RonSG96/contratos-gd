@@ -96,7 +96,7 @@ const RegistrationForm = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
   }, []);
 
-  const handleCapturePhoto = () => {
+ const handleCapturePhoto = () => {
   if (!webcamRef.current) {
     console.error('Webcam no está inicializada');
     return;
@@ -137,6 +137,13 @@ const RegistrationForm = () => {
   const adjustedCropWidth = Math.min(cropWidth, videoWidth - adjustedCropX);
   const adjustedCropHeight = Math.min(cropHeight, videoHeight - adjustedCropY);
 
+  // Depuración: Imprimir valores para inspeccionar
+  console.log('Dimensiones del video:', { videoWidth, videoHeight });
+  console.log('Dimensiones del webcamRect:', { width: webcamRect.width, height: webcamRect.height });
+  console.log('Escalas:', { scaleX, scaleY });
+  console.log('Coordenadas del recorte:', { cropX, cropY, cropWidth, cropHeight });
+  console.log('Coordenadas ajustadas:', { adjustedCropX, adjustedCropY, adjustedCropWidth, adjustedCropHeight });
+
   // Crear un canvas para recortar la imagen
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -161,7 +168,8 @@ const RegistrationForm = () => {
     );
 
     // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9); // Ajustar calidad para mejor resolución
+    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9);
+    console.log('Imagen recortada (base64):', croppedPhoto);
     setPhotoDataURL(croppedPhoto);
     setPhotoModalOpen(false);
     setPhotoTaken(true);
@@ -210,6 +218,13 @@ const RegistrationForm = () => {
   const adjustedCropWidth = Math.min(cropWidth, videoWidth - adjustedCropX);
   const adjustedCropHeight = Math.min(cropHeight, videoHeight - adjustedCropY);
 
+  // Depuración: Imprimir valores para inspeccionar
+  console.log('Dimensiones del video:', { videoWidth, videoHeight });
+  console.log('Dimensiones del webcamRect:', { width: webcamRect.width, height: webcamRect.height });
+  console.log('Escalas:', { scaleX, scaleY });
+  console.log('Coordenadas del recorte:', { cropX, cropY, cropWidth, cropHeight });
+  console.log('Coordenadas ajustadas:', { adjustedCropX, adjustedCropY, adjustedCropWidth, adjustedCropHeight });
+
   // Crear un canvas para recortar la imagen
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -234,7 +249,8 @@ const RegistrationForm = () => {
     );
 
     // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9); // Ajustar calidad para mejor resolución
+    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9);
+    console.log('Imagen recortada (base64):', croppedPhoto);
     setPhoto2DataURL(croppedPhoto);
     setPhoto2ModalOpen(false);
     setPhoto2Taken(true);
@@ -766,7 +782,7 @@ const RegistrationForm = () => {
       </Dialog>
 
       {/* Modal para tomar foto 1 */}
-      <Dialog
+    <Dialog
   open={isPhotoModalOpen}
   onClose={() => setPhotoModalOpen(false)}
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
@@ -779,7 +795,7 @@ const RegistrationForm = () => {
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
-        videoConstraints={{ width: 1280, height: 720, facingMode }}
+        videoConstraints={{ width: 1280, height: 720, facingMode, aspectRatio: 16/9 }}
         style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
@@ -823,7 +839,7 @@ const RegistrationForm = () => {
 </Dialog>
 
       {/* Modal para tomar foto 2 */}
-     <Dialog
+    <Dialog
   open={isPhoto2ModalOpen}
   onClose={() => setPhoto2ModalOpen(false)}
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
@@ -836,7 +852,7 @@ const RegistrationForm = () => {
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
-        videoConstraints={{ width: 1280, height: 720, facingMode }}
+        videoConstraints={{ width: 1280, height: 720, facingMode, aspectRatio: 16/9 }}
         style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
