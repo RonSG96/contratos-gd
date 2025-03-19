@@ -612,7 +612,7 @@ doc
 
 
   // Detalles del usuario con formato mejorado
-  doc.moveDown(4); // Añadir espacio entre el último texto y la firma
+  doc.moveDown(5); // Añadir espacio entre el último texto y la firma
   doc
     .fontSize(12)
     .text(
@@ -658,7 +658,7 @@ doc
     `La siguiente firma y fotos de cédula del cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, la cual constituye prueba fehaciente del presente contrato, firmado de común acuerdo entre el usuario, en calidad de Cliente, y GIMNASIOS DORIAN, en su calidad de prestador del servicio. La firma debe corresponder exactamente con la registrada en la cédula de ciudadanía; de no ser así, las fotos de la cédula aportadas por el Cliente serán tomadas como respaldo válido y vinculante del acuerdo, conforme a los términos y condiciones aquí establecidos.`,
     {
       align: 'justify',
-      lineGap: 15,
+      lineGap: 10,
     }
   );
   doc.moveDown(1.5);
