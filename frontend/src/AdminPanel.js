@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   TextField,
@@ -22,6 +22,7 @@ import {
   DialogActions,
   FormControl,
   InputLabel,
+  CircularProgress, // Added for loading indicator
 } from '@mui/material';
 import {
   Download as DownloadIcon,
@@ -33,29 +34,118 @@ import {
   QrCode2 as QrCodeIcon,
 } from '@mui/icons-material';
 import { toPng } from 'html-to-image';
+import debounce from 'lodash/debounce'; // Added for search debouncing
 import './AdminPanel.css';
+
+// Optimize table row rendering with React.memo
+const UserRow = React.memo(({ user, onDownloadPDF, onToggleEstado, onEditUser, onDeleteUser, onDownloadQR, onAllowEdit }) => (
+  <TableRow key={user.id}>
+    <TableCell>{user.nombre}</TableCell>
+    <TableCell>{user.apellido}</TableCell>
+    <TableCell>{user.cedula}</TableCell>
+    <TableCell>
+      {new Date(user.fecha_inscripcion).toLocaleDateString()}
+    </TableCell>
+    <TableCell>
+      {new Date(user.fecha_expiracion).toLocaleDateString()}
+    </TableCell>
+    <TableCell>{user.sucursal}</TableCell>
+    <TableCell>{user.plan_contratado}</TableCell>
+    <TableCell>{user.estado}</TableCell>
+    <TableCell>
+      <IconButton
+        color="primary"
+        onClick={() => onDownloadPDF(user.cedula)}
+      >
+        <DownloadIcon />
+      </IconButton>
+      <IconButton
+        color="primary"
+        onClick={() => onToggleEstado(user)}
+      >
+        {user.estado === 'activo' ? (
+          <ToggleOnIcon />
+        ) : (
+          <ToggleOffIcon />
+        )}
+      </IconButton>
+      <IconButton
+        color="primary"
+        onClick={() => onEditUser(user)}
+      >
+        <EditIcon />
+      </IconButton>
+      <IconButton
+        color="primary"
+        onClick={() => onDeleteUser(user.id)}
+      >
+        <DeleteIcon />
+      </IconButton>
+      <IconButton
+        color="primary"
+        onClick={() => onDownloadQR(user.id)}
+      >
+        <QrCodeIcon />
+      </IconButton>
+      <IconButton
+        color="secondary"
+        onClick={() => onAllowEdit(user.cedula)}
+      >
+        <EditIcon />
+      </IconButton>
+    </TableCell>
+  </TableRow>
+));
 
 const AdminPanel = ({ setToken }) => {
   const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0); // Added for server-side pagination
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editUser, setEditUser] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false); // Added for loading indicator
   const apiUrl = process.env.REACT_APP_API_URL;
   const qrRef = React.createRef(); // Para capturar el QR
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await fetch(`${apiUrl}/users`);
+  // Updated fetchUsers to support server-side pagination, filtering, and sorting
+  const fetchUsers = useCallback(async (currentPage, currentRowsPerPage, searchQuery) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${apiUrl}/users?page=${currentPage + 1}&limit=${currentRowsPerPage}&search=${encodeURIComponent(searchQuery)}`
+      );
       const data = await response.json();
-      setUsers(data);
-    };
-    fetchUsers();
+      setUsers(data.users || []);
+      setTotalUsers(data.total || 0);
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error);
+      alert('Error al cargar los usuarios');
+    } finally {
+      setLoading(false);
+    }
   }, [apiUrl]);
+
+  // Debounce the fetchUsers call for search
+  const debouncedFetchUsers = useCallback(
+    debounce((page, rowsPerPage, search) => {
+      fetchUsers(page, rowsPerPage, search);
+    }, 500),
+    [fetchUsers]
+  );
+
+  useEffect(() => {
+    fetchUsers(page, rowsPerPage, search);
+  }, [page, rowsPerPage, fetchUsers]);
+
+  useEffect(() => {
+    debouncedFetchUsers(page, rowsPerPage, search);
+  }, [search, debouncedFetchUsers, page, rowsPerPage]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
+    setPage(0); // Reset to first page on search
   };
 
   const handleChangePage = (event, newPage) => {
@@ -70,7 +160,7 @@ const AdminPanel = ({ setToken }) => {
   const handleAllowEdit = async (cedula) => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Token enviado:', token); // Depuración: Verificar el token
+      console.log('Token enviado:', token);
       if (!token) {
         alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
         return;
@@ -89,13 +179,9 @@ const AdminPanel = ({ setToken }) => {
       const result = await response.json();
       if (response.ok) {
         alert('Edición habilitada para el usuario');
-        const updatedUsers = await fetch(`${apiUrl}/users`, {
-          headers: { 'x-access-token': token },
-        });
-        const data = await updatedUsers.json();
-        setUsers(data);
+        fetchUsers(page, rowsPerPage, search); // Refresh the user list
       } else {
-        console.log('Error en la respuesta:', result); // Depuración: Verificar el error
+        console.log('Error en la respuesta:', result);
         alert(result.message || 'Error al habilitar edición');
       }
     } catch (error) {
@@ -104,14 +190,6 @@ const AdminPanel = ({ setToken }) => {
     }
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      user.apellido.toLowerCase().includes(search.toLowerCase()) ||
-      user.cedula.includes(search)
-  );
-
-  // Cambia esto para generar la imagen con el QR y los datos del cliente
   const handleDownloadQR = async (id) => {
     try {
       const response = await fetch(
@@ -174,11 +252,7 @@ const AdminPanel = ({ setToken }) => {
         },
         body: JSON.stringify({ estado: newEstado }),
       });
-      setUsers((prevUsers) =>
-        prevUsers.map((u) =>
-          u.id === user.id ? { ...u, estado: newEstado } : u
-        )
-      );
+      fetchUsers(page, rowsPerPage, search); // Refresh the user list
     } catch (error) {
       console.error('Error al actualizar el estado del usuario:', error);
     }
@@ -189,7 +263,7 @@ const AdminPanel = ({ setToken }) => {
       await fetch(`${apiUrl}/user/${id}`, {
         method: 'DELETE',
       });
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+      fetchUsers(page, rowsPerPage, search); // Refresh the user list
     } catch (error) {
       console.error('Error al eliminar el usuario:', error);
     }
@@ -200,7 +274,7 @@ const AdminPanel = ({ setToken }) => {
       ...user,
       fecha_inscripcion: new Date(user.fecha_inscripcion)
         .toISOString()
-        .split('T')[0], // Convert to YYYY-MM-DD format
+        .split('T')[0],
     });
     setEditDialogOpen(true);
   };
@@ -221,11 +295,7 @@ const AdminPanel = ({ setToken }) => {
       });
       const result = await response.json();
       if (result.status === 'success') {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === editUser.id ? { ...user, ...editUser } : user
-          )
-        );
+        fetchUsers(page, rowsPerPage, search); // Refresh the user list
         handleEditDialogClose();
       } else {
         console.error('Error al actualizar el usuario:', result.message);
@@ -271,95 +341,54 @@ const AdminPanel = ({ setToken }) => {
         onChange={handleSearchChange}
         margin="normal"
       />
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Apellido</TableCell>
-              <TableCell>Cédula</TableCell>
-              <TableCell>Fecha de Inscripción</TableCell>
-              <TableCell>Fecha de Expiración</TableCell>
-              <TableCell>Sucursal</TableCell>
-              <TableCell>Plan Contratado</TableCell>
-              <TableCell>Estado</TableCell>
-              <TableCell>Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredUsers
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.nombre}</TableCell>
-                  <TableCell>{user.apellido}</TableCell>
-                  <TableCell>{user.cedula}</TableCell>
-                  <TableCell>
-                    {new Date(user.fecha_inscripcion).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(user.fecha_expiracion).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{user.sucursal}</TableCell>
-                  <TableCell>{user.plan_contratado}</TableCell>
-                  <TableCell>{user.estado}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleDownloadPDF(user.cedula)}
-                    >
-                      <DownloadIcon />
-                    </IconButton>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleToggleEstado(user)}
-                    >
-                      {user.estado === 'activo' ? (
-                        <ToggleOnIcon />
-                      ) : (
-                        <ToggleOffIcon />
-                      )}
-                    </IconButton>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEditUser(user)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleDownloadQR(user.id)}
-                    >
-                      <QrCodeIcon />
-                    </IconButton>
-                    <IconButton
-                      color="secondary" // Usamos el color secundario para distinguirlo (naranja según tu CSS)
-                      onClick={() => handleAllowEdit(user.cedula)}
-                    >
-                      <EditIcon />{' '}
-                      {/* Podemos usar un ícono diferente si prefieres, como EditIcon */}
-                    </IconButton>
-                  </TableCell>
+      {loading ? (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Apellido</TableCell>
+                  <TableCell>Cédula</TableCell>
+                  <TableCell>Fecha de Inscripción</TableCell>
+                  <TableCell>Fecha de Expiración</TableCell>
+                  <TableCell>Sucursal</TableCell>
+                  <TableCell>Plan Contratado</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Acciones</TableCell>
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredUsers.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+              </TableHead>
+              <TableBody>
+                {users.map((user) => (
+                  <UserRow
+                    key={user.id}
+                    user={user}
+                    onDownloadPDF={handleDownloadPDF}
+                    onToggleEstado={handleToggleEstado}
+                    onEditUser={handleEditUser}
+                    onDeleteUser={handleDeleteUser}
+                    onDownloadQR={handleDownloadQR}
+                    onAllowEdit={handleAllowEdit}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={totalUsers} // Updated to use totalUsers from server
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </>
+      )}
 
       <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
         <DialogTitle>Editar Usuario</DialogTitle>
@@ -473,5 +502,3 @@ const AdminPanel = ({ setToken }) => {
 };
 
 export default AdminPanel;
-
-
