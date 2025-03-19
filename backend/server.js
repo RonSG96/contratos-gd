@@ -10,6 +10,7 @@ const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const canvas = require('canvas');
 const { sequelize, User, Admin, initDb } = require('./database');
+const { Op } = require('sequelize');
 
 const app = express();
 const PORT = 5500;
@@ -212,8 +213,34 @@ app.post('/admin/login', async (req, res) => {
 });
 
 app.get('/users', async (req, res) => {
-  const users = await User.findAll();
-  res.json(users);
+  try {
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const offset = (pageNum - 1) * limitNum;
+
+    const whereClause = search
+      ? {
+          [Op.or]: [
+            { nombre: { [Op.iLike]: `%${search}%` } },
+            { apellido: { [Op.iLike]: `%${search}%` } },
+            { cedula: { [Op.iLike]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const { rows: users, count: total } = await User.findAndCountAll({
+      where: whereClause,
+      limit: limitNum,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    res.json({ users, total });
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ message: 'Error al obtener usuarios' });
+  }
 });
 
 app.get('/user/:id', verifyToken, async (req, res) => {
