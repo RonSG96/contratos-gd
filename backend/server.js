@@ -589,6 +589,28 @@ app.get('/download/:cedula', async (req, res) => {
     )
     .moveDown();
 
+   // Protección de datos
+  doc.moveDown(2);
+  doc
+    .fontSize(14)
+    .text('6. Protección de datos personales', { underline: true });
+  doc.moveDown(0.5);
+  doc
+    .fontSize(12)
+    .text(
+      `Las partes se comprometen a mantener la máxima confidencialidad respecto de los datos personales de la otra parte que pudieren llegar a conocer en virtud de la ejecución del presente convenio.
+       Los datos personales, serán tratados con la única y exclusiva finalidad de cumplir con el objeto del presente, conforme a las instrucciones determinadas por el responsable del tratamiento, quedando expresamente prohibida su utilización con fines distintos.
+       Las partes se comprometen a cumplir con todas las condiciones para salvaguardar y/o tutelar el derecho a la protección de datos personales, obligándose a protegerlos adecuadamente e impedir su acceso a terceros ajenos no autorizados, adoptando para ello las medidas de seguridad exigibles, adecuadas y necesarias para mantener el deber de secreto, la no divulgación, pérdida, robo o sustracción; y, se comprometen a instruir y hacer cumplir a sus empleados o terceros contratados, las obligaciones establecidas en esta cláusula y en la Ley Orgánica de Protección de Datos Personales (LOPDP).
+       Las partes conservarán los mencionados datos mientras dure la relación establecida en el presente; una vez finalizada, conservarán dichos datos de manera bloqueada, el tiempo durante el cual pudieran exigirse responsabilidades derivadas de su tratamiento.
+       Cada parte asume la responsabilidad del tratamiento de los datos personales desde el momento que los hubiere recibido y queden bajo su custodia por consecuencia de la suscripción del presente instrumento.
+       Las partes no cederán a terceros los citados datos personales, ni realizarán tratamiento alguno que implique transferencia de los mismos.
+       Los titulares podrán ejercitar sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad, dirigiéndose por escrito a los delegados o representantes de Protección de Datos de las Partes para el presente convenio, en las siguientes direcciones electrónicas:
+        `,
+      { align: 'justify' }
+    )
+    .moveDown();
+
+
   // Detalles del usuario con formato mejorado
   doc.moveDown(6); // Añadir espacio entre el último texto y la firma
   doc
@@ -655,7 +677,7 @@ app.get('/download/:cedula', async (req, res) => {
   }
 
   // Añadir espacio entre la firma y las fotos
-  doc.moveDown(7);
+  doc.moveDown(9);
 
  // Definir dimensiones y posiciones para las fotos
   const photoWidth = 250; // Ancho de cada foto
