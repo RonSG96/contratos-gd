@@ -139,10 +139,10 @@ const handleCapturePhoto = () => {
   // Crear un canvas final para recortar el área del cuadro
   const finalCanvas = document.createElement('canvas');
   const finalCtx = finalCanvas.getContext('2d');
-  // Aumentar la resolución del canvas final (duplicar las dimensiones)
-  const scaleFactor = 2; // Duplicar la resolución
-  finalCanvas.width = cropWidth * scaleFactor; // 240 * 2 = 480px
-  finalCanvas.height = cropHeight * scaleFactor; // 180 * 2 = 360px
+  // Aumentar la resolución del canvas final (cuadruplicar las dimensiones)
+  const scaleFactor = 4; // Cuadruplicar la resolución
+  finalCanvas.width = cropWidth * scaleFactor; // 240 * 4 = 960px
+  finalCanvas.height = cropHeight * scaleFactor; // 180 * 4 = 720px
 
   // Recortar el área del cuadro de recorte desde el canvas temporal y escalarla
   finalCtx.drawImage(
@@ -157,8 +157,9 @@ const handleCapturePhoto = () => {
     cropHeight * scaleFactor // Alto escalado en el canvas final
   );
 
-  // Convertir el canvas a base64 y guardarlo en el estado
-  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 1.0); // Aumentar la calidad a 1.0
+  // Convertir el canvas a base64 (usar PNG para evitar compresión)
+  const croppedPhoto = finalCanvas.toDataURL('image/png');
+  console.log('Dimensiones del canvas final:', { width: finalCanvas.width, height: finalCanvas.height });
   console.log('Imagen recortada (base64):', croppedPhoto);
   setPhotoDataURL(croppedPhoto);
   setPhotoModalOpen(false);
@@ -209,10 +210,10 @@ const handleCapturePhoto2 = () => {
   // Crear un canvas final para recortar el área del cuadro
   const finalCanvas = document.createElement('canvas');
   const finalCtx = finalCanvas.getContext('2d');
-  // Aumentar la resolución del canvas final (duplicar las dimensiones)
-  const scaleFactor = 2; // Duplicar la resolución
-  finalCanvas.width = cropWidth * scaleFactor; // 240 * 2 = 480px
-  finalCanvas.height = cropHeight * scaleFactor; // 180 * 2 = 360px
+  // Aumentar la resolución del canvas final (cuadruplicar las dimensiones)
+  const scaleFactor = 4; // Cuadruplicar la resolución
+  finalCanvas.width = cropWidth * scaleFactor; // 240 * 4 = 960px
+  finalCanvas.height = cropHeight * scaleFactor; // 180 * 4 = 720px
 
   // Recortar el área del cuadro de recorte desde el canvas temporal y escalarla
   finalCtx.drawImage(
@@ -227,8 +228,9 @@ const handleCapturePhoto2 = () => {
     cropHeight * scaleFactor // Alto escalado en el canvas final
   );
 
-  // Convertir el canvas a base64 y guardarlo en el estado
-  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 1.0); // Aumentar la calidad a 1.0
+  // Convertir el canvas a base64 (usar PNG para evitar compresión)
+  const croppedPhoto = finalCanvas.toDataURL('image/png');
+  console.log('Dimensiones del canvas final:', { width: finalCanvas.width, height: finalCanvas.height });
   console.log('Imagen recortada (base64):', croppedPhoto);
   setPhoto2DataURL(croppedPhoto);
   setPhoto2ModalOpen(false);
@@ -438,8 +440,8 @@ const handleCapturePhoto2 = () => {
     <Box
       sx={{
         width: '100%',
-        aspectRatio: '4 / 3', // Forzar proporción 4:3
-        maxWidth: '480px', // Ancho máximo igual a la resolución de la imagen
+        aspectRatio: '4 / 3', // Mantener proporción 4:3
+        maxWidth: '960px', // Aumentar el ancho máximo para coincidir con la resolución de la imagen
         borderRadius: '8px',
         overflow: 'hidden',
         border: '1px solid #1976d2',
@@ -448,7 +450,7 @@ const handleCapturePhoto2 = () => {
         justifyContent: 'center',
         cursor: 'pointer',
         backgroundColor: photoDataURL ? 'transparent' : '#fff',
-        margin: '0 auto', // Centrar el contenedor
+        margin: '0 auto',
       }}
       onClick={() => setPhotoModalOpen(true)}
     >
@@ -456,7 +458,7 @@ const handleCapturePhoto2 = () => {
         <img
           src={photoDataURL}
           alt="Cédula Frontal"
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }} // Cambiar a 'contain' para evitar distorsión
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       ) : (
         <Typography variant="body2" color="textSecondary">
@@ -473,8 +475,8 @@ const handleCapturePhoto2 = () => {
     <Box
       sx={{
         width: '100%',
-        aspectRatio: '4 / 3', // Forzar proporción 4:3
-        maxWidth: '480px', // Ancho máximo igual a la resolución de la imagen
+        aspectRatio: '4 / 3', // Mantener proporción 4:3
+        maxWidth: '960px', // Aumentar el ancho máximo para coincidir con la resolución de la imagen
         borderRadius: '8px',
         overflow: 'hidden',
         border: '1px solid #1976d2',
@@ -483,7 +485,7 @@ const handleCapturePhoto2 = () => {
         justifyContent: 'center',
         cursor: 'pointer',
         backgroundColor: photo2DataURL ? 'transparent' : '#fff',
-        margin: '0 auto', // Centrar el contenedor
+        margin: '0 auto',
       }}
       onClick={() => setPhoto2ModalOpen(true)}
     >
@@ -491,7 +493,7 @@ const handleCapturePhoto2 = () => {
         <img
           src={photo2DataURL}
           alt="Cédula Posterior"
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }} // Cambiar a 'contain' para evitar distorsión
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       ) : (
         <Typography variant="body2" color="textSecondary">
