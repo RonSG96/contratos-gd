@@ -102,256 +102,134 @@ const handleCapturePhoto = () => {
     return;
   }
 
-  const photo = webcamRef.current.getScreenshot();
-  if (!photo) {
-    console.error('No se pudo capturar la foto');
-    return;
-  }
-
-  // Obtener las dimensiones y posición del cuadro de recorte
+  // Obtener el elemento del cuadro de recorte
   const cropBox = cropBoxRef.current;
   if (!cropBox) {
     console.error('Cuadro de recorte no encontrado');
     return;
   }
 
+  // Obtener las dimensiones y posición del cuadro de recorte en la pantalla
   const cropBoxRect = cropBox.getBoundingClientRect();
+  const cropWidth = cropBoxRect.width; // 240px
+  const cropHeight = cropBoxRect.height; // 180px
+
+  // Obtener el elemento del video (Webcam)
   const webcamVideo = webcamRef.current.video;
-  const videoWidth = webcamVideo.videoWidth;
-  const videoHeight = webcamVideo.videoHeight;
   const webcamRect = webcamVideo.getBoundingClientRect();
 
-  // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
-  const scaleX = videoWidth / webcamRect.width;
-  const scaleY = videoHeight / webcamRect.height;
-
-  // Calcular las coordenadas del cuadro de recorte relativas al video
-  let cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
-  let cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
-  let cropWidth = cropBoxRect.width * scaleX;
-  let cropHeight = cropBoxRect.height * scaleY;
-
-  // Forzar proporción 4:3 para el recorte
-  const targetAspectRatio = 4 / 3;
-  if (cropWidth / cropHeight > targetAspectRatio) {
-    // Si el recorte es más ancho de lo deseado, ajustar el ancho
-    cropWidth = cropHeight * targetAspectRatio;
-  } else {
-    // Si el recorte es más alto de lo deseado, ajustar la altura
-    cropHeight = cropWidth / targetAspectRatio;
-  }
-
-  // Recalcular cropX y cropY para centrar el recorte
-  cropX = (cropBoxRect.left - webcamRect.left + (cropBoxRect.width - cropWidth / scaleX) / 2) * scaleX;
-  cropY = (cropBoxRect.top - webcamRect.top + (cropBoxRect.height - cropHeight / scaleY) / 2) * scaleY;
-
-  // Asegurarse de que las coordenadas estén dentro de los límites del video
-  cropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
-  cropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
-  cropWidth = Math.min(cropWidth, videoWidth - cropX);
-  cropHeight = Math.min(cropHeight, videoHeight - cropY);
+  // Calcular las coordenadas del cuadro de recorte relativas al elemento Webcam
+  const offsetX = cropBoxRect.left - webcamRect.left;
+  const offsetY = cropBoxRect.top - webcamRect.top;
 
   // Depuración: Imprimir valores para inspeccionar
-  console.log('Dimensiones del video:', { videoWidth, videoHeight });
-  console.log('Dimensiones del webcamRect:', { width: webcamRect.width, height: webcamRect.height });
-  console.log('Escalas:', { scaleX, scaleY });
-  console.log('Coordenadas del recorte:', { cropX, cropY, cropWidth, cropHeight });
+  console.log('Dimensiones del cuadro de recorte:', { width: cropWidth, height: cropHeight });
+  console.log('Posición del cuadro de recorte relativa al Webcam:', { offsetX, offsetY });
+  console.log('Dimensiones del Webcam en pantalla:', { width: webcamRect.width, height: webcamRect.height });
 
-  // Cargar la imagen capturada para procesarla
-  const img = new Image();
-  img.src = photo;
-  img.onload = () => {
-    // Detectar la orientación del dispositivo y determinar si se necesita rotación
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const rotationAngle = facingMode === 'environment' && isPortrait ? 90 : 0;
+  // Crear un canvas temporal para dibujar el contenido del Webcam
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCanvas.width = webcamRect.width;
+  tempCanvas.height = webcamRect.height;
 
-    // Crear un canvas temporal para manejar la rotación (si es necesaria)
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
+  // Dibujar el contenido del video en el canvas temporal
+  tempCtx.drawImage(webcamVideo, 0, 0, webcamRect.width, webcamRect.height);
 
-    if (rotationAngle !== 0) {
-      // Ajustar las dimensiones del canvas para la rotación
-      tempCanvas.width = videoHeight;
-      tempCanvas.height = videoWidth;
-      tempCtx.save();
-      tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-      tempCtx.rotate((rotationAngle * Math.PI) / 180);
-      tempCtx.translate(-tempCanvas.height / 2, -tempCanvas.width / 2);
-      tempCtx.drawImage(img, 0, 0);
-      tempCtx.restore();
+  // Crear un canvas final para recortar el área del cuadro
+  const finalCanvas = document.createElement('canvas');
+  const finalCtx = finalCanvas.getContext('2d');
+  finalCanvas.width = cropWidth;
+  finalCanvas.height = cropHeight;
 
-      // Ajustar las coordenadas del recorte después de la rotación
-      const tempCropX = cropY;
-      const tempCropY = videoWidth - cropX - cropWidth;
-      cropX = tempCropX;
-      cropY = tempCropY;
-      const tempCropWidth = cropHeight;
-      const tempCropHeight = cropWidth;
-      cropWidth = tempCropWidth;
-      cropHeight = tempCropHeight;
-    } else {
-      // Sin rotación, usar las dimensiones originales
-      tempCanvas.width = videoWidth;
-      tempCanvas.height = videoHeight;
-      tempCtx.drawImage(img, 0, 0);
-    }
+  // Recortar el área del cuadro de recorte desde el canvas temporal
+  finalCtx.drawImage(
+    tempCanvas,
+    offsetX, // Posición X del cuadro relativa al Webcam
+    offsetY, // Posición Y del cuadro relativa al Webcam
+    cropWidth, // Ancho del cuadro
+    cropHeight, // Alto del cuadro
+    0, // Posición X en el canvas final
+    0, // Posición Y en el canvas final
+    cropWidth, // Ancho en el canvas final
+    cropHeight // Alto en el canvas final
+  );
 
-    // Crear un canvas final para recortar la imagen
-    const finalCanvas = document.createElement('canvas');
-    const finalCtx = finalCanvas.getContext('2d');
-    finalCanvas.width = cropWidth;
-    finalCanvas.height = cropHeight;
-
-    // Dibujar la imagen recortada en el canvas final
-    finalCtx.drawImage(
-      tempCanvas,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
-      0,
-      0,
-      cropWidth,
-      cropHeight
-    );
-
-    // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
-    console.log('Imagen recortada (base64):', croppedPhoto);
-    setPhotoDataURL(croppedPhoto);
-    setPhotoModalOpen(false);
-    setPhotoTaken(true);
-    checkIfCanEnableAgree();
-  };
+  // Convertir el canvas a base64 y guardarlo en el estado
+  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
+  console.log('Imagen recortada (base64):', croppedPhoto);
+  setPhotoDataURL(croppedPhoto);
+  setPhotoModalOpen(false);
+  setPhotoTaken(true);
+  checkIfCanEnableAgree();
 };
 
- const handleCapturePhoto2 = () => {
+const handleCapturePhoto2 = () => {
   if (!webcamRef.current) {
     console.error('Webcam no está inicializada');
     return;
   }
 
-  const photo2 = webcamRef.current.getScreenshot();
-  if (!photo2) {
-    console.error('No se pudo capturar la foto 2');
-    return;
-  }
-
-  // Obtener las dimensiones y posición del cuadro de recorte
+  // Obtener el elemento del cuadro de recorte
   const cropBox = cropBoxRef.current;
   if (!cropBox) {
     console.error('Cuadro de recorte no encontrado');
     return;
   }
 
+  // Obtener las dimensiones y posición del cuadro de recorte en la pantalla
   const cropBoxRect = cropBox.getBoundingClientRect();
+  const cropWidth = cropBoxRect.width; // 240px
+  const cropHeight = cropBoxRect.height; // 180px
+
+  // Obtener el elemento del video (Webcam)
   const webcamVideo = webcamRef.current.video;
-  const videoWidth = webcamVideo.videoWidth;
-  const videoHeight = webcamVideo.videoHeight;
   const webcamRect = webcamVideo.getBoundingClientRect();
 
-  // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
-  const scaleX = videoWidth / webcamRect.width;
-  const scaleY = videoHeight / webcamRect.height;
-
-  // Calcular las coordenadas del cuadro de recorte relativas al video
-  let cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
-  let cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
-  let cropWidth = cropBoxRect.width * scaleX;
-  let cropHeight = cropBoxRect.height * scaleY;
-
-  // Forzar proporción 4:3 para el recorte
-  const targetAspectRatio = 4 / 3;
-  if (cropWidth / cropHeight > targetAspectRatio) {
-    // Si el recorte es más ancho de lo deseado, ajustar el ancho
-    cropWidth = cropHeight * targetAspectRatio;
-  } else {
-    // Si el recorte es más alto de lo deseado, ajustar la altura
-    cropHeight = cropWidth / targetAspectRatio;
-  }
-
-  // Recalcular cropX y cropY para centrar el recorte
-  cropX = (cropBoxRect.left - webcamRect.left + (cropBoxRect.width - cropWidth / scaleX) / 2) * scaleX;
-  cropY = (cropBoxRect.top - webcamRect.top + (cropBoxRect.height - cropHeight / scaleY) / 2) * scaleY;
-
-  // Asegurarse de que las coordenadas estén dentro de los límites del video
-  cropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
-  cropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
-  cropWidth = Math.min(cropWidth, videoWidth - cropX);
-  cropHeight = Math.min(cropHeight, videoHeight - cropY);
+  // Calcular las coordenadas del cuadro de recorte relativas al elemento Webcam
+  const offsetX = cropBoxRect.left - webcamRect.left;
+  const offsetY = cropBoxRect.top - webcamRect.top;
 
   // Depuración: Imprimir valores para inspeccionar
-  console.log('Dimensiones del video:', { videoWidth, videoHeight });
-  console.log('Dimensiones del webcamRect:', { width: webcamRect.width, height: webcamRect.height });
-  console.log('Escalas:', { scaleX, scaleY });
-  console.log('Coordenadas del recorte:', { cropX, cropY, cropWidth, cropHeight });
+  console.log('Dimensiones del cuadro de recorte:', { width: cropWidth, height: cropHeight });
+  console.log('Posición del cuadro de recorte relativa al Webcam:', { offsetX, offsetY });
+  console.log('Dimensiones del Webcam en pantalla:', { width: webcamRect.width, height: webcamRect.height });
 
-  // Cargar la imagen capturada para procesarla
-  const img = new Image();
-  img.src = photo2;
-  img.onload = () => {
-    // Detectar la orientación del dispositivo y determinar si se necesita rotación
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const rotationAngle = facingMode === 'environment' && isPortrait ? 90 : 0;
+  // Crear un canvas temporal para dibujar el contenido del Webcam
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCanvas.width = webcamRect.width;
+  tempCanvas.height = webcamRect.height;
 
-    // Crear un canvas temporal para manejar la rotación (si es necesaria)
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
+  // Dibujar el contenido del video en el canvas temporal
+  tempCtx.drawImage(webcamVideo, 0, 0, webcamRect.width, webcamRect.height);
 
-    if (rotationAngle !== 0) {
-      // Ajustar las dimensiones del canvas para la rotación
-      tempCanvas.width = videoHeight;
-      tempCanvas.height = videoWidth;
-      tempCtx.save();
-      tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-      tempCtx.rotate((rotationAngle * Math.PI) / 180);
-      tempCtx.translate(-tempCanvas.height / 2, -tempCanvas.width / 2);
-      tempCtx.drawImage(img, 0, 0);
-      tempCtx.restore();
+  // Crear un canvas final para recortar el área del cuadro
+  const finalCanvas = document.createElement('canvas');
+  const finalCtx = finalCanvas.getContext('2d');
+  finalCanvas.width = cropWidth;
+  finalCanvas.height = cropHeight;
 
-      // Ajustar las coordenadas del recorte después de la rotación
-      const tempCropX = cropY;
-      const tempCropY = videoWidth - cropX - cropWidth;
-      cropX = tempCropX;
-      cropY = tempCropY;
-      const tempCropWidth = cropHeight;
-      const tempCropHeight = cropWidth;
-      cropWidth = tempCropWidth;
-      cropHeight = tempCropHeight;
-    } else {
-      // Sin rotación, usar las dimensiones originales
-      tempCanvas.width = videoWidth;
-      tempCanvas.height = videoHeight;
-      tempCtx.drawImage(img, 0, 0);
-    }
+  // Recortar el área del cuadro de recorte desde el canvas temporal
+  finalCtx.drawImage(
+    tempCanvas,
+    offsetX, // Posición X del cuadro relativa al Webcam
+    offsetY, // Posición Y del cuadro relativa al Webcam
+    cropWidth, // Ancho del cuadro
+    cropHeight, // Alto del cuadro
+    0, // Posición X en el canvas final
+    0, // Posición Y en el canvas final
+    cropWidth, // Ancho en el canvas final
+    cropHeight // Alto en el canvas final
+  );
 
-    // Crear un canvas final para recortar la imagen
-    const finalCanvas = document.createElement('canvas');
-    const finalCtx = finalCanvas.getContext('2d');
-    finalCanvas.width = cropWidth;
-    finalCanvas.height = cropHeight;
-
-    // Dibujar la imagen recortada en el canvas final
-    finalCtx.drawImage(
-      tempCanvas,
-      cropX,
-      cropY,
-      cropWidth,
-      cropHeight,
-      0,
-      0,
-      cropWidth,
-      cropHeight
-    );
-
-    // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
-    console.log('Imagen recortada (base64):', croppedPhoto);
-    setPhoto2DataURL(croppedPhoto);
-    setPhoto2ModalOpen(false);
-    setPhoto2Taken(true);
-    checkIfCanEnableAgree();
-  };
+  // Convertir el canvas a base64 y guardarlo en el estado
+  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
+  console.log('Imagen recortada (base64):', croppedPhoto);
+  setPhoto2DataURL(croppedPhoto);
+  setPhoto2ModalOpen(false);
+  setPhoto2Taken(true);
+  checkIfCanEnableAgree();
 };
 
   const checkIfCanEnableAgree = () => {
