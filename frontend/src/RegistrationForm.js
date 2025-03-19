@@ -59,6 +59,7 @@ const RegistrationForm = () => {
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null); // Usaremos una sola referencia para ambas cámaras
+  const cropBoxRef = useRef(null); // Nueva referencia para el cuadro de recorte
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -96,42 +97,136 @@ const RegistrationForm = () => {
   }, []);
 
   const handleCapturePhoto = () => {
-    if (!webcamRef.current) {
-      console.error('Webcam no está inicializada');
-      return;
-    }
+  if (!webcamRef.current) {
+    console.error('Webcam no está inicializada');
+    return;
+  }
 
-    const photo = webcamRef.current.getScreenshot();
-    if (!photo) {
-      console.error('No se pudo capturar la foto');
-      return;
-    }
+  const photo = webcamRef.current.getScreenshot();
+  if (!photo) {
+    console.error('No se pudo capturar la foto');
+    return;
+  }
 
-    // Quitamos la rotación automática para evitar que la imagen gire innecesariamente
-    setPhotoDataURL(photo);
+  // Obtener las dimensiones y posición del cuadro de recorte
+  const cropBox = cropBoxRef.current;
+  const cropBoxRect = cropBox.getBoundingClientRect();
+  const webcamVideo = webcamRef.current.video;
+  const videoWidth = webcamVideo.videoWidth;
+  const videoHeight = webcamVideo.videoHeight;
+
+  // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
+  const scaleX = videoWidth / webcamVideo.clientWidth;
+  const scaleY = videoHeight / webcamVideo.clientHeight;
+
+  const cropX = cropBoxRect.left - webcamVideo.getBoundingClientRect().left;
+  const cropY = cropBoxRect.top - webcamVideo.getBoundingClientRect().top;
+  const cropWidth = cropBoxRect.width;
+  const cropHeight = cropBoxRect.height;
+
+  // Ajustar las coordenadas y dimensiones según la escala del video
+  const adjustedCropX = cropX * scaleX;
+  const adjustedCropY = cropY * scaleY;
+  const adjustedCropWidth = cropWidth * scaleX;
+  const adjustedCropHeight = cropHeight * scaleY;
+
+  // Crear un canvas para recortar la imagen
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = adjustedCropWidth;
+  canvas.height = adjustedCropHeight;
+
+  // Cargar la imagen capturada en el canvas
+  const img = new Image();
+  img.src = photo;
+  img.onload = () => {
+    // Dibujar la imagen recortada en el canvas
+    ctx.drawImage(
+      img,
+      adjustedCropX,
+      adjustedCropY,
+      adjustedCropWidth,
+      adjustedCropHeight,
+      0,
+      0,
+      adjustedCropWidth,
+      adjustedCropHeight
+    );
+
+    // Convertir el canvas a base64 y guardarlo en el estado
+    const croppedPhoto = canvas.toDataURL('image/jpeg');
+    setPhotoDataURL(croppedPhoto);
     setPhotoModalOpen(false);
     setPhotoTaken(true);
     checkIfCanEnableAgree();
   };
+};
 
   const handleCapturePhoto2 = () => {
-    if (!webcamRef.current) {
-      console.error('Webcam no está inicializada');
-      return;
-    }
+  if (!webcamRef.current) {
+    console.error('Webcam no está inicializada');
+    return;
+  }
 
-    const photo2 = webcamRef.current.getScreenshot();
-    if (!photo2) {
-      console.error('No se pudo capturar la foto 2');
-      return;
-    }
+  const photo2 = webcamRef.current.getScreenshot();
+  if (!photo2) {
+    console.error('No se pudo capturar la foto 2');
+    return;
+  }
 
-    // Quitamos la rotación automática para evitar que la imagen gire innecesariamente
-    setPhoto2DataURL(photo2);
+  // Obtener las dimensiones y posición del cuadro de recorte
+  const cropBox = cropBoxRef.current;
+  const cropBoxRect = cropBox.getBoundingClientRect();
+  const webcamVideo = webcamRef.current.video;
+  const videoWidth = webcamVideo.videoWidth;
+  const videoHeight = webcamVideo.videoHeight;
+
+  // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
+  const scaleX = videoWidth / webcamVideo.clientWidth;
+  const scaleY = videoHeight / webcamVideo.clientHeight;
+
+  const cropX = cropBoxRect.left - webcamVideo.getBoundingClientRect().left;
+  const cropY = cropBoxRect.top - webcamVideo.getBoundingClientRect().top;
+  const cropWidth = cropBoxRect.width;
+  const cropHeight = cropBoxRect.height;
+
+  // Ajustar las coordenadas y dimensiones según la escala del video
+  const adjustedCropX = cropX * scaleX;
+  const adjustedCropY = cropY * scaleY;
+  const adjustedCropWidth = cropWidth * scaleX;
+  const adjustedCropHeight = cropHeight * scaleY;
+
+  // Crear un canvas para recortar la imagen
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = adjustedCropWidth;
+  canvas.height = adjustedCropHeight;
+
+  // Cargar la imagen capturada en el canvas
+  const img = new Image();
+  img.src = photo2;
+  img.onload = () => {
+    // Dibujar la imagen recortada en el canvas
+    ctx.drawImage(
+      img,
+      adjustedCropX,
+      adjustedCropY,
+      adjustedCropWidth,
+      adjustedCropHeight,
+      0,
+      0,
+      adjustedCropWidth,
+      adjustedCropHeight
+    );
+
+    // Convertir el canvas a base64 y guardarlo en el estado
+    const croppedPhoto = canvas.toDataURL('image/jpeg');
+    setPhoto2DataURL(croppedPhoto);
     setPhoto2ModalOpen(false);
     setPhoto2Taken(true);
     checkIfCanEnableAgree();
   };
+};
 
   const checkIfCanEnableAgree = () => {
     if (signatureDataURL && photoDataURL && photo2DataURL) {
@@ -659,89 +754,117 @@ const RegistrationForm = () => {
       {/* Modal para tomar foto 1 */}
       {/* Modal para tomar foto 1 */}
       <Dialog
-        open={isPhotoModalOpen}
-        onClose={() => setPhotoModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }} // Reducir altura y ajustar ancho del modal
+  open={isPhotoModalOpen}
+  onClose={() => setPhotoModalOpen(false)}
+  sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
+>
+  <DialogTitle>Cédula Frontal</DialogTitle>
+  <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
+    <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}>
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        width="100%"
+        videoConstraints={{ width: 1280, height: 720, facingMode }}
+        style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }}
+      />
+      <Box
+        ref={cropBoxRef}
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '300px',
+          height: '200px',
+          border: '2px dashed #fff',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          pointerEvents: 'none',
+        }}
+      />
+    </Box>
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+      <IconButton
+        onClick={handleCapturePhoto}
+        sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
       >
-        <DialogTitle>Cédula Frontal</DialogTitle>
-        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}> {/* Evitar scroll interno */}
-          <Box sx={{ flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}> {/* Limitar altura del contenedor del Webcam */}
-            <Webcam
-              audio={false}
-              ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              width="100%"
-              videoConstraints={{ width: 1280, height: 720, facingMode }}
-              style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }} // Altura fija más pequeña
-            />
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-            <IconButton
-              onClick={handleCapturePhoto}
-              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-            >
-              <CameraIcon sx={{ color: '#fff' }} />
-            </IconButton>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <IconButton
-            onClick={toggleCamera}
-            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            <SwitchCameraIcon sx={{ color: '#fff' }} />
-          </IconButton>
-          <IconButton
-            onClick={() => setPhotoModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-          >
-            <CloseIcon sx={{ color: '#fff' }} />
-          </IconButton>
-        </DialogActions>
-      </Dialog>
+        <CameraIcon sx={{ color: '#fff' }} />
+      </IconButton>
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <IconButton
+      onClick={toggleCamera}
+      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+    >
+      <SwitchCameraIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
+      onClick={() => setPhotoModalOpen(false)}
+      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+    >
+      <CloseIcon sx={{ color: '#fff' }} />
+    </IconButton>
+  </DialogActions>
+</Dialog>
 
       {/* Modal para tomar foto 2 */}
       <Dialog
-        open={isPhoto2ModalOpen}
-        onClose={() => setPhoto2ModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }} // Reducir altura y ajustar ancho del modal
+  open={isPhoto2ModalOpen}
+  onClose={() => setPhoto2ModalOpen(false)}
+  sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
+>
+  <DialogTitle>Cédula Posterior</DialogTitle>
+  <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
+    <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}>
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        width="100%"
+        videoConstraints={{ width: 1280, height: 720, facingMode }}
+        style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }}
+      />
+      <Box
+        ref={cropBoxRef}
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '300px',
+          height: '200px',
+          border: '2px dashed #fff',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          pointerEvents: 'none',
+        }}
+      />
+    </Box>
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+      <IconButton
+        onClick={handleCapturePhoto2}
+        sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
       >
-        <DialogTitle>Cédula Posterior</DialogTitle>
-        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}> {/* Evitar scroll interno */}
-          <Box sx={{ flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}> {/* Limitar altura del contenedor del Webcam */}
-            <Webcam
-              audio={false}
-              ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              width="100%"
-              videoConstraints={{ width: 1280, height: 720, facingMode }}
-              style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }} // Altura fija más pequeña
-            />
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-            <IconButton
-              onClick={handleCapturePhoto2}
-              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-            >
-              <CameraIcon sx={{ color: '#fff' }} />
-            </IconButton>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <IconButton
-            onClick={toggleCamera}
-            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            <SwitchCameraIcon sx={{ color: '#fff' }} />
-          </IconButton>
-          <IconButton
-            onClick={() => setPhoto2ModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
-          >
-            <CloseIcon sx={{ color: '#fff' }} />
-          </IconButton>
-        </DialogActions>
-      </Dialog>
+        <CameraIcon sx={{ color: '#fff' }} />
+      </IconButton>
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <IconButton
+      onClick={toggleCamera}
+      sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+    >
+      <SwitchCameraIcon sx={{ color: '#fff' }} />
+    </IconButton>
+    <IconButton
+      onClick={() => setPhoto2ModalOpen(false)}
+      sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+    >
+      <CloseIcon sx={{ color: '#fff' }} />
+    </IconButton>
+  </DialogActions>
+</Dialog>
     </Container>
   );
 };
