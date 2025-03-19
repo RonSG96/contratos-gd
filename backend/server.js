@@ -641,34 +641,37 @@ app.get('/download/:cedula', async (req, res) => {
   );
   doc.moveDown(1.5);
 
+  // Agregar la firma centrada
   if (user.firma_blob) {
     const firmaImagePath = `temp_firma.png`;
     fs.writeFileSync(firmaImagePath, user.firma_blob);
-    // doc.text('Firma del usuario:');
-    doc.image(firmaImagePath, { fit: [150, 75], align: 'left' });
+    doc.image(firmaImagePath, {
+      fit: [200, 100], // Aumentar el tamaño de la firma para mejor visibilidad
+      align: 'center', // Centrar la firma horizontalmente
+    });
     fs.unlinkSync(firmaImagePath);
   } else {
-    doc.text('Firma no disponible');
+    doc.text('Firma no disponible', { align: 'center' });
   }
 
   // Añadir espacio entre la firma y las fotos
-  doc.moveDown(2); // Espacio extra entre la firma y las fotos
+  doc.moveDown(2);
 
-  // Posicionar las fotos horizontalmente a la derecha de la firma
-  const firmaWidth = 150; // Ancho de la firma
-  const photoWidth = 250; // Ancho deseado para cada foto
-  const photoHeight = 120; // Alto deseado para cada foto
-  const marginLeft = firmaWidth + 5; // Margen después de la firma (20 de espacio)
-  const spacing = 10; // Espacio reducido entre las dos fotos
+ // Definir dimensiones y posiciones para las fotos
+  const photoWidth = 250; // Ancho de cada foto
+  const photoHeight = 150; // Alto de cada foto (ajustado para proporción de cédula)
+  const pageWidth = doc.page.width; // Ancho de la página (612px por defecto en PDFKit para tamaño carta)
+  const totalPhotosWidth = photoWidth * 2 + 20; // Ancho total de ambas fotos + espacio entre ellas
+  const startX = (pageWidth - totalPhotosWidth) / 2; // Posición X inicial para centrar las fotos
 
+  // Posicionar las fotos una al lado de la otra
   if (user.foto_blob) {
     const fotoImagePath = `temp_foto.jpg`;
     fs.writeFileSync(fotoImagePath, user.foto_blob);
     doc.image(fotoImagePath, {
-      fit: [photoWidth, photoHeight], // Tamaño proporcional
-      x: 350, // Posición justo después de la firma
-      y: doc.y,
-      // No se necesita rotate porque la imagen ya llega rotada
+      fit: [photoWidth, photoHeight],
+      x: startX, // Posición X para la primera foto (centrada)
+      y: doc.y, // Mantener la posición Y actual
     });
     fs.unlinkSync(fotoImagePath);
   }
@@ -677,16 +680,18 @@ app.get('/download/:cedula', async (req, res) => {
     const foto2ImagePath = `temp_foto_2.jpg`;
     fs.writeFileSync(foto2ImagePath, user.foto_2_blob);
     doc.image(foto2ImagePath, {
-      fit: [photoWidth, photoHeight], // Mismo tamaño para la segunda foto
-      x: 450, // Posición a la derecha de la primera foto
-      y: doc.y,
-      // No se necesita rotate porque la imagen ya llega rotada
+      fit: [photoWidth, photoHeight],
+      x: startX + photoWidth + 20, // Posición X para la segunda foto (a la derecha de la primera)
+      y: doc.y, // Mantener la misma posición Y que la primera foto
     });
     fs.unlinkSync(foto2ImagePath);
   }
 
+  // Asegurar que el cursor se mueva hacia abajo después de las fotos
+  doc.moveDown(photoHeight / 10); // Ajustar el salto según el alto de las fotos
+
   // Texto final de constancia
-  doc.moveDown(25); // Espacio antes del texto final
+  // doc.moveDown(25); // Espacio antes del texto final
   doc.text(
     `Se hace constar que la información proporcionada por el cliente, ${user.nombre} ${user.apellido}, identificado con número de cédula ${user.cedula}, ha sido declarada como correcta y veraz bajo su responsabilidad, en virtud de la identificación presentada. En caso de discrepancia entre la información registrada y los datos consignados en la cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de analizar la situación y adoptar las medidas legales y administrativas pertinentes, conforme a lo establecido en el presente contrato.`,
     {
