@@ -110,25 +110,32 @@ const RegistrationForm = () => {
 
   // Obtener las dimensiones y posición del cuadro de recorte
   const cropBox = cropBoxRef.current;
+  if (!cropBox) {
+    console.error('Cuadro de recorte no encontrado');
+    return;
+  }
+
   const cropBoxRect = cropBox.getBoundingClientRect();
   const webcamVideo = webcamRef.current.video;
   const videoWidth = webcamVideo.videoWidth;
   const videoHeight = webcamVideo.videoHeight;
+  const webcamRect = webcamVideo.getBoundingClientRect();
 
   // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
-  const scaleX = videoWidth / webcamVideo.clientWidth;
-  const scaleY = videoHeight / webcamVideo.clientHeight;
+  const scaleX = videoWidth / webcamRect.width;
+  const scaleY = videoHeight / webcamRect.height;
 
-  const cropX = cropBoxRect.left - webcamVideo.getBoundingClientRect().left;
-  const cropY = cropBoxRect.top - webcamVideo.getBoundingClientRect().top;
-  const cropWidth = cropBoxRect.width;
-  const cropHeight = cropBoxRect.height;
+  // Calcular las coordenadas del cuadro de recorte relativas al video
+  const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
+  const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
+  const cropWidth = cropBoxRect.width * scaleX;
+  const cropHeight = cropBoxRect.height * scaleY;
 
-  // Ajustar las coordenadas y dimensiones según la escala del video
-  const adjustedCropX = cropX * scaleX;
-  const adjustedCropY = cropY * scaleY;
-  const adjustedCropWidth = cropWidth * scaleX;
-  const adjustedCropHeight = cropHeight * scaleY;
+  // Asegurarse de que las coordenadas estén dentro de los límites del video
+  const adjustedCropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
+  const adjustedCropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
+  const adjustedCropWidth = Math.min(cropWidth, videoWidth - adjustedCropX);
+  const adjustedCropHeight = Math.min(cropHeight, videoHeight - adjustedCropY);
 
   // Crear un canvas para recortar la imagen
   const canvas = document.createElement('canvas');
@@ -154,7 +161,7 @@ const RegistrationForm = () => {
     );
 
     // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = canvas.toDataURL('image/jpeg');
+    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9); // Ajustar calidad para mejor resolución
     setPhotoDataURL(croppedPhoto);
     setPhotoModalOpen(false);
     setPhotoTaken(true);
@@ -176,25 +183,32 @@ const RegistrationForm = () => {
 
   // Obtener las dimensiones y posición del cuadro de recorte
   const cropBox = cropBoxRef.current;
+  if (!cropBox) {
+    console.error('Cuadro de recorte no encontrado');
+    return;
+  }
+
   const cropBoxRect = cropBox.getBoundingClientRect();
   const webcamVideo = webcamRef.current.video;
   const videoWidth = webcamVideo.videoWidth;
   const videoHeight = webcamVideo.videoHeight;
+  const webcamRect = webcamVideo.getBoundingClientRect();
 
   // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
-  const scaleX = videoWidth / webcamVideo.clientWidth;
-  const scaleY = videoHeight / webcamVideo.clientHeight;
+  const scaleX = videoWidth / webcamRect.width;
+  const scaleY = videoHeight / webcamRect.height;
 
-  const cropX = cropBoxRect.left - webcamVideo.getBoundingClientRect().left;
-  const cropY = cropBoxRect.top - webcamVideo.getBoundingClientRect().top;
-  const cropWidth = cropBoxRect.width;
-  const cropHeight = cropBoxRect.height;
+  // Calcular las coordenadas del cuadro de recorte relativas al video
+  const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
+  const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
+  const cropWidth = cropBoxRect.width * scaleX;
+  const cropHeight = cropBoxRect.height * scaleY;
 
-  // Ajustar las coordenadas y dimensiones según la escala del video
-  const adjustedCropX = cropX * scaleX;
-  const adjustedCropY = cropY * scaleY;
-  const adjustedCropWidth = cropWidth * scaleX;
-  const adjustedCropHeight = cropHeight * scaleY;
+  // Asegurarse de que las coordenadas estén dentro de los límites del video
+  const adjustedCropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
+  const adjustedCropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
+  const adjustedCropWidth = Math.min(cropWidth, videoWidth - adjustedCropX);
+  const adjustedCropHeight = Math.min(cropHeight, videoHeight - adjustedCropY);
 
   // Crear un canvas para recortar la imagen
   const canvas = document.createElement('canvas');
@@ -220,7 +234,7 @@ const RegistrationForm = () => {
     );
 
     // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = canvas.toDataURL('image/jpeg');
+    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9); // Ajustar calidad para mejor resolución
     setPhoto2DataURL(croppedPhoto);
     setPhoto2ModalOpen(false);
     setPhoto2Taken(true);
@@ -752,7 +766,6 @@ const RegistrationForm = () => {
       </Dialog>
 
       {/* Modal para tomar foto 1 */}
-      {/* Modal para tomar foto 1 */}
       <Dialog
   open={isPhotoModalOpen}
   onClose={() => setPhotoModalOpen(false)}
@@ -760,14 +773,14 @@ const RegistrationForm = () => {
 >
   <DialogTitle>Cédula Frontal</DialogTitle>
   <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
-    <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}>
+    <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '300px', overflow: 'hidden' }}>
       <Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
         videoConstraints={{ width: 1280, height: 720, facingMode }}
-        style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }}
+        style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
         ref={cropBoxRef}
@@ -776,8 +789,8 @@ const RegistrationForm = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '300px',
-          height: '200px',
+          width: '270px',
+          height: '180px',
           border: '2px dashed #fff',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
           pointerEvents: 'none',
@@ -810,21 +823,21 @@ const RegistrationForm = () => {
 </Dialog>
 
       {/* Modal para tomar foto 2 */}
-      <Dialog
+     <Dialog
   open={isPhoto2ModalOpen}
   onClose={() => setPhoto2ModalOpen(false)}
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
 >
   <DialogTitle>Cédula Posterior</DialogTitle>
   <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
-    <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}>
+    <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '300px', overflow: 'hidden' }}>
       <Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
         videoConstraints={{ width: 1280, height: 720, facingMode }}
-        style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }}
+        style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
         ref={cropBoxRef}
@@ -833,8 +846,8 @@ const RegistrationForm = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '300px',
-          height: '200px',
+          width: '270px',
+          height: '180px',
           border: '2px dashed #fff',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
           pointerEvents: 'none',
