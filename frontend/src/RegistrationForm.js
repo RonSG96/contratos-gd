@@ -96,7 +96,7 @@ const RegistrationForm = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
   }, []);
 
- const handleCapturePhoto = () => {
+const handleCapturePhoto = () => {
   if (!webcamRef.current) {
     console.error('Webcam no está inicializada');
     return;
@@ -126,49 +126,97 @@ const RegistrationForm = () => {
   const scaleY = videoHeight / webcamRect.height;
 
   // Calcular las coordenadas del cuadro de recorte relativas al video
-  const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
-  const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
-  const cropWidth = cropBoxRect.width * scaleX;
-  const cropHeight = cropBoxRect.height * scaleY;
+  let cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
+  let cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
+  let cropWidth = cropBoxRect.width * scaleX;
+  let cropHeight = cropBoxRect.height * scaleY;
+
+  // Forzar proporción 4:3 para el recorte
+  const targetAspectRatio = 4 / 3;
+  if (cropWidth / cropHeight > targetAspectRatio) {
+    // Si el recorte es más ancho de lo deseado, ajustar el ancho
+    cropWidth = cropHeight * targetAspectRatio;
+  } else {
+    // Si el recorte es más alto de lo deseado, ajustar la altura
+    cropHeight = cropWidth / targetAspectRatio;
+  }
+
+  // Recalcular cropX y cropY para centrar el recorte
+  cropX = (cropBoxRect.left - webcamRect.left + (cropBoxRect.width - cropWidth / scaleX) / 2) * scaleX;
+  cropY = (cropBoxRect.top - webcamRect.top + (cropBoxRect.height - cropHeight / scaleY) / 2) * scaleY;
 
   // Asegurarse de que las coordenadas estén dentro de los límites del video
-  const adjustedCropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
-  const adjustedCropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
-  const adjustedCropWidth = Math.min(cropWidth, videoWidth - adjustedCropX);
-  const adjustedCropHeight = Math.min(cropHeight, videoHeight - adjustedCropY);
+  cropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
+  cropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
+  cropWidth = Math.min(cropWidth, videoWidth - cropX);
+  cropHeight = Math.min(cropHeight, videoHeight - cropY);
 
   // Depuración: Imprimir valores para inspeccionar
   console.log('Dimensiones del video:', { videoWidth, videoHeight });
   console.log('Dimensiones del webcamRect:', { width: webcamRect.width, height: webcamRect.height });
   console.log('Escalas:', { scaleX, scaleY });
   console.log('Coordenadas del recorte:', { cropX, cropY, cropWidth, cropHeight });
-  console.log('Coordenadas ajustadas:', { adjustedCropX, adjustedCropY, adjustedCropWidth, adjustedCropHeight });
 
-  // Crear un canvas para recortar la imagen
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = adjustedCropWidth;
-  canvas.height = adjustedCropHeight;
-
-  // Cargar la imagen capturada en el canvas
+  // Cargar la imagen capturada para procesarla
   const img = new Image();
   img.src = photo;
   img.onload = () => {
-    // Dibujar la imagen recortada en el canvas
-    ctx.drawImage(
-      img,
-      adjustedCropX,
-      adjustedCropY,
-      adjustedCropWidth,
-      adjustedCropHeight,
+    // Detectar la orientación del dispositivo y determinar si se necesita rotación
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const rotationAngle = facingMode === 'environment' && isPortrait ? 90 : 0;
+
+    // Crear un canvas temporal para manejar la rotación (si es necesaria)
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+
+    if (rotationAngle !== 0) {
+      // Ajustar las dimensiones del canvas para la rotación
+      tempCanvas.width = videoHeight;
+      tempCanvas.height = videoWidth;
+      tempCtx.save();
+      tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+      tempCtx.rotate((rotationAngle * Math.PI) / 180);
+      tempCtx.translate(-tempCanvas.height / 2, -tempCanvas.width / 2);
+      tempCtx.drawImage(img, 0, 0);
+      tempCtx.restore();
+
+      // Ajustar las coordenadas del recorte después de la rotación
+      const tempCropX = cropY;
+      const tempCropY = videoWidth - cropX - cropWidth;
+      cropX = tempCropX;
+      cropY = tempCropY;
+      const tempCropWidth = cropHeight;
+      const tempCropHeight = cropWidth;
+      cropWidth = tempCropWidth;
+      cropHeight = tempCropHeight;
+    } else {
+      // Sin rotación, usar las dimensiones originales
+      tempCanvas.width = videoWidth;
+      tempCanvas.height = videoHeight;
+      tempCtx.drawImage(img, 0, 0);
+    }
+
+    // Crear un canvas final para recortar la imagen
+    const finalCanvas = document.createElement('canvas');
+    const finalCtx = finalCanvas.getContext('2d');
+    finalCanvas.width = cropWidth;
+    finalCanvas.height = cropHeight;
+
+    // Dibujar la imagen recortada en el canvas final
+    finalCtx.drawImage(
+      tempCanvas,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      adjustedCropWidth,
-      adjustedCropHeight
+      cropWidth,
+      cropHeight
     );
 
     // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9);
+    const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
     console.log('Imagen recortada (base64):', croppedPhoto);
     setPhotoDataURL(croppedPhoto);
     setPhotoModalOpen(false);
@@ -177,7 +225,7 @@ const RegistrationForm = () => {
   };
 };
 
-  const handleCapturePhoto2 = () => {
+ const handleCapturePhoto2 = () => {
   if (!webcamRef.current) {
     console.error('Webcam no está inicializada');
     return;
@@ -207,49 +255,97 @@ const RegistrationForm = () => {
   const scaleY = videoHeight / webcamRect.height;
 
   // Calcular las coordenadas del cuadro de recorte relativas al video
-  const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
-  const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
-  const cropWidth = cropBoxRect.width * scaleX;
-  const cropHeight = cropBoxRect.height * scaleY;
+  let cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
+  let cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
+  let cropWidth = cropBoxRect.width * scaleX;
+  let cropHeight = cropBoxRect.height * scaleY;
+
+  // Forzar proporción 4:3 para el recorte
+  const targetAspectRatio = 4 / 3;
+  if (cropWidth / cropHeight > targetAspectRatio) {
+    // Si el recorte es más ancho de lo deseado, ajustar el ancho
+    cropWidth = cropHeight * targetAspectRatio;
+  } else {
+    // Si el recorte es más alto de lo deseado, ajustar la altura
+    cropHeight = cropWidth / targetAspectRatio;
+  }
+
+  // Recalcular cropX y cropY para centrar el recorte
+  cropX = (cropBoxRect.left - webcamRect.left + (cropBoxRect.width - cropWidth / scaleX) / 2) * scaleX;
+  cropY = (cropBoxRect.top - webcamRect.top + (cropBoxRect.height - cropHeight / scaleY) / 2) * scaleY;
 
   // Asegurarse de que las coordenadas estén dentro de los límites del video
-  const adjustedCropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
-  const adjustedCropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
-  const adjustedCropWidth = Math.min(cropWidth, videoWidth - adjustedCropX);
-  const adjustedCropHeight = Math.min(cropHeight, videoHeight - adjustedCropY);
+  cropX = Math.max(0, Math.min(cropX, videoWidth - cropWidth));
+  cropY = Math.max(0, Math.min(cropY, videoHeight - cropHeight));
+  cropWidth = Math.min(cropWidth, videoWidth - cropX);
+  cropHeight = Math.min(cropHeight, videoHeight - cropY);
 
   // Depuración: Imprimir valores para inspeccionar
   console.log('Dimensiones del video:', { videoWidth, videoHeight });
   console.log('Dimensiones del webcamRect:', { width: webcamRect.width, height: webcamRect.height });
   console.log('Escalas:', { scaleX, scaleY });
   console.log('Coordenadas del recorte:', { cropX, cropY, cropWidth, cropHeight });
-  console.log('Coordenadas ajustadas:', { adjustedCropX, adjustedCropY, adjustedCropWidth, adjustedCropHeight });
 
-  // Crear un canvas para recortar la imagen
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = adjustedCropWidth;
-  canvas.height = adjustedCropHeight;
-
-  // Cargar la imagen capturada en el canvas
+  // Cargar la imagen capturada para procesarla
   const img = new Image();
   img.src = photo2;
   img.onload = () => {
-    // Dibujar la imagen recortada en el canvas
-    ctx.drawImage(
-      img,
-      adjustedCropX,
-      adjustedCropY,
-      adjustedCropWidth,
-      adjustedCropHeight,
+    // Detectar la orientación del dispositivo y determinar si se necesita rotación
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const rotationAngle = facingMode === 'environment' && isPortrait ? 90 : 0;
+
+    // Crear un canvas temporal para manejar la rotación (si es necesaria)
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+
+    if (rotationAngle !== 0) {
+      // Ajustar las dimensiones del canvas para la rotación
+      tempCanvas.width = videoHeight;
+      tempCanvas.height = videoWidth;
+      tempCtx.save();
+      tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+      tempCtx.rotate((rotationAngle * Math.PI) / 180);
+      tempCtx.translate(-tempCanvas.height / 2, -tempCanvas.width / 2);
+      tempCtx.drawImage(img, 0, 0);
+      tempCtx.restore();
+
+      // Ajustar las coordenadas del recorte después de la rotación
+      const tempCropX = cropY;
+      const tempCropY = videoWidth - cropX - cropWidth;
+      cropX = tempCropX;
+      cropY = tempCropY;
+      const tempCropWidth = cropHeight;
+      const tempCropHeight = cropWidth;
+      cropWidth = tempCropWidth;
+      cropHeight = tempCropHeight;
+    } else {
+      // Sin rotación, usar las dimensiones originales
+      tempCanvas.width = videoWidth;
+      tempCanvas.height = videoHeight;
+      tempCtx.drawImage(img, 0, 0);
+    }
+
+    // Crear un canvas final para recortar la imagen
+    const finalCanvas = document.createElement('canvas');
+    const finalCtx = finalCanvas.getContext('2d');
+    finalCanvas.width = cropWidth;
+    finalCanvas.height = cropHeight;
+
+    // Dibujar la imagen recortada en el canvas final
+    finalCtx.drawImage(
+      tempCanvas,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      adjustedCropWidth,
-      adjustedCropHeight
+      cropWidth,
+      cropHeight
     );
 
     // Convertir el canvas a base64 y guardarlo en el estado
-    const croppedPhoto = canvas.toDataURL('image/jpeg', 0.9);
+    const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
     console.log('Imagen recortada (base64):', croppedPhoto);
     setPhoto2DataURL(croppedPhoto);
     setPhoto2ModalOpen(false);
@@ -456,42 +552,70 @@ const RegistrationForm = () => {
               )}
             </Box>
             {signatureDataURL && (
-              <Box mt={2}>
-                <Button
-                  onClick={() => setPhotoModalOpen(true)}
-                  variant="outlined"
-                  color="primary"
-                >
-                  Cédula frontal
-                </Button>
-                {photoDataURL && (
-                  <img
-                    src={photoDataURL}
-                    alt="Cédula frontal"
-                    style={{ width: '100%', marginTop: 10 }}
-                  />
-                )}
-              </Box>
-            )}
-            {photoDataURL && (
-              <Box mt={2}>
-                <Button
-                  onClick={() => setPhoto2ModalOpen(true)}
-                  variant="outlined"
-                  color="primary"
-                >
-                  Cédula posterior
-                </Button>
-                {photo2DataURL && (
-                  <img
-                    kısa
-                    src={photo2DataURL}
-                    alt="Cédula Posterior 2"
-                    style={{ width: '100%', marginTop: 10 }}
-                  />
-                )}
-              </Box>
-            )}
+  <Box mt={2}>
+    {/* Sección de CÉDULA FRONTAL */}
+    <Box
+      sx={{
+        width: '100%',
+        height: '200px',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        border: '1px solid #1976d2', // Borde azul para coincidir con el color del botón
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        backgroundColor: photoDataURL ? 'transparent' : '#fff',
+      }}
+      onClick={() => setPhotoModalOpen(true)}
+    >
+      {photoDataURL ? (
+        <img
+          src={photoDataURL}
+          alt="Cédula Frontal"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      ) : (
+        <Typography variant="body2" color="textSecondary">
+          CÉDULA FRONTAL
+        </Typography>
+      )}
+    </Box>
+  </Box>
+)}
+
+{photoDataURL && (
+  <Box mt={2}>
+    {/* Sección de CÉDULA POSTERIOR */}
+    <Box
+      sx={{
+        width: '100%',
+        height: '200px',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        border: '1px solid #1976d2', // Borde azul para coincidir con el color del botón
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        backgroundColor: photo2DataURL ? 'transparent' : '#fff',
+      }}
+      onClick={() => setPhoto2ModalOpen(true)}
+    >
+      {photo2DataURL ? (
+        <img
+          src={photo2DataURL}
+          alt="Cédula Posterior"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      ) : (
+        <Typography variant="body2" color="textSecondary">
+          CÉDULA POSTERIOR
+        </Typography>
+      )}
+    </Box>
+  </Box>
+)}
 
             <FormControlLabel
               control={
@@ -782,7 +906,7 @@ const RegistrationForm = () => {
       </Dialog>
 
       {/* Modal para tomar foto 1 */}
-    <Dialog
+  <Dialog
   open={isPhotoModalOpen}
   onClose={() => setPhotoModalOpen(false)}
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
@@ -795,7 +919,7 @@ const RegistrationForm = () => {
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
-        videoConstraints={{ width: 1280, height: 720, facingMode, aspectRatio: 16/9 }}
+        videoConstraints={{ width: 1280, height: 960, facingMode, aspectRatio: 4/3 }}
         style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
@@ -805,7 +929,7 @@ const RegistrationForm = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '270px',
+          width: '240px',
           height: '180px',
           border: '2px dashed #fff',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -837,7 +961,6 @@ const RegistrationForm = () => {
     </IconButton>
   </DialogActions>
 </Dialog>
-
       {/* Modal para tomar foto 2 */}
     <Dialog
   open={isPhoto2ModalOpen}
@@ -852,7 +975,7 @@ const RegistrationForm = () => {
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         width="100%"
-        videoConstraints={{ width: 1280, height: 720, facingMode, aspectRatio: 16/9 }}
+        videoConstraints={{ width: 1280, height: 960, facingMode, aspectRatio: 4/3 }}
         style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
@@ -862,7 +985,7 @@ const RegistrationForm = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '270px',
+          width: '240px',
           height: '180px',
           border: '2px dashed #fff',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
