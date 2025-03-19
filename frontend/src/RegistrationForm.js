@@ -102,35 +102,29 @@ const handleCapturePhoto = () => {
     return;
   }
 
-  // Obtener el elemento del cuadro de recorte
   const cropBox = cropBoxRef.current;
   if (!cropBox) {
     console.error('Cuadro de recorte no encontrado');
     return;
   }
 
-  // Obtener las dimensiones y posición del cuadro de recorte en la pantalla
   const cropBoxRect = cropBox.getBoundingClientRect();
-  const cropWidth = cropBoxRect.width; // 240px
-  const cropHeight = cropBoxRect.height; // 180px
+  const cropWidth = cropBoxRect.width;
+  const cropHeight = cropBoxRect.height;
 
-  // Obtener el elemento del video (Webcam)
   const webcamVideo = webcamRef.current.video;
-  const videoWidth = webcamVideo.videoWidth; // 1280px
-  const videoHeight = webcamVideo.videoHeight; // 960px
+  const videoWidth = webcamVideo.videoWidth;
+  const videoHeight = webcamVideo.videoHeight;
   const webcamRect = webcamVideo.getBoundingClientRect();
 
-  // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
-  const scaleX = videoWidth / webcamRect.width; // 1280 / 334 ≈ 3.83
-  const scaleY = videoHeight / webcamRect.height; // 960 / 300 = 3.2
+  const scaleX = videoWidth / webcamRect.width;
+  const scaleY = videoHeight / webcamRect.height;
 
-  // Calcular las coordenadas del cuadro de recorte relativas al video original
   const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
   const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
-  const cropWidthInVideo = cropWidth * scaleX; // 240 * 3.83 ≈ 919px
-  const cropHeightInVideo = cropHeight * scaleY; // 180 * 3.2 = 576px
+  const cropWidthInVideo = cropWidth * scaleX;
+  const cropHeightInVideo = cropHeight * scaleY;
 
-  // Depuración: Imprimir valores para inspeccionar
   console.log('Dimensiones del video:', { videoWidth, videoHeight });
   console.log('Dimensiones del cuadro de recorte en pantalla:', { width: cropWidth, height: cropHeight });
   console.log('Dimensiones del cuadro de recorte en el video:', { width: cropWidthInVideo, height: cropHeightInVideo });
@@ -138,29 +132,26 @@ const handleCapturePhoto = () => {
   console.log('Dimensiones del Webcam en pantalla:', { width: webcamRect.width, height: webcamRect.height });
   console.log('Escalas:', { scaleX, scaleY });
 
-  // Crear un canvas final para recortar el área del cuadro directamente desde el video
   const finalCanvas = document.createElement('canvas');
   const finalCtx = finalCanvas.getContext('2d');
-  // Aumentar la resolución del canvas final (16 veces las dimensiones del cuadro de recorte)
-  const scaleFactor = 16; // 16 veces la resolución
-  finalCanvas.width = cropWidth * scaleFactor; // 240 * 16 = 3840px
-  finalCanvas.height = cropHeight * scaleFactor; // 180 * 16 = 2880px
+  const scaleFactor = 4; // Reducir el factor de escalado para mantener calidad
+  finalCanvas.width = cropWidth * scaleFactor;
+  finalCanvas.height = cropHeight * scaleFactor;
 
-  // Recortar el área del cuadro de recorte directamente desde el video y escalarla
+  finalCtx.imageSmoothingEnabled = false; // Desactivar suavizado para mantener nitidez
   finalCtx.drawImage(
-    webcamVideo, // Usar el video original
-    cropX, // Posición X en el video
-    cropY, // Posición Y en el video
-    cropWidthInVideo, // Ancho del área en el video
-    cropHeightInVideo, // Alto del área en el video
-    0, // Posición X en el canvas final
-    0, // Posición Y en el canvas final
-    cropWidth * scaleFactor, // Ancho escalado en el canvas final
-    cropHeight * scaleFactor // Alto escalado en el canvas final
+    webcamVideo,
+    cropX,
+    cropY,
+    cropWidthInVideo,
+    cropHeightInVideo,
+    0,
+    0,
+    cropWidth * scaleFactor,
+    cropHeight * scaleFactor
   );
 
-  // Convertir el canvas a base64 (usar PNG para evitar compresión)
-  const croppedPhoto = finalCanvas.toDataURL('image/png');
+  const croppedPhoto = finalCanvas.toDataURL('image/png', 1.0); // Usar PNG con máxima calidad
   console.log('Dimensiones del canvas final:', { width: finalCanvas.width, height: finalCanvas.height });
   console.log('Imagen recortada (base64):', croppedPhoto);
   setPhotoDataURL(croppedPhoto);
@@ -175,35 +166,29 @@ const handleCapturePhoto2 = () => {
     return;
   }
 
-  // Obtener el elemento del cuadro de recorte
   const cropBox = cropBoxRef.current;
   if (!cropBox) {
     console.error('Cuadro de recorte no encontrado');
     return;
   }
 
-  // Obtener las dimensiones y posición del cuadro de recorte en la pantalla
   const cropBoxRect = cropBox.getBoundingClientRect();
-  const cropWidth = cropBoxRect.width; // 240px
-  const cropHeight = cropBoxRect.height; // 180px
+  const cropWidth = cropBoxRect.width;
+  const cropHeight = cropBoxRect.height;
 
-  // Obtener el elemento del video (Webcam)
   const webcamVideo = webcamRef.current.video;
-  const videoWidth = webcamVideo.videoWidth; // 1280px
-  const videoHeight = webcamVideo.videoHeight; // 960px
+  const videoWidth = webcamVideo.videoWidth;
+  const videoHeight = webcamVideo.videoHeight;
   const webcamRect = webcamVideo.getBoundingClientRect();
 
-  // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
-  const scaleX = videoWidth / webcamRect.width; // 1280 / 334 ≈ 3.83
-  const scaleY = videoHeight / webcamRect.height; // 960 / 300 = 3.2
+  const scaleX = videoWidth / webcamRect.width;
+  const scaleY = videoHeight / webcamRect.height;
 
-  // Calcular las coordenadas del cuadro de recorte relativas al video original
   const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
   const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
-  const cropWidthInVideo = cropWidth * scaleX; // 240 * 3.83 ≈ 919px
-  const cropHeightInVideo = cropHeight * scaleY; // 180 * 3.2 = 576px
+  const cropWidthInVideo = cropWidth * scaleX;
+  const cropHeightInVideo = cropHeight * scaleY;
 
-  // Depuración: Imprimir valores para inspeccionar
   console.log('Dimensiones del video:', { videoWidth, videoHeight });
   console.log('Dimensiones del cuadro de recorte en pantalla:', { width: cropWidth, height: cropHeight });
   console.log('Dimensiones del cuadro de recorte en el video:', { width: cropWidthInVideo, height: cropHeightInVideo });
@@ -211,29 +196,26 @@ const handleCapturePhoto2 = () => {
   console.log('Dimensiones del Webcam en pantalla:', { width: webcamRect.width, height: webcamRect.height });
   console.log('Escalas:', { scaleX, scaleY });
 
-  // Crear un canvas final para recortar el área del cuadro directamente desde el video
   const finalCanvas = document.createElement('canvas');
   const finalCtx = finalCanvas.getContext('2d');
-  // Aumentar la resolución del canvas final (16 veces las dimensiones del cuadro de recorte)
-  const scaleFactor = 16; // 16 veces la resolución
-  finalCanvas.width = cropWidth * scaleFactor; // 240 * 16 = 3840px
-  finalCanvas.height = cropHeight * scaleFactor; // 180 * 16 = 2880px
+  const scaleFactor = 4; // Reducir el factor de escalado
+  finalCanvas.width = cropWidth * scaleFactor;
+  finalCanvas.height = cropHeight * scaleFactor;
 
-  // Recortar el área del cuadro de recorte directamente desde el video y escalarla
+  finalCtx.imageSmoothingEnabled = false; // Desactivar suavizado
   finalCtx.drawImage(
-    webcamVideo, // Usar el video original
-    cropX, // Posición X en el video
-    cropY, // Posición Y en el video
-    cropWidthInVideo, // Ancho del área en el video
-    cropHeightInVideo, // Alto del área en el video
-    0, // Posición X en el canvas final
-    0, // Posición Y en el canvas final
-    cropWidth * scaleFactor, // Ancho escalado en el canvas final
-    cropHeight * scaleFactor // Alto escalado en el canvas final
+    webcamVideo,
+    cropX,
+    cropY,
+    cropWidthInVideo,
+    cropHeightInVideo,
+    0,
+    0,
+    cropWidth * scaleFactor,
+    cropHeight * scaleFactor
   );
 
-  // Convertir el canvas a base64 (usar PNG para evitar compresión)
-  const croppedPhoto = finalCanvas.toDataURL('image/png');
+  const croppedPhoto = finalCanvas.toDataURL('image/png', 1.0); // Usar PNG con máxima calidad
   console.log('Dimensiones del canvas final:', { width: finalCanvas.width, height: finalCanvas.height });
   console.log('Imagen recortada (base64):', croppedPhoto);
   setPhoto2DataURL(croppedPhoto);
@@ -445,8 +427,8 @@ const handleCapturePhoto2 = () => {
     <Box
       sx={{
         width: '100%',
-        aspectRatio: '4 / 3', // Mantener proporción 4:3
-        maxWidth: '3840px', // Aumentar el ancho máximo para coincidir con la resolución de la imagen
+        aspectRatio: '5 / 3', // Ajustar proporción para que coincida con el cuadro de recorte
+        maxWidth: '3840px',
         borderRadius: '8px',
         overflow: 'hidden',
         border: '1px solid #1976d2',
@@ -467,7 +449,7 @@ const handleCapturePhoto2 = () => {
             width: '100%',
             height: '100%',
             objectFit: 'contain',
-            imageRendering: 'pixelated', // Evitar que el navegador aplique suavizado
+            imageRendering: 'pixelated',
           }}
         />
       ) : (
@@ -485,8 +467,8 @@ const handleCapturePhoto2 = () => {
     <Box
       sx={{
         width: '100%',
-        aspectRatio: '4 / 3', // Mantener proporción 4:3
-        maxWidth: '3840px', // Aumentar el ancho máximo para coincidir con la resolución de la imagen
+        aspectRatio: '5 / 3', // Ajustar proporción
+        maxWidth: '3840px',
         borderRadius: '8px',
         overflow: 'hidden',
         border: '1px solid #1976d2',
@@ -507,7 +489,7 @@ const handleCapturePhoto2 = () => {
             width: '100%',
             height: '100%',
             objectFit: 'contain',
-            imageRendering: 'pixelated', // Evitar que el navegador aplique suavizado
+            imageRendering: 'pixelated',
           }}
         />
       ) : (
@@ -819,9 +801,14 @@ const handleCapturePhoto2 = () => {
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/jpeg"
+        screenshotFormat="image/png"
         width="100%"
-        videoConstraints={{ width: 1280, height: 960, facingMode, aspectRatio: 4/3 }}
+        videoConstraints={{
+          facingMode,
+          aspectRatio: 5/3,
+          width: { ideal: 1920 },
+          height: { ideal: 1440 },
+        }}
         style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
@@ -831,7 +818,7 @@ const handleCapturePhoto2 = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '240px',
+          width: '300px',
           height: '180px',
           border: '2px dashed #fff',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -863,8 +850,9 @@ const handleCapturePhoto2 = () => {
     </IconButton>
   </DialogActions>
 </Dialog>
-      {/* Modal para tomar foto 2 */}
-    <Dialog
+      
+{/* Modal para tomar foto 2 */}
+   <Dialog
   open={isPhoto2ModalOpen}
   onClose={() => setPhoto2ModalOpen(false)}
   sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
@@ -875,9 +863,14 @@ const handleCapturePhoto2 = () => {
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/jpeg"
+        screenshotFormat="image/png"
         width="100%"
-        videoConstraints={{ width: 1280, height: 960, facingMode, aspectRatio: 4/3 }}
+        videoConstraints={{
+          facingMode,
+          aspectRatio: 5/3,
+          width: { ideal: 1920 },
+          height: { ideal: 1440 },
+        }}
         style={{ borderRadius: '8px', width: '100%', height: '300px', objectFit: 'cover' }}
       />
       <Box
@@ -887,7 +880,7 @@ const handleCapturePhoto2 = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '240px',
+          width: '300px',
           height: '180px',
           border: '2px dashed #fff',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
