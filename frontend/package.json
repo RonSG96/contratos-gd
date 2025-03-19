@@ -16,7 +16,7 @@
     "react-signature-canvas": "^1.0.5",
     "react-webcam": "^7.0.1",
     "web-vitals": "^2.1.4",
-    "serve": "^14.0.1"
+    "serve": "^14.0.1",
     "lodash": "^4.17.21" 
   },
   "scripts": {
