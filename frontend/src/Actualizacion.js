@@ -36,13 +36,14 @@ const Actualizacion = () => {
   const [isPhoto2ModalOpen, setPhoto2ModalOpen] = useState(false);
   const sigCanvas = useRef({});
   const webcamRef = useRef(null);
+  const cropBoxRef = useRef(null); // Nueva referencia para el cuadro de recorte
   const [firma, setFirma] = useState(null);
   const [foto, setFoto] = useState(null);
   const [foto2, setFoto2] = useState(null);
   const [isAgreementChecked, setAgreementChecked] = useState(false);
-  const [facingMode, setFacingMode] = useState('user');
+  const [facingMode, setFacingMode] = useState('environment'); // Cambiado a 'environment' como en RegistrationForm.js
   const [rotation, setRotation] = useState(0);
-  const [isDataUpdated, setIsDataUpdated] = useState(false); // Nuevo estado para is_data_updated
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
 
   const buscarUsuario = async () => {
     try {
@@ -56,13 +57,13 @@ const Actualizacion = () => {
         setFirma(null);
         setFoto(null);
         setFoto2(null);
-        setIsDataUpdated(false); // Resetear al buscar un usuario no encontrado
+        setIsDataUpdated(false);
       } else {
         setUserData(data);
         setFirma(data.firma_blob ? `data:image/jpeg;base64,${data.firma_blob}` : null);
         setFoto(data.foto_blob ? `data:image/jpeg;base64,${data.foto_blob}` : null);
         setFoto2(data.foto_2_blob ? `data:image/jpeg;base64,${data.foto_2_blob}` : null);
-        setIsDataUpdated(data.is_data_updated || false); // Inicializar con el valor del servidor
+        setIsDataUpdated(data.is_data_updated || false);
       }
     } catch (error) {
       console.error('Error al buscar usuario:', error);
@@ -76,20 +77,142 @@ const Actualizacion = () => {
     setSignatureModalOpen(false);
   };
 
+  const toggleCamera = useCallback(() => {
+    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
+  }, []);
+
+  const rotateCamera = () => {
+    setRotation((prev) => (prev + 90) % 360);
+  };
+
   const handleCapturePhoto = () => {
-    const photo = webcamRef.current.getScreenshot();
-    if (photo) {
-      setFoto(photo);
-      setPhotoModalOpen(false);
+    if (!webcamRef.current) {
+      console.error('Webcam no está inicializada');
+      return;
     }
+
+    const cropBox = cropBoxRef.current;
+    if (!cropBox) {
+      console.error('Cuadro de recorte no encontrado');
+      return;
+    }
+
+    const cropBoxRect = cropBox.getBoundingClientRect();
+    const cropWidth = cropBoxRect.width;
+    const cropHeight = cropBoxRect.height;
+
+    const webcamVideo = webcamRef.current.video;
+    const videoWidth = webcamVideo.videoWidth;
+    const videoHeight = webcamVideo.videoHeight;
+    const webcamRect = webcamVideo.getBoundingClientRect();
+
+    const scaleX = videoWidth / webcamRect.width;
+    const scaleY = videoHeight / webcamRect.height;
+
+    const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
+    const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
+    const cropWidthInVideo = cropWidth * scaleX;
+    const cropHeightInVideo = cropHeight * scaleY;
+
+    console.log('Dimensiones del video:', { videoWidth, videoHeight });
+    console.log('Dimensiones del cuadro de recorte en pantalla:', { width: cropWidth, height: cropHeight });
+    console.log('Dimensiones del cuadro de recorte en el video:', { width: cropWidthInVideo, height: cropHeightInVideo });
+    console.log('Posición del cuadro de recorte en el video:', { cropX, cropY });
+    console.log('Dimensiones del Webcam en pantalla:', { width: webcamRect.width, height: webcamRect.height });
+    console.log('Escalas:', { scaleX, scaleY });
+
+    const finalCanvas = document.createElement('canvas');
+    const finalCtx = finalCanvas.getContext('2d');
+    const scaleFactor = 4;
+    finalCanvas.width = cropWidth * scaleFactor;
+    finalCanvas.height = cropHeight * scaleFactor;
+
+    finalCtx.imageSmoothingEnabled = false;
+    finalCtx.translate(finalCanvas.width / 2, finalCanvas.height / 2);
+    finalCtx.rotate((rotation * Math.PI) / 180);
+    finalCtx.translate(-finalCanvas.width / 2, -finalCanvas.height / 2);
+    finalCtx.drawImage(
+      webcamVideo,
+      cropX,
+      cropY,
+      cropWidthInVideo,
+      cropHeightInVideo,
+      0,
+      0,
+      cropWidth * scaleFactor,
+      cropHeight * scaleFactor
+    );
+
+    const croppedPhoto = finalCanvas.toDataURL('image/png', 1.0);
+    console.log('Dimensiones del canvas final:', { width: finalCanvas.width, height: finalCanvas.height });
+    console.log('Imagen recortada (base64):', croppedPhoto);
+    setFoto(croppedPhoto);
+    setPhotoModalOpen(false);
   };
 
   const handleCapturePhoto2 = () => {
-    const photo2 = webcamRef.current.getScreenshot();
-    if (photo2) {
-      setFoto2(photo2);
-      setPhoto2ModalOpen(false);
+    if (!webcamRef.current) {
+      console.error('Webcam no está inicializada');
+      return;
     }
+
+    const cropBox = cropBoxRef.current;
+    if (!cropBox) {
+      console.error('Cuadro de recorte no encontrado');
+      return;
+    }
+
+    const cropBoxRect = cropBox.getBoundingClientRect();
+    const cropWidth = cropBoxRect.width;
+    const cropHeight = cropBoxRect.height;
+
+    const webcamVideo = webcamRef.current.video;
+    const videoWidth = webcamVideo.videoWidth;
+    const videoHeight = webcamVideo.videoHeight;
+    const webcamRect = webcamVideo.getBoundingClientRect();
+
+    const scaleX = videoWidth / webcamRect.width;
+    const scaleY = videoHeight / webcamRect.height;
+
+    const cropX = (cropBoxRect.left - webcamRect.left) * scaleX;
+    const cropY = (cropBoxRect.top - webcamRect.top) * scaleY;
+    const cropWidthInVideo = cropWidth * scaleX;
+    const cropHeightInVideo = cropHeight * scaleY;
+
+    console.log('Dimensiones del video:', { videoWidth, videoHeight });
+    console.log('Dimensiones del cuadro de recorte en pantalla:', { width: cropWidth, height: cropHeight });
+    console.log('Dimensiones del cuadro de recorte en el video:', { width: cropWidthInVideo, height: cropHeightInVideo });
+    console.log('Posición del cuadro de recorte en el video:', { cropX, cropY });
+    console.log('Dimensiones del Webcam en pantalla:', { width: webcamRect.width, height: webcamRect.height });
+    console.log('Escalas:', { scaleX, scaleY });
+
+    const finalCanvas = document.createElement('canvas');
+    const finalCtx = finalCanvas.getContext('2d');
+    const scaleFactor = 4;
+    finalCanvas.width = cropWidth * scaleFactor;
+    finalCanvas.height = cropHeight * scaleFactor;
+
+    finalCtx.imageSmoothingEnabled = false;
+    finalCtx.translate(finalCanvas.width / 2, finalCanvas.height / 2);
+    finalCtx.rotate((rotation * Math.PI) / 180);
+    finalCtx.translate(-finalCanvas.width / 2, -finalCanvas.height / 2);
+    finalCtx.drawImage(
+      webcamVideo,
+      cropX,
+      cropY,
+      cropWidthInVideo,
+      cropHeightInVideo,
+      0,
+      0,
+      cropWidth * scaleFactor,
+      cropHeight * scaleFactor
+    );
+
+    const croppedPhoto = finalCanvas.toDataURL('image/png', 1.0);
+    console.log('Dimensiones del canvas final:', { width: finalCanvas.width, height: finalCanvas.height });
+    console.log('Imagen recortada (base64):', croppedPhoto);
+    setFoto2(croppedPhoto);
+    setPhoto2ModalOpen(false);
   };
 
   const actualizarDatos = async () => {
@@ -113,7 +236,6 @@ const Actualizacion = () => {
         alert(
           'Datos actualizados correctamente. Gracias por ser parte de Gimnasios Dorian.'
         );
-        // Recargar los datos del usuario para reflejar is_data_updated
         const updatedResponse = await fetch(
           `https://contratos-backend.onrender.com/api/actualizacion/${cedula}`
         );
@@ -122,8 +244,8 @@ const Actualizacion = () => {
         setFirma(updatedData.firma_blob ? `data:image/jpeg;base64,${updatedData.firma_blob}` : null);
         setFoto(updatedData.foto_blob ? `data:image/jpeg;base64,${updatedData.foto_blob}` : null);
         setFoto2(updatedData.foto_2_blob ? `data:image/jpeg;base64,${updatedData.foto_2_blob}` : null);
-        setIsDataUpdated(updatedData.is_data_updated || true); // Actualizar el estado
-        setAgreementChecked(false); // Resetear el checkbox
+        setIsDataUpdated(updatedData.is_data_updated || true);
+        setAgreementChecked(false);
       } else {
         alert(result.message || 'Error al actualizar los datos.');
       }
@@ -131,18 +253,6 @@ const Actualizacion = () => {
       console.error('Error al actualizar datos:', error);
       alert('Hubo un problema al actualizar los datos.');
     }
-  };
-
-  const toggleCamera = () => {
-    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
-  };
-
-  const rotateCamera = () => {
-    setRotation((prev) => (prev + 90) % 360);
-  };
-
-  const videoConstraints = {
-    facingMode: facingMode,
   };
 
   return (
@@ -308,63 +418,87 @@ const Actualizacion = () => {
                 variant="contained"
                 color="secondary"
                 onClick={() => setSignatureModalOpen(true)}
-                disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
+                disabled={isDataUpdated}
                 sx={{ mt: 1 }}
               >
                 Actualizar Firma
               </Button>
             </Box>
 
-            <Box mt={3} textAlign="center">
-              <Typography variant="h6" color="textSecondary">
-                Foto 1 (Frente de Cédula)
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+            <Box mt={2}>
+              {/* Sección de CÉDULA FRONTAL */}
+              <Box
+                sx={{
+                  width: '100%',
+                  aspectRatio: '5 / 3',
+                  maxWidth: '3840px',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  border: '1px solid #1976d2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: foto ? 'transparent' : '#fff',
+                  margin: '0 auto',
+                }}
+                onClick={() => setPhotoModalOpen(true)}
+              >
                 {foto ? (
                   <img
                     src={foto}
-                    alt="Foto 1"
-                    style={{ width: '150px', borderRadius: '8px', marginTop: '10px' }}
+                    alt="Cédula Frontal"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      imageRendering: 'pixelated',
+                    }}
                   />
                 ) : (
-                  <Typography color="textSecondary">No disponible</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    CÉDULA FRONTAL
+                  </Typography>
                 )}
               </Box>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setPhotoModalOpen(true)}
-                disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
-                sx={{ mt: 1 }}
-              >
-                Actualizar Foto 1
-              </Button>
             </Box>
 
-            <Box mt={3} textAlign="center">
-              <Typography variant="h6" color="textSecondary">
-                Foto 2 (Reverso de Cédula)
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+            <Box mt={2}>
+              {/* Sección de CÉDULA POSTERIOR */}
+              <Box
+                sx={{
+                  width: '100%',
+                  aspectRatio: '5 / 3',
+                  maxWidth: '3840px',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  border: '1px solid #1976d2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: foto2 ? 'transparent' : '#fff',
+                  margin: '0 auto',
+                }}
+                onClick={() => setPhoto2ModalOpen(true)}
+              >
                 {foto2 ? (
                   <img
                     src={foto2}
-                    alt="Foto 2"
-                    style={{ width: '150px', borderRadius: '8px', marginTop: '10px' }}
+                    alt="Cédula Posterior"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      imageRendering: 'pixelated',
+                    }}
                   />
                 ) : (
-                  <Typography color="textSecondary">No disponible</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    CÉDULA POSTERIOR
+                  </Typography>
                 )}
               </Box>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setPhoto2ModalOpen(true)}
-                disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
-                sx={{ mt: 1 }}
-              >
-                Actualizar Foto 2
-              </Button>
             </Box>
 
             <Box mt={3} textAlign="center">
@@ -374,7 +508,7 @@ const Actualizacion = () => {
                     checked={isAgreementChecked}
                     onChange={(e) => setAgreementChecked(e.target.checked)}
                     color="primary"
-                    disabled={isDataUpdated} // Deshabilitar si isDataUpdated es true
+                    disabled={isDataUpdated}
                   />
                 }
                 label={
@@ -390,7 +524,7 @@ const Actualizacion = () => {
                 variant="contained"
                 color="primary"
                 onClick={actualizarDatos}
-                disabled={!isAgreementChecked || !firma || !foto || !foto2 || isDataUpdated} // Deshabilitar si isDataUpdated es true
+                disabled={!isAgreementChecked || !firma || !foto || !foto2 || isDataUpdated}
                 sx={{ px: 4, py: 1 }}
               >
                 Finalizar
@@ -614,7 +748,7 @@ const Actualizacion = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal para firmar */}
+     {/* Modal para firmar */}
       <Dialog
         open={isSignatureModalOpen}
         onClose={() => setSignatureModalOpen(false)}
@@ -663,18 +797,45 @@ const Actualizacion = () => {
       <Dialog
         open={isPhotoModalOpen}
         onClose={() => setPhotoModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
       >
-        <DialogTitle>Tomar Foto 1 (Frente de Cédula)</DialogTitle>
-        <DialogContent>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="100%"
-            videoConstraints={videoConstraints}
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
-          />
+        <DialogTitle>Cédula Frontal</DialogTitle>
+        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
+          <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '300px', overflow: 'hidden' }}>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/png"
+              width="100%"
+              videoConstraints={{
+                facingMode,
+                aspectRatio: 5/3,
+                width: { ideal: 1920 },
+                height: { ideal: 1440 },
+              }}
+              style={{
+                borderRadius: '8px',
+                width: '100%',
+                height: '300px',
+                objectFit: 'cover',
+                transform: `rotate(${rotation}deg)`,
+              }}
+            />
+            <Box
+              ref={cropBoxRef}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '300px',
+                height: '180px',
+                border: '2px dashed #fff',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                pointerEvents: 'none',
+              }}
+            />
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
             <IconButton
               onClick={handleCapturePhoto}
@@ -692,6 +853,12 @@ const Actualizacion = () => {
             <SwitchCameraIcon sx={{ color: '#fff' }} />
           </IconButton>
           <IconButton
+            onClick={rotateCamera}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <RotateIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
             onClick={() => setPhotoModalOpen(false)}
             sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
           >
@@ -704,18 +871,45 @@ const Actualizacion = () => {
       <Dialog
         open={isPhoto2ModalOpen}
         onClose={() => setPhoto2ModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }}
+        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }}
       >
-        <DialogTitle>Tomar Foto 2 (Reverso de Cédula)</DialogTitle>
-        <DialogContent>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="100%"
-            videoConstraints={videoConstraints}
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
-          />
+        <DialogTitle>Cédula Posterior</DialogTitle>
+        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
+          <Box sx={{ position: 'relative', flex: '0 1 auto', maxHeight: '300px', overflow: 'hidden' }}>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/png"
+              width="100%"
+              videoConstraints={{
+                facingMode,
+                aspectRatio: 5/3,
+                width: { ideal: 1920 },
+                height: { ideal: 1440 },
+              }}
+              style={{
+                borderRadius: '8px',
+                width: '100%',
+                height: '300px',
+                objectFit: 'cover',
+                transform: `rotate(${rotation}deg)`,
+              }}
+            />
+            <Box
+              ref={cropBoxRef}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '300px',
+                height: '180px',
+                border: '2px dashed #fff',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                pointerEvents: 'none',
+              }}
+            />
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
             <IconButton
               onClick={handleCapturePhoto2}
@@ -731,6 +925,12 @@ const Actualizacion = () => {
             sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
           >
             <SwitchCameraIcon sx={{ color: '#fff' }} />
+          </IconButton>
+          <IconButton
+            onClick={rotateCamera}
+            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+          >
+            <RotateIcon sx={{ color: '#fff' }} />
           </IconButton>
           <IconButton
             onClick={() => setPhoto2ModalOpen(false)}
