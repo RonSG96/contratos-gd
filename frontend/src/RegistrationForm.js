@@ -139,10 +139,12 @@ const handleCapturePhoto = () => {
   // Crear un canvas final para recortar el área del cuadro
   const finalCanvas = document.createElement('canvas');
   const finalCtx = finalCanvas.getContext('2d');
-  finalCanvas.width = cropWidth;
-  finalCanvas.height = cropHeight;
+  // Aumentar la resolución del canvas final (duplicar las dimensiones)
+  const scaleFactor = 2; // Duplicar la resolución
+  finalCanvas.width = cropWidth * scaleFactor; // 240 * 2 = 480px
+  finalCanvas.height = cropHeight * scaleFactor; // 180 * 2 = 360px
 
-  // Recortar el área del cuadro de recorte desde el canvas temporal
+  // Recortar el área del cuadro de recorte desde el canvas temporal y escalarla
   finalCtx.drawImage(
     tempCanvas,
     offsetX, // Posición X del cuadro relativa al Webcam
@@ -151,12 +153,12 @@ const handleCapturePhoto = () => {
     cropHeight, // Alto del cuadro
     0, // Posición X en el canvas final
     0, // Posición Y en el canvas final
-    cropWidth, // Ancho en el canvas final
-    cropHeight // Alto en el canvas final
+    cropWidth * scaleFactor, // Ancho escalado en el canvas final
+    cropHeight * scaleFactor // Alto escalado en el canvas final
   );
 
   // Convertir el canvas a base64 y guardarlo en el estado
-  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
+  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 1.0); // Aumentar la calidad a 1.0
   console.log('Imagen recortada (base64):', croppedPhoto);
   setPhotoDataURL(croppedPhoto);
   setPhotoModalOpen(false);
@@ -207,10 +209,12 @@ const handleCapturePhoto2 = () => {
   // Crear un canvas final para recortar el área del cuadro
   const finalCanvas = document.createElement('canvas');
   const finalCtx = finalCanvas.getContext('2d');
-  finalCanvas.width = cropWidth;
-  finalCanvas.height = cropHeight;
+  // Aumentar la resolución del canvas final (duplicar las dimensiones)
+  const scaleFactor = 2; // Duplicar la resolución
+  finalCanvas.width = cropWidth * scaleFactor; // 240 * 2 = 480px
+  finalCanvas.height = cropHeight * scaleFactor; // 180 * 2 = 360px
 
-  // Recortar el área del cuadro de recorte desde el canvas temporal
+  // Recortar el área del cuadro de recorte desde el canvas temporal y escalarla
   finalCtx.drawImage(
     tempCanvas,
     offsetX, // Posición X del cuadro relativa al Webcam
@@ -219,19 +223,18 @@ const handleCapturePhoto2 = () => {
     cropHeight, // Alto del cuadro
     0, // Posición X en el canvas final
     0, // Posición Y en el canvas final
-    cropWidth, // Ancho en el canvas final
-    cropHeight // Alto en el canvas final
+    cropWidth * scaleFactor, // Ancho escalado en el canvas final
+    cropHeight * scaleFactor // Alto escalado en el canvas final
   );
 
   // Convertir el canvas a base64 y guardarlo en el estado
-  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 0.9);
+  const croppedPhoto = finalCanvas.toDataURL('image/jpeg', 1.0); // Aumentar la calidad a 1.0
   console.log('Imagen recortada (base64):', croppedPhoto);
   setPhoto2DataURL(croppedPhoto);
   setPhoto2ModalOpen(false);
   setPhoto2Taken(true);
   checkIfCanEnableAgree();
 };
-
   const checkIfCanEnableAgree = () => {
     if (signatureDataURL && photoDataURL && photo2DataURL) {
       setAgreeChecked(false);
@@ -435,15 +438,17 @@ const handleCapturePhoto2 = () => {
     <Box
       sx={{
         width: '100%',
-        height: '200px',
+        aspectRatio: '4 / 3', // Forzar proporción 4:3
+        maxWidth: '480px', // Ancho máximo igual a la resolución de la imagen
         borderRadius: '8px',
         overflow: 'hidden',
-        border: '1px solid #1976d2', // Borde azul para coincidir con el color del botón
+        border: '1px solid #1976d2',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         backgroundColor: photoDataURL ? 'transparent' : '#fff',
+        margin: '0 auto', // Centrar el contenedor
       }}
       onClick={() => setPhotoModalOpen(true)}
     >
@@ -451,7 +456,7 @@ const handleCapturePhoto2 = () => {
         <img
           src={photoDataURL}
           alt="Cédula Frontal"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }} // Cambiar a 'contain' para evitar distorsión
         />
       ) : (
         <Typography variant="body2" color="textSecondary">
@@ -468,15 +473,17 @@ const handleCapturePhoto2 = () => {
     <Box
       sx={{
         width: '100%',
-        height: '200px',
+        aspectRatio: '4 / 3', // Forzar proporción 4:3
+        maxWidth: '480px', // Ancho máximo igual a la resolución de la imagen
         borderRadius: '8px',
         overflow: 'hidden',
-        border: '1px solid #1976d2', // Borde azul para coincidir con el color del botón
+        border: '1px solid #1976d2',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         backgroundColor: photo2DataURL ? 'transparent' : '#fff',
+        margin: '0 auto', // Centrar el contenedor
       }}
       onClick={() => setPhoto2ModalOpen(true)}
     >
@@ -484,7 +491,7 @@ const handleCapturePhoto2 = () => {
         <img
           src={photo2DataURL}
           alt="Cédula Posterior"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }} // Cambiar a 'contain' para evitar distorsión
         />
       ) : (
         <Typography variant="body2" color="textSecondary">
