@@ -655,7 +655,7 @@ app.get('/download/:cedula', async (req, res) => {
   }
 
   // Añadir espacio entre la firma y las fotos
-  doc.moveDown(5);
+  doc.moveDown(7);
 
  // Definir dimensiones y posiciones para las fotos
   const photoWidth = 250; // Ancho de cada foto
