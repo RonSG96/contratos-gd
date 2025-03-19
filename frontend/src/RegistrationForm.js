@@ -18,7 +18,7 @@ import {
   DialogActions,
   Checkbox,
   FormControlLabel,
-  IconButton, // Correctamente importado
+  IconButton,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -59,6 +59,7 @@ const RegistrationForm = () => {
 
   const sigCanvas = useRef({});
   const webcamRef = useRef(null); // Usaremos una sola referencia para ambas cámaras
+  const cropBoxRef = useRef(null); // Nueva referencia para el cuadro de recorte
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -95,6 +96,7 @@ const RegistrationForm = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
   }, []);
 
+  // Modificado: Nueva función handleCapturePhoto con lógica de recorte
   const handleCapturePhoto = () => {
     if (!webcamRef.current) {
       console.error('Webcam no está inicializada');
@@ -107,13 +109,61 @@ const RegistrationForm = () => {
       return;
     }
 
-    // Quitamos la rotación automática para evitar que la imagen gire innecesariamente
-    setPhotoDataURL(photo);
-    setPhotoModalOpen(false);
-    setPhotoTaken(true);
-    checkIfCanEnableAgree();
+    // Obtener las dimensiones y posición del cuadro de recorte
+    const cropBox = cropBoxRef.current;
+    const cropBoxRect = cropBox.getBoundingClientRect();
+    const webcamVideo = webcamRef.current.video;
+    const videoWidth = webcamVideo.videoWidth;
+    const videoHeight = webcamVideo.videoHeight;
+
+    // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
+    const scaleX = videoWidth / webcamVideo.clientWidth;
+    const scaleY = videoHeight / webcamVideo.clientHeight;
+
+    const cropX = cropBoxRect.left - webcamVideo.getBoundingClientRect().left;
+    const cropY = cropBoxRect.top - webcamVideo.getBoundingClientRect().top;
+    const cropWidth = cropBoxRect.width;
+    const cropHeight = cropBoxRect.height;
+
+    // Ajustar las coordenadas y dimensiones según la escala del video
+    const adjustedCropX = cropX * scaleX;
+    const adjustedCropY = cropY * scaleY;
+    const adjustedCropWidth = cropWidth * scaleX;
+    const adjustedCropHeight = cropHeight * scaleY;
+
+    // Crear un canvas para recortar la imagen
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = adjustedCropWidth;
+    canvas.height = adjustedCropHeight;
+
+    // Cargar la imagen capturada en el canvas
+    const img = new Image();
+    img.src = photo;
+    img.onload = () => {
+      // Dibujar la imagen recortada en el canvas
+      ctx.drawImage(
+        img,
+        adjustedCropX,
+        adjustedCropY,
+        adjustedCropWidth,
+        adjustedCropHeight,
+        0,
+        0,
+        adjustedCropWidth,
+        adjustedCropHeight
+      );
+
+      // Convertir el canvas a base64 y guardarlo en el estado
+      const croppedPhoto = canvas.toDataURL('image/jpeg');
+      setPhotoDataURL(croppedPhoto);
+      setPhotoModalOpen(false);
+      setPhotoTaken(true);
+      checkIfCanEnableAgree();
+    };
   };
 
+  // Modificado: Nueva función handleCapturePhoto2 con lógica de recorte
   const handleCapturePhoto2 = () => {
     if (!webcamRef.current) {
       console.error('Webcam no está inicializada');
@@ -126,11 +176,58 @@ const RegistrationForm = () => {
       return;
     }
 
-    // Quitamos la rotación automática para evitar que la imagen gire innecesariamente
-    setPhoto2DataURL(photo2);
-    setPhoto2ModalOpen(false);
-    setPhoto2Taken(true);
-    checkIfCanEnableAgree();
+    // Obtener las dimensiones y posición del cuadro de recorte
+    const cropBox = cropBoxRef.current;
+    const cropBoxRect = cropBox.getBoundingClientRect();
+    const webcamVideo = webcamRef.current.video;
+    const videoWidth = webcamVideo.videoWidth;
+    const videoHeight = webcamVideo.videoHeight;
+
+    // Calcular las proporciones para mapear el cuadro de recorte a las dimensiones del video
+    const scaleX = videoWidth / webcamVideo.clientWidth;
+    const scaleY = videoHeight / webcamVideo.clientHeight;
+
+    const cropX = cropBoxRect.left - webcamVideo.getBoundingClientRect().left;
+    const cropY = cropBoxRect.top - webcamVideo.getBoundingClientRect().top;
+    const cropWidth = cropBoxRect.width;
+    const cropHeight = cropBoxRect.height;
+
+    // Ajustar las coordenadas y dimensiones según la escala del video
+    const adjustedCropX = cropX * scaleX;
+    const adjustedCropY = cropY * scaleY;
+    const adjustedCropWidth = cropWidth * scaleX;
+    const adjustedCropHeight = cropHeight * scaleY;
+
+    // Crear un canvas para recortar la imagen
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = adjustedCropWidth;
+    canvas.height = adjustedCropHeight;
+
+    // Cargar la imagen capturada en el canvas
+    const img = new Image();
+    img.src = photo2;
+    img.onload = () => {
+      // Dibujar la imagen recortada en el canvas
+      ctx.drawImage(
+        img,
+        adjustedCropX,
+        adjustedCropY,
+        adjustedCropWidth,
+        adjustedCropHeight,
+        0,
+        0,
+        adjustedCropWidth,
+        adjustedCropHeight
+      );
+
+      // Convertir el canvas a base64 y guardarlo en el estado
+      const croppedPhoto = canvas.toDataURL('image/jpeg');
+      setPhoto2DataURL(croppedPhoto);
+      setPhoto2ModalOpen(false);
+      setPhoto2Taken(true);
+      checkIfCanEnableAgree();
+    };
   };
 
   const checkIfCanEnableAgree = () => {
@@ -213,14 +310,17 @@ const RegistrationForm = () => {
         setPhotoTaken(false);
         setPhoto2Taken(false);
       } else {
-      // Mostrar el mensaje específico devuelto por el servidor
-      alert(result.message || 'Hubo un problema con el registro: Notificar en counter');
+        // Mostrar el mensaje específico devuelto por el servidor
+        alert(
+          result.message ||
+            'Hubo un problema con el registro: Notificar en counter'
+        );
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
     }
-  } catch (error) {
-    console.error('Error de red:', error);
-    alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
-  }
-};
+  };
 
   return (
     <Container component="main" className="registration-container">
@@ -359,7 +459,6 @@ const RegistrationForm = () => {
                 </Button>
                 {photo2DataURL && (
                   <img
-                    kısa
                     src={photo2DataURL}
                     alt="Cédula Posterior 2"
                     style={{ width: '100%', marginTop: 10 }}
@@ -579,18 +678,22 @@ const RegistrationForm = () => {
               <b>4. Incumplimiento</b>
               <br />
               <br />
-              <b>4.1.</b> En caso de incumplimiento, GIMNASIO DORIAN se reserva la posibilidad de expulsar a dicho usuario, sin restitución de gastos y sin perjuicio de las acciones legales que pudieran derivar.
+              <b>4.1.</b> En caso de incumplimiento, GIMNASIO DORIAN se reserva
+              la posibilidad de expulsar a dicho usuario, sin restitución de
+              gastos y sin perjuicio de las acciones legales que pudieran
+              derivar.
               <br />
               <br />
               <b>5. Política de Congelamiento de Planes</b>
               <br />
-              Los planes no serán sujetos a devoluciones o extensiones, y tendrán validez durante el tiempo y por el monto acordado.
+              Los planes no serán sujetos a devoluciones o extensiones, y
+              tendrán validez durante el tiempo y por el monto acordado.
               <br />
               <br />
               <b>Importante:</b> La siguiente firma y fotos de cédula del
               cliente la cual constituye prueba fehaciente del presente contrato
-              será declarada como correcta y veraz bajo su responsabilidad,
-              en virtud de la identificación presentada. En caso de discrepancia
+              será declarada como correcta y veraz bajo su responsabilidad, en
+              virtud de la identificación presentada. En caso de discrepancia
               entre la información registrada y los datos consignados en la
               cédula de ciudadanía, GIMNASIOS DORIAN se reserva el derecho de
               analizar la situación y adoptar las medidas legales y
@@ -612,7 +715,7 @@ const RegistrationForm = () => {
       </Dialog>
 
       {/* Modal para firmar */}
-     <Dialog
+      <Dialog
         open={isSignatureModalOpen}
         onClose={() => setSignatureModalOpen(false)}
         sx={{ '& .MuiDialog-paper': { borderRadius: '12px' } }} // Estilo consistente
@@ -637,48 +740,95 @@ const RegistrationForm = () => {
         <DialogActions>
           <IconButton
             onClick={handleClearSignature} // Cambiado a la función existente
-            sx={{ backgroundColor: '#ffeb3b', '&:hover': { backgroundColor: '#fdd835' } }}
+            sx={{
+              backgroundColor: '#ffeb3b',
+              '&:hover': { backgroundColor: '#fdd835' },
+            }}
           >
             <DeleteIcon sx={{ color: '#000' }} />
           </IconButton>
           <IconButton
             onClick={() => setSignatureModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+            sx={{
+              backgroundColor: '#f44336',
+              '&:hover': { backgroundColor: '#d32f2f' },
+            }}
           >
             <CloseIcon sx={{ color: '#fff' }} />
           </IconButton>
           <IconButton
             onClick={handleSaveSignature}
-            sx={{ backgroundColor: '#f28c38', '&:hover': { backgroundColor: '#e07b30' } }}
+            sx={{
+              backgroundColor: '#f28c38',
+              '&:hover': { backgroundColor: '#e07b30' },
+            }}
           >
             <SaveIcon sx={{ color: '#fff' }} />
           </IconButton>
         </DialogActions>
       </Dialog>
 
-      {/* Modal para tomar foto 1 */}
-      {/* Modal para tomar foto 1 */}
+      {/* Modal para tomar foto 1 - Modificado para agregar cuadro de recorte */}
       <Dialog
         open={isPhotoModalOpen}
         onClose={() => setPhotoModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }} // Reducir altura y ajustar ancho del modal
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: '12px',
+            maxHeight: '70vh',
+            width: '90%',
+            maxWidth: '400px',
+          },
+        }} // Reducir altura y ajustar ancho del modal
       >
         <DialogTitle>Cédula Frontal</DialogTitle>
-        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}> {/* Evitar scroll interno */}
-          <Box sx={{ flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}> {/* Limitar altura del contenedor del Webcam */}
+        <DialogContent
+          sx={{
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'hidden',
+          }}
+        >
+          <Box sx={{ position: 'relative', width: '100%', height: 'auto' }}>
             <Webcam
               audio={false}
               ref={webcamRef}
               screenshotFormat="image/jpeg"
               width="100%"
               videoConstraints={{ width: 1280, height: 720, facingMode }}
-              style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }} // Altura fija más pequeña
+              style={{
+                borderRadius: '8px',
+                width: '100%',
+                height: 'auto',
+                objectFit: 'cover',
+              }} // Ajustado para mejor proporción
+            />
+            {/* Cuadro de recorte */}
+            <Box
+              ref={cropBoxRef}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '80%', // Ajusta según el tamaño deseado
+                height: '50%', // Ajusta según el tamaño deseado
+                border: '2px dashed #fff',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                pointerEvents: 'none', // Para que no interfiera con los eventos del webcam
+              }}
             />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}
+          >
             <IconButton
               onClick={handleCapturePhoto}
-              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+              sx={{
+                backgroundColor: '#1976d2',
+                '&:hover': { backgroundColor: '#1565c0' },
+              }}
             >
               <CameraIcon sx={{ color: '#fff' }} />
             </IconButton>
@@ -687,41 +837,86 @@ const RegistrationForm = () => {
         <DialogActions>
           <IconButton
             onClick={toggleCamera}
-            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+            sx={{
+              backgroundColor: '#1976d2',
+              '&:hover': { backgroundColor: '#1565c0' },
+            }}
           >
             <SwitchCameraIcon sx={{ color: '#fff' }} />
           </IconButton>
           <IconButton
             onClick={() => setPhotoModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+            sx={{
+              backgroundColor: '#f44336',
+              '&:hover': { backgroundColor: '#d32f2f' },
+            }}
           >
             <CloseIcon sx={{ color: '#fff' }} />
           </IconButton>
         </DialogActions>
       </Dialog>
 
-      {/* Modal para tomar foto 2 */}
+      {/* Modal para tomar foto 2 - Modificado para agregar cuadro de recorte */}
       <Dialog
         open={isPhoto2ModalOpen}
         onClose={() => setPhoto2ModalOpen(false)}
-        sx={{ '& .MuiDialog-paper': { borderRadius: '12px', maxHeight: '70vh', width: '90%', maxWidth: '400px' } }} // Reducir altura y ajustar ancho del modal
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: '12px',
+            maxHeight: '70vh',
+            width: '90%',
+            maxWidth: '400px',
+          },
+        }} // Reducir altura y ajustar ancho del modal
       >
         <DialogTitle>Cédula Posterior</DialogTitle>
-        <DialogContent sx={{ padding: '16px', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}> {/* Evitar scroll interno */}
-          <Box sx={{ flex: '0 1 auto', maxHeight: '200px', overflow: 'hidden' }}> {/* Limitar altura del contenedor del Webcam */}
+        <DialogContent
+          sx={{
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'hidden',
+          }}
+        >
+          <Box sx={{ position: 'relative', width: '100%', height: 'auto' }}>
             <Webcam
               audio={false}
               ref={webcamRef}
               screenshotFormat="image/jpeg"
               width="100%"
               videoConstraints={{ width: 1280, height: 720, facingMode }}
-              style={{ borderRadius: '8px', width: '100%', height: '200px', objectFit: 'cover' }} // Altura fija más pequeña
+              style={{
+                borderRadius: '8px',
+                width: '100%',
+                height: 'auto',
+                objectFit: 'cover',
+              }} // Ajustado para mejor proporción
+            />
+            {/* Cuadro de recorte */}
+            <Box
+              ref={cropBoxRef}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '80%',
+                height: '50%',
+                border: '2px dashed #fff',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                pointerEvents: 'none',
+              }}
             />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}
+          >
             <IconButton
               onClick={handleCapturePhoto2}
-              sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+              sx={{
+                backgroundColor: '#1976d2',
+                '&:hover': { backgroundColor: '#1565c0' },
+              }}
             >
               <CameraIcon sx={{ color: '#fff' }} />
             </IconButton>
@@ -730,13 +925,19 @@ const RegistrationForm = () => {
         <DialogActions>
           <IconButton
             onClick={toggleCamera}
-            sx={{ backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+            sx={{
+              backgroundColor: '#1976d2',
+              '&:hover': { backgroundColor: '#1565c0' },
+            }}
           >
             <SwitchCameraIcon sx={{ color: '#fff' }} />
           </IconButton>
           <IconButton
             onClick={() => setPhoto2ModalOpen(false)}
-            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+            sx={{
+              backgroundColor: '#f44336',
+              '&:hover': { backgroundColor: '#d32f2f' },
+            }}
           >
             <CloseIcon sx={{ color: '#fff' }} />
           </IconButton>
