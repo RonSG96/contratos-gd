@@ -10,24 +10,98 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
 });
 
 const User = sequelize.define('User', {
-  nombre: { type: DataTypes.STRING, allowNull: true },
-  apellido: { type: DataTypes.STRING, allowNull: false },
-  cedula: { type: DataTypes.STRING, allowNull: false, unique: true },
-  fecha_inscripcion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
-  plan_contratado: { type: DataTypes.STRING, allowNull: true },
-  fecha_expiracion: { type: DataTypes.DATE, allowNull: true },
-  direccion: { type: DataTypes.STRING, allowNull: false },
-  telefono: { type: DataTypes.STRING, allowNull: false },
-  correo: { type: DataTypes.STRING, allowNull: false, unique: true },
-  firma: { type: DataTypes.STRING, allowNull: true },
-  foto: { type: DataTypes.STRING, allowNull: true },
-  firma_blob: { type: DataTypes.BLOB('long'), allowNull: true },
-  foto_blob: { type: DataTypes.BLOB('long'), allowNull: true },
-  foto_2_blob: { type: DataTypes.BLOB('long'), allowNull: true }, // Nuevo campo para la segunda foto
-  sucursal: { type: DataTypes.STRING, allowNull: false },
-  estado: { type: DataTypes.STRING, allowNull: false, defaultValue: 'activo' },
-  qr_code: { type: DataTypes.TEXT, allowNull: true },
-  is_data_updated: { type: DataTypes.BOOLEAN, defaultValue: false }, // Campo ya añadido
+  nombre: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    indexes: [{ fields: ['nombre'] }], // Agregar índice
+  },
+  apellido: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    indexes: [{ fields: ['apellido'] }], // Agregar índice
+  },
+  cedula: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true,
+    indexes: [{ fields: ['cedula'] }], // Agregar índice
+  },
+  fecha_inscripcion: { 
+    type: DataTypes.DATE, 
+    allowNull: false, 
+    defaultValue: DataTypes.NOW 
+  },
+  plan_contratado: { 
+    type: DataTypes.STRING, 
+    allowNull: true 
+  },
+  fecha_expiracion: { 
+    type: DataTypes.DATE, 
+    allowNull: true 
+  },
+  direccion: { 
+    type: DataTypes.STRING, 
+    allowNull: false 
+  },
+  telefono: { 
+    type: DataTypes.STRING, 
+    allowNull: false 
+  },
+  correo: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true 
+  },
+  firma: { 
+    type: DataTypes.STRING, 
+    allowNull: true 
+  },
+  foto: { 
+    type: DataTypes.STRING, 
+    allowNull: true 
+  },
+  firma_blob: { 
+    type: DataTypes.BLOB('long'), 
+    allowNull: true 
+  },
+  foto_blob: { 
+    type: DataTypes.BLOB('long'), 
+    allowNull: true 
+  },
+  foto_2_blob: { 
+    type: DataTypes.BLOB('long'), 
+    allowNull: true 
+  },
+  sucursal: { 
+    type: DataTypes.STRING, 
+    allowNull: false 
+  },
+  estado: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    defaultValue: 'activo' 
+  },
+  qr_code: { 
+    type: DataTypes.TEXT, 
+    allowNull: true 
+  },
+  is_data_updated: { 
+    type: DataTypes.BOOLEAN, 
+    defaultValue: false 
+  },
+  createdAt: { 
+    type: DataTypes.DATE, 
+    allowNull: false, 
+    defaultValue: Sequelize.NOW,
+    indexes: [{ fields: ['createdAt'] }], // Agregar índice
+  },
+}, {
+  indexes: [
+    { fields: ['nombre'] },
+    { fields: ['apellido'] },
+    { fields: ['cedula'] },
+    { fields: ['createdAt'] },
+  ],
 });
 
 const Admin = sequelize.define('Admin', {
@@ -36,6 +110,8 @@ const Admin = sequelize.define('Admin', {
 });
 
 const initDb = async () => {
+تبر
+
   try {
     await sequelize.authenticate();
     console.log('Conexión a la base de datos establecida correctamente.');
