@@ -22,7 +22,7 @@ import {
   DialogActions,
   FormControl,
   InputLabel,
-  CircularProgress, // Added for loading indicator
+  CircularProgress,
 } from '@mui/material';
 import {
   Download as DownloadIcon,
@@ -34,10 +34,9 @@ import {
   QrCode2 as QrCodeIcon,
 } from '@mui/icons-material';
 import { toPng } from 'html-to-image';
-import debounce from 'lodash/debounce'; // Added for search debouncing
+import debounce from 'lodash/debounce';
 import './AdminPanel.css';
 
-// Optimize table row rendering with React.memo
 const UserRow = React.memo(({ user, onDownloadPDF, onToggleEstado, onEditUser, onDeleteUser, onDownloadQR, onAllowEdit }) => (
   <TableRow key={user.id}>
     <TableCell>{user.nombre}</TableCell>
@@ -99,35 +98,38 @@ const UserRow = React.memo(({ user, onDownloadPDF, onToggleEstado, onEditUser, o
 
 const AdminPanel = ({ setToken }) => {
   const [users, setUsers] = useState([]);
-  const [totalUsers, setTotalUsers] = useState(0); // Added for server-side pagination
+  const [totalUsers, setTotalUsers] = useState(0);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editUser, setEditUser] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(false); // Added for loading indicator
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Added for error handling
   const apiUrl = process.env.REACT_APP_API_URL;
-  const qrRef = React.createRef(); // Para capturar el QR
+  const qrRef = React.createRef();
 
-  // Updated fetchUsers to support server-side pagination, filtering, and sorting
   const fetchUsers = useCallback(async (currentPage, currentRowsPerPage, searchQuery) => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(
         `${apiUrl}/users?page=${currentPage + 1}&limit=${currentRowsPerPage}&search=${encodeURIComponent(searchQuery)}`
       );
+      if (!response.ok) {
+        throw new Error('Error al obtener los usuarios');
+      }
       const data = await response.json();
       setUsers(data.users || []);
       setTotalUsers(data.total || 0);
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
-      alert('Error al cargar los usuarios');
+      setError('No se pudieron cargar los usuarios. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
   }, [apiUrl]);
 
-  // Debounce the fetchUsers call for search
   const debouncedFetchUsers = useCallback(
     debounce((page, rowsPerPage, search) => {
       fetchUsers(page, rowsPerPage, search);
@@ -136,16 +138,12 @@ const AdminPanel = ({ setToken }) => {
   );
 
   useEffect(() => {
-    fetchUsers(page, rowsPerPage, search);
-  }, [page, rowsPerPage, fetchUsers]);
-
-  useEffect(() => {
     debouncedFetchUsers(page, rowsPerPage, search);
-  }, [search, debouncedFetchUsers, page, rowsPerPage]);
+  }, [page, rowsPerPage, search, debouncedFetchUsers]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    setPage(0); // Reset to first page on search
+    setPage(0);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -160,7 +158,6 @@ const AdminPanel = ({ setToken }) => {
   const handleAllowEdit = async (cedula) => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Token enviado:', token);
       if (!token) {
         alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
         return;
@@ -179,7 +176,7 @@ const AdminPanel = ({ setToken }) => {
       const result = await response.json();
       if (response.ok) {
         alert('Edición habilitada para el usuario');
-        fetchUsers(page, rowsPerPage, search); // Refresh the user list
+        fetchUsers(page, rowsPerPage, search);
       } else {
         console.log('Error en la respuesta:', result);
         alert(result.message || 'Error al habilitar edición');
@@ -252,7 +249,7 @@ const AdminPanel = ({ setToken }) => {
         },
         body: JSON.stringify({ estado: newEstado }),
       });
-      fetchUsers(page, rowsPerPage, search); // Refresh the user list
+      fetchUsers(page, rowsPerPage, search);
     } catch (error) {
       console.error('Error al actualizar el estado del usuario:', error);
     }
@@ -263,7 +260,7 @@ const AdminPanel = ({ setToken }) => {
       await fetch(`${apiUrl}/user/${id}`, {
         method: 'DELETE',
       });
-      fetchUsers(page, rowsPerPage, search); // Refresh the user list
+      fetchUsers(page, rowsPerPage, search);
     } catch (error) {
       console.error('Error al eliminar el usuario:', error);
     }
@@ -285,6 +282,11 @@ const AdminPanel = ({ setToken }) => {
   };
 
   const handleEditSubmit = async () => {
+    if (!editUser.nombre || !editUser.apellido || !editUser.cedula || !editUser.telefono || !editUser.correo || !editUser.direccion || !editUser.sucursal || !editUser.plan_contratado || !editUser.fecha_inscripcion) {
+      alert('Por favor, completa todos los campos requeridos.');
+      return;
+    }
+
     try {
       const response = await fetch(`${apiUrl}/user/${editUser.id}`, {
         method: 'PUT',
@@ -295,13 +297,15 @@ const AdminPanel = ({ setToken }) => {
       });
       const result = await response.json();
       if (result.status === 'success') {
-        fetchUsers(page, rowsPerPage, search); // Refresh the user list
+        fetchUsers(page, rowsPerPage, search);
         handleEditDialogClose();
       } else {
         console.error('Error al actualizar el usuario:', result.message);
+        alert('Error al actualizar el usuario: ' + result.message);
       }
     } catch (error) {
       console.error('Error al actualizar el usuario:', error);
+      alert('Error de conexión con el servidor');
     }
   };
 
@@ -333,60 +337,94 @@ const AdminPanel = ({ setToken }) => {
           Cerrar Sesión
         </Button>
       </Box>
-      <TextField
-        label="Buscar por nombre, apellido o cédula"
-        variant="outlined"
-        fullWidth
-        value={search}
-        onChange={handleSearchChange}
-        margin="normal"
-      />
+      <Box display="flex" alignItems="center" mb={2}>
+        <TextField
+          label="Buscar por nombre, apellido o cédula"
+          variant="outlined"
+          fullWidth
+          value={search}
+          onChange={handleSearchChange}
+          margin="normal"
+        />
+        {search && (
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setSearch('');
+              setPage(0);
+            }}
+            sx={{ ml: 2, height: '56px' }}
+          >
+            Limpiar
+          </Button>
+        )}
+      </Box>
       {loading ? (
-        <Box display="flex" justifyContent="center" my={4}>
+        <Box display="flex" flexDirection="column" alignItems="center" my={4}>
           <CircularProgress />
+          <Typography variant="body1" mt={2}>
+            {search ? `Buscando usuarios con "${search}"...` : 'Cargando usuarios, por favor espera...'}
+          </Typography>
+        </Box>
+      ) : error ? (
+        <Box display="flex" justifyContent="center" my={4}>
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
         </Box>
       ) : (
         <>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Nombre</TableCell>
-                  <TableCell>Apellido</TableCell>
-                  <TableCell>Cédula</TableCell>
-                  <TableCell>Fecha de Inscripción</TableCell>
-                  <TableCell>Fecha de Expiración</TableCell>
-                  <TableCell>Sucursal</TableCell>
-                  <TableCell>Plan Contratado</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <UserRow
-                    key={user.id}
-                    user={user}
-                    onDownloadPDF={handleDownloadPDF}
-                    onToggleEstado={handleToggleEstado}
-                    onEditUser={handleEditUser}
-                    onDeleteUser={handleDeleteUser}
-                    onDownloadQR={handleDownloadQR}
-                    onAllowEdit={handleAllowEdit}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={totalUsers} // Updated to use totalUsers from server
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          {users.length === 0 ? (
+            <Box display="flex" justifyContent="center" my={4}>
+              <Typography variant="body1">
+                {search ? `No se encontraron usuarios con "${search}"` : 'No hay usuarios registrados.'}
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Nombre</TableCell>
+                      <TableCell>Apellido</TableCell>
+                      <TableCell>Cédula</TableCell>
+                      <TableCell>Fecha de Inscripción</TableCell>
+                      <TableCell>Fecha de Expiración</TableCell>
+                      <TableCell>Sucursal</TableCell>
+                      <TableCell>Plan Contratado</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell>Acciones</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {users.map((user) => (
+                      <UserRow
+                        key={user.id}
+                        user={user}
+                        onDownloadPDF={handleDownloadPDF}
+                        onToggleEstado={handleToggleEstado}
+                        onEditUser={handleEditUser}
+                        onDeleteUser={handleDeleteUser}
+                        onDownloadQR={handleDownloadQR}
+                        onAllowEdit={handleAllowEdit}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={totalUsers}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </>
+          )}
         </>
       )}
 
