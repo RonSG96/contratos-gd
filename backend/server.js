@@ -215,6 +215,7 @@ app.post('/admin/login', async (req, res) => {
 app.get('/users', async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query;
+
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
@@ -230,6 +231,18 @@ app.get('/users', async (req, res) => {
       : {};
 
     const { rows: users, count: total } = await User.findAndCountAll({
+      attributes: [
+        'id',
+        'nombre',
+        'apellido',
+        'cedula',
+        'fecha_inscripcion',
+        'fecha_expiracion',
+        'sucursal',
+        'plan_contratado',
+        'estado',
+        'createdAt',
+      ],
       where: whereClause,
       limit: limitNum,
       offset,
