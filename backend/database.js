@@ -110,7 +110,6 @@ const Admin = sequelize.define('Admin', {
 });
 
 const initDb = async () => {
-تبر
 
   try {
     await sequelize.authenticate();
