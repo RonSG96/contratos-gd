@@ -52,14 +52,14 @@ const User = sequelize.define('User', {
     allowNull: false, 
     unique: true 
   },
-  firma: { 
-    type: DataTypes.STRING, 
-    allowNull: true 
-  },
-  foto: { 
-    type: DataTypes.STRING, 
-    allowNull: true 
-  },
+  // firma: { 
+  //   type: DataTypes.STRING, 
+  //   allowNull: true 
+  // },
+  // foto: { 
+  //   type: DataTypes.STRING, 
+  //   allowNull: true 
+  // },
   firma_blob: { 
     type: DataTypes.BLOB('long'), 
     allowNull: true 
