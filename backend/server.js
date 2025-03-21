@@ -241,6 +241,9 @@ app.get('/users', async (req, res) => {
         'sucursal',
         'plan_contratado',
         'estado',
+        'telefono', // Agregado
+        'correo',   // Agregado
+        'direccion', // Agregado
         'createdAt',
       ],
       where: whereClause,
