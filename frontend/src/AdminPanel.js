@@ -74,12 +74,12 @@ const UserRow = React.memo(({ user, onDownloadPDF, onToggleEstado, onEditUser, o
       >
         <EditIcon />
       </IconButton>
-      <IconButton
+      {/* <IconButton
         color="primary"
         onClick={() => onDeleteUser(user.id)}
       >
         <DeleteIcon />
-      </IconButton>
+      </IconButton> */}
       <IconButton
         color="primary"
         onClick={() => onDownloadQR(user.id)}
@@ -267,14 +267,22 @@ const AdminPanel = ({ setToken }) => {
   };
 
   const handleEditUser = (user) => {
-    setEditUser({
-      ...user,
-      fecha_inscripcion: new Date(user.fecha_inscripcion)
-        .toISOString()
-        .split('T')[0],
-    });
-    setEditDialogOpen(true);
-  };
+  setEditUser({
+    id: user.id,
+    nombre: user.nombre,
+    apellido: user.apellido,
+    cedula: user.cedula,
+    telefono: user.telefono,
+    correo: user.correo,
+    direccion: user.direccion,
+    sucursal: user.sucursal,
+    plan_contratado: user.plan_contratado,
+    fecha_inscripcion: new Date(user.fecha_inscripcion)
+      .toISOString()
+      .split('T')[0],
+  });
+  setEditDialogOpen(true);
+};
 
   const handleEditDialogClose = () => {
     setEditDialogOpen(false);
