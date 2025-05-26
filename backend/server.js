@@ -11,6 +11,7 @@ const QRCode = require('qrcode');
 const canvas = require('canvas');
 const { sequelize, User, Admin, initDb } = require('./database');
 const { Op } = require('sequelize');
+const { initDb } = require('./initializeAdmin'); // Importa initDb
 
 const app = express();
 const PORT = 5500;
@@ -769,19 +770,27 @@ doc
 });
 
 const startServer = async () => {
-  await initDb();
+  try {
+    await sequelize.authenticate(); // Verifica la conexión
+    console.log('Conexión a la base de datos establecida.');
 
-  // Inicializar el administrador si no existe
-  const adminExists = await Admin.findOne({ where: { username: 'admin' } });
-  if (!adminExists) {
-    const hashedPassword = await bcrypt.hash('admin_password', 10); // Cambia 'admin_password' por la contraseña que prefieras
-    await Admin.create({ username: 'admin', password: hashedPassword });
-    console.log('Administrador creado con éxito.');
+    await sequelize.sync({ alter: true }); // Sincroniza la tabla Admins con el modelo
+    await initDb(); // Inicializa los administradores
+
+    // Inicializar el administrador predeterminado si no existe
+    const adminExists = await Admin.findOne({ where: { username: 'admin' } });
+    if (!adminExists) {
+      const hashedPassword = await bcrypt.hash('admin_password', 10);
+      await Admin.create({ username: 'admin', password: hashedPassword });
+      console.log('Administrador predeterminado creado con éxito.');
+    }
+
+    app.listen(PORT, () => {
+      console.log(`Servidor escuchando en el puerto ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Error al iniciar el servidor:', error);
   }
-
-  app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
-  });
 };
 
 startServer();
