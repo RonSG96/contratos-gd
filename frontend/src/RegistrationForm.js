@@ -391,6 +391,8 @@ const handleCapturePhoto2 = () => {
                 <MenuItem value="Parque Industrial">Parque Industrial</MenuItem>
                 <MenuItem value="Gonzalez Suarez">Gonzalez Suarez</MenuItem>
                 <MenuItem value="El Cebollar">El Cebollar</MenuItem>
+                <MenuItem value="El Tiempo">El Tiempo</MenuItem>
+
               </Select>
             </FormControl>
 
