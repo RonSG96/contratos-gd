@@ -6,10 +6,11 @@ const adminUsers = [
   { username: 'counter-gonzalez-admin', password: 'doriangonzalez24' },
   { username: 'counter-pi-admin', password: 'dorianpi2024' },
   { username: 'gimnasios-dorian', password: 'Gonza2024*..' },
-  { username: 'dorian-el-tiempo', password: 'Dori@nTi3mpo*' },
+  { username: 'dorian-el-tiempo', password: 'Dori@nTi3mpo*' }, // Nuevo usuario
 ];
 
 const initializeAdmins = async () => {
+  console.log('Inicializando administradores...'); // Depuración
   try {
     for (let user of adminUsers) {
       const existingAdmin = await Admin.findOne({
@@ -35,4 +36,4 @@ const initDb = async () => {
   await initializeAdmins();
 };
 
-initDb();
+module.exports = { initDb }; // Exporta initDb para usarlo en server.js
