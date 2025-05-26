@@ -11,7 +11,7 @@ const QRCode = require('qrcode');
 const canvas = require('canvas');
 const { sequelize, User, Admin, initDb } = require('./database');
 const { Op } = require('sequelize');
-const { initDb } = require('./initializeAdmin'); // Importa initDb
+// const { initDb } = require('./initializeAdmin'); // Importa initDb
 
 const app = express();
 const PORT = 5500;
