@@ -6,6 +6,7 @@ const adminUsers = [
   { username: 'counter-gonzalez-admin', password: 'doriangonzalez24' },
   { username: 'counter-pi-admin', password: 'dorianpi2024' },
   { username: 'gimnasios-dorian', password: 'Gonza2024*..' },
+  { username: 'dorian-el-tiempo', password: 'Dori@nTi3mpo*' },
 ];
 
 const initializeAdmins = async () => {
