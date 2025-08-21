@@ -86,6 +86,20 @@ app.get('/user/:id/qr', async (req, res) => {
   }
 });
 
+// Nueva Ruta para mostrar los beneficios de Gimnasios Dorian
+app.get('/beneficios/qr', async (req, res) => {
+  try {
+
+    const imagePath ='/assets/beneficios.jpg';
+
+    res.sendFile(path.join(__dirname, imagePath));
+  } catch (error) {
+    console.error('Error fetching user QR:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // Ruta para descargar el QR Code con fondo personalizado
 app.get('/user/:id/download-qr', async (req, res) => {
   try {
